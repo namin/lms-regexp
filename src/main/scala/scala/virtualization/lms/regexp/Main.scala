@@ -1,7 +1,5 @@
 package scala.virtualization.lms.regexp
 
-import scala.virtualization.lms.common._
-
 object Main extends App {
 
   trait Prog extends DSL {
@@ -18,7 +16,13 @@ object Main extends App {
     }
   }
 
-  val prog = new Prog with Impl {
+  trait EmptyProg extends DSL {
+    def test(x: Rep[Unit]) = convertNFAtoDFA(Nil)
+  }
+
+  trait Go extends Impl {
+    def test(x:Rep[Unit]): DIO
+
     def go() = {
       val f = (x:Rep[Unit]) => test(x)
       codegen.emitSource(f, "Match", new java.io.PrintWriter(System.out))
@@ -45,5 +49,9 @@ object Main extends App {
     }
   }
 
+  val prog = new Prog with Go
   prog.go()
+
+  val emptyProg = new EmptyProg with Go
+  emptyProg.go()
 }
