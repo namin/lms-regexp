@@ -51,6 +51,10 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
     List(NTrans(cond, if (found) Some(unit("found").asInstanceOf[Rep[Unit]]) else None, () => e))
   }
 
+  def guards(conds: List[CharSet], found: Boolean = false)(e: => NIO): NIO = {
+    conds.flatMap(guard(_, found)(e))
+  }
+
   def stop(): NIO = Nil
   
 
