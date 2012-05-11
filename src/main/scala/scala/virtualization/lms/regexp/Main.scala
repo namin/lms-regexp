@@ -25,7 +25,7 @@ object Main extends App {
       def findAAB(): NIO = {
         guards(List(Some('A'), Some('X'))) {
           guard(Some('A')) {
-            guard(Some('B'), true) {
+            guards(List(Some('A'), Some('B')), true) {
               stop()
         }}} ++
         guard(None) { findAAB() } // in parallel ...
