@@ -5,12 +5,12 @@ object Main extends App {
   trait Prog extends DSL {
     def test(x: Rep[Unit]) = {
       def findAAB(): NIO = {
-        guard(Some('A')) {
-          guard(Some('A')) {
-            guard(Some('B'), true) {
+        guard(C('A')) {
+          guard(C('A')) {
+            guard(C('B'), true) {
               stop()
         }}} ++
-        guard(None) { findAAB() } // in parallel ...
+        guard(W) { findAAB() } // in parallel ...
       }
       convertNFAtoDFA(findAAB())
     }
@@ -23,12 +23,12 @@ object Main extends App {
   trait NProg extends DSL {
     def test(x: Rep[Unit]) = {
       def findAAB(): NIO = {
-        guards(List(Some('A'), Some('X'))) {
-          guard(Some('A')) {
-            guards(List(Some('A'), Some('B')), true) {
+        guards(List(C('A'), C('X'))) {
+          guard(C('A')) {
+            guards(List(C('A'), C('B')), true) {
               stop()
         }}} ++
-        guard(None) { findAAB() } // in parallel ...
+        guard(W) { findAAB() } // in parallel ...
       }
       convertNFAtoDFA(findAAB())
     }

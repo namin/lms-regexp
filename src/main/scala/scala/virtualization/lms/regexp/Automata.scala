@@ -58,28 +58,44 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   def stop(): NIO = Nil
   
 
-  type CharSet = Option[Char]
+  sealed abstract class CharSet
+  case object W extends CharSet
+  case class C(c: Char) extends CharSet
   
   def infix_contains(s: CharSet, c: Rep[Char]): Rep[Boolean] = s match {
-    case Some(c1) => c == c1
-    case None => unit(true)
+    case C(c1) => c == c1
+    case W => unit(true)
   }
 
+  def infix_knowing(s1: CharSet, s2: CharSet): Option[CharSet] = (s1,s2) match {
+    case (W,_) => Some(W)
+    case (C(c1),C(c2)) if c1 == c2 => Some(W)
+    case _ => None
+  }
+
+  def infix_knowing_not(s1: CharSet, s2: CharSet): Option[CharSet] = (s1,s2) match {
+    case (C(c1), C(c2)) if c1 == c2 => None
+    case _ => Some(s1)
+  }
 
   def exploreNFA[A:Manifest](xs: NIO, cin: Rep[Char])(flag: Rep[Any] => Rep[A] => Rep[A])(k: NIO => Rep[A]): Rep[A] = xs match {
     case Nil => k(Nil)
-    case NTrans(cset@Some(c), e, s)::rest =>
+    case NTrans(W, e, s)::rest =>
+      val maybeFlag = e map flag getOrElse ((x:Rep[A])=>x)
+      maybeFlag(exploreNFA(rest,cin)(flag)(acc => k(acc ++ s())))
+    case NTrans(cset, e, s)::rest =>
       if (cset contains cin) {
-        val xs1 = rest collect { case NTrans(Some(`c`) | None,e,s) => NTrans(None,e,s) }
+        val xs1 = for (NTrans(rcset, re, rs) <- rest;
+		       kcset <- rcset knowing cset) yield
+			 NTrans(kcset,re,rs)
         val maybeFlag = e map flag getOrElse ((x:Rep[A])=>x)
         maybeFlag(exploreNFA(xs1, cin)(flag)(acc => k(acc ++ s())))
       } else {
-        val xs1 = rest filter { case NTrans(Some(`c`),_,_) => false case _ => true }
+        val xs1 = for (NTrans(rcset, re, rs) <- rest;
+		       kcset <- rcset knowing_not cset) yield
+			 NTrans(kcset,re,rs)
         exploreNFA(xs1, cin)(flag)(k)
       }
-    case NTrans(None, e, s)::rest =>
-      val maybeFlag = e map flag getOrElse ((x:Rep[A])=>x)
-      maybeFlag(exploreNFA(rest,cin)(flag)(acc => k(acc ++ s())))
   }
 
 
