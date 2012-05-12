@@ -62,7 +62,12 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   case object W extends CharSet
   case class C(c: Char) extends CharSet
   case class R(a: Char, b: Char) extends CharSet
-  
+
+  def r(a: Char, b: Char) = {
+    assert(a <= b)
+    if (a == b) C(a) else R(a, b)
+  }
+
   def infix_contains(s: CharSet, c: Rep[Char]): Rep[Boolean] = s match {
     case C(c1) => c == c1
     case R(a, b) => a <= c && c <= b
@@ -74,7 +79,8 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
     case (C(c1),C(c2)) if c1 == c2 => Some(W)
     case (R(a1,b1),R(a2,b2)) if a2 <= a1 && b1 <= b2 => Some(W)
     case (C(c1),R(a2,b2)) if a2 <= c1 && c1 <= b2 => Some(W)
-    case (R(a1,b1),R(a2,b2)) if a2 <= b1 || a2 <= b2 => Some(s1)
+    case (R(a1,b1),R(a2,b2)) if a1 <= a2 && a2 <= b1 && b1 <= b2 => Some(r(a2, b1))
+    case (R(a1,b1),R(a2,b2)) if a2 <= a1 && a1 <= b2 && b2 <= b1 => Some(r(a1, b2))
     case (R(a1,b1),C(c2)) if a1 <= c2 && c2 <= b1 => Some(s1)
     case _ => None
   }
@@ -83,6 +89,8 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
     case (C(c1), C(c2)) if c1 == c2 => None
     case (R(a1,b1),R(a2,b2)) if a2 <= a1 && b1 <= b2 => None
     case (C(c1),R(a2,b2)) if a2 <= c1 && c1 <= b2 => None
+    case (R(a1,b1),R(a2,b2)) if a1 <= a2 && a2 <= b1 && b1 <= b2 => Some(r(a1, a2))
+    case (R(a1,b1),R(a2,b2)) if a2 <= a1 && a1 <= b2 && b2 <= b1 => Some(r(b2, b1))
     case _ => Some(s1)
   }
 
