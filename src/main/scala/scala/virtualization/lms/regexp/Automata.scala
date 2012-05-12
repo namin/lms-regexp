@@ -40,7 +40,7 @@ trait ScalaGenDFAOps extends ScalaGenBase {
 }
 
 
-trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions with Equal with IfThenElse =>
+trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
   type NIO = List[NTrans]
   
   case class NTrans(c: CharSet, e: Option[Rep[Unit]], s: () => NIO)
@@ -61,20 +61,28 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   sealed abstract class CharSet
   case object W extends CharSet
   case class C(c: Char) extends CharSet
+  case class R(a: Char, b: Char) extends CharSet
   
   def infix_contains(s: CharSet, c: Rep[Char]): Rep[Boolean] = s match {
     case C(c1) => c == c1
+    case R(a, b) => a <= c && c <= b
     case W => unit(true)
   }
 
   def infix_knowing(s1: CharSet, s2: CharSet): Option[CharSet] = (s1,s2) match {
     case (W,_) => Some(W)
     case (C(c1),C(c2)) if c1 == c2 => Some(W)
+    case (R(a1,b1),R(a2,b2)) if a2 <= a1 && b1 <= b2 => Some(W)
+    case (C(c1),R(a2,b2)) if a2 <= c1 && c1 <= b2 => Some(W)
+    case (R(a1,b1),R(a2,b2)) if a2 <= b1 || a2 <= b2 => Some(s1)
+    case (R(a1,b1),C(c2)) if a1 <= c2 && c2 <= b1 => Some(s1)
     case _ => None
   }
 
   def infix_knowing_not(s1: CharSet, s2: CharSet): Option[CharSet] = (s1,s2) match {
     case (C(c1), C(c2)) if c1 == c2 => None
+    case (R(a1,b1),R(a2,b2)) if a2 <= a1 && b1 <= b2 => None
+    case (C(c1),R(a2,b2)) if a2 <= c1 && c1 <= b2 => None
     case _ => Some(s1)
   }
 
@@ -111,11 +119,11 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   }
 }
 
-trait DSL extends DFAOps with NFAtoDFA with NumericOps with LiftNumeric with Functions with Equal with IfThenElse
+trait DSL extends DFAOps with NFAtoDFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
 
-trait Impl extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with BooleanOpsExp with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala { q =>
+trait Impl extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala { q =>
   override val verbosity = 1
-  object codegen extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
+  object codegen extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
     val IR: q.type = q
   }
 }
