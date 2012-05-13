@@ -2,9 +2,6 @@ package scala.virtualization.lms.regexp
 
 import scala.virtualization.lms.common._
 
-// careful with @specialized blowup
-case class Automaton[@specialized(Boolean,Char,Int) I, @specialized(Boolean,Char,Int) O](out: O, next: I => Automaton[I,O])
-
 trait DFAOps extends Base {
 
   type DfaState = Automaton[Char,List[Any]]
