@@ -58,6 +58,5 @@ class TestRegexp extends Suite {
     expect(false){exs.fullmatch(fc)("usd1234.00")}
     expect(false){exs.fullmatch(fc)("usd 1234")}
     expect(false){exs.begmatch(fc)("  usd 1234.01  ")}
-
   }
 }
