@@ -157,6 +157,14 @@ trait RegexpToNFA { this: NFAtoDFA =>
     rec
   }
 
+  def plus(x: RE): RE = {
+    seq(x, star(x))
+  }
+
+  def opt(x: RE): RE = { nio: (() => NIO) =>
+    nio() ++ x(nio)
+  }
+
   def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => Nil))
 }
 
