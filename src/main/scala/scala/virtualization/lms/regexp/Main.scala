@@ -16,36 +16,10 @@ object Main extends App {
     }
   }
 
-  trait EmptyProg extends DSL {
-    def test(x: Rep[Unit]) = convertNFAtoDFA(Nil)
-  }
-
-  trait NProg extends DSL {
-    def test(x: Rep[Unit]) = {
-      def findAAB(): NIO = {
-        guards(List(C('A'), C('X'))) {
-          guard(C('A')) {
-            guards(List(C('A'), C('B')), true) {
-              stop()
-        }}} ++
-        guard(W) { findAAB() } // in parallel ...
-      }
-      convertNFAtoDFA(findAAB())
-    }
-  }
-
   trait RProg extends DSL {
-    def test(x: Rep[Unit]) = {
-      def findAAB(): NIO = {
-        guard(R('A', 'X')) {
-          guard(C('A')) {
-            guard(R('A', 'B'), true) {
-              stop()
-        }}} ++
-        guard(W) { findAAB() } // in parallel ...
-      }
-      convertNFAtoDFA(findAAB())
-    }
+    def test(x: Rep[Unit]) = convertREtoDFA(
+      many(seq)(star(wildcard), c('A'), c('A'), c('B'))
+    )
   }
 
   trait Go extends Impl {
@@ -79,12 +53,6 @@ object Main extends App {
 
   val prog = new Prog with Go
   prog.go()
-
-  val emptyProg = new EmptyProg with Go
-  emptyProg.go()
-
-  val nprog = new NProg with Go
-  nprog.go()
 
   val rprog = new RProg with Go
   rprog.go()

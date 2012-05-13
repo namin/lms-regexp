@@ -43,12 +43,12 @@ trait ScalaGenDFAOps extends ScalaGenBase {
 trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
   type NIO = List[NTrans]
   
-  case class NTrans(c: CharSet, e: Option[Rep[Unit]], s: () => NIO)
+  case class NTrans(c: CharSet, e: () => Option[Rep[Unit]], s: () => NIO)
   
-  def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, None, s))
+  def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => None, s))
 
-  def guard(cond: CharSet, found: Boolean = false)(e: => NIO): NIO = {
-    List(NTrans(cond, if (found) Some(unit("found").asInstanceOf[Rep[Unit]]) else None, () => e))
+  def guard(cond: CharSet, found: => Boolean = false)(e: => NIO): NIO = {
+    List(NTrans(cond, () => if (found) Some(unit("found").asInstanceOf[Rep[Unit]]) else None, () => e))
   }
 
   def guards(conds: List[CharSet], found: Boolean = false)(e: => NIO): NIO = {
@@ -97,14 +97,14 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   def exploreNFA[A:Manifest](xs: NIO, cin: Rep[Char])(flag: Rep[Any] => Rep[A] => Rep[A])(k: NIO => Rep[A]): Rep[A] = xs match {
     case Nil => k(Nil)
     case NTrans(W, e, s)::rest =>
-      val maybeFlag = e map flag getOrElse ((x:Rep[A])=>x)
+      val maybeFlag = e() map flag getOrElse ((x:Rep[A])=>x)
       maybeFlag(exploreNFA(rest,cin)(flag)(acc => k(acc ++ s())))
     case NTrans(cset, e, s)::rest =>
       if (cset contains cin) {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
 		       kcset <- rcset knowing cset) yield
 			 NTrans(kcset,re,rs)
-        val maybeFlag = e map flag getOrElse ((x:Rep[A])=>x)
+        val maybeFlag = e() map flag getOrElse ((x:Rep[A])=>x)
         maybeFlag(exploreNFA(xs1, cin)(flag)(acc => k(acc ++ s())))
       } else {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
@@ -127,7 +127,43 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   }
 }
 
-trait DSL extends DFAOps with NFAtoDFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
+trait RegexpToNFA { this: NFAtoDFA =>
+  type RE = (() => NIO) => NIO
+
+  def wrap(cset: CharSet): RE = { nio: (() => NIO) =>
+    guard(cset, nio() == Nil)(nio())
+  }
+
+  def c(c0: Char): RE = wrap(C(c0))
+  def in(a: Char, b: Char): RE = wrap(r(a, b))
+  val wildcard: RE = wrap(W)
+
+  def alt(x: RE, y: RE): RE = { nio: (() => NIO) =>
+    x(nio) ++ y(nio)
+  }
+
+  def seq(x: RE, y: RE): RE = { nio: (() => NIO) =>
+    x(() => y(nio))
+  }
+
+  val id = {nio: (() => NIO) => nio()}
+
+  def many(f: (RE, RE) => RE)(xs: RE*): RE = xs.length match {
+    case 0 => id
+    case 1 => xs(0)
+    case 2 => f(xs(0), xs(1))
+    case n => f(xs(0), many(f)(xs.slice(1, n) : _*))
+  }
+
+  def star(x: RE): RE = {
+    def rec(nio: () => NIO): NIO = nio() ++ x(() => rec(nio))
+    rec
+  }
+
+  def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => Nil))
+}
+
+trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
 
 trait Impl extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala { q =>
   override val verbosity = 1
