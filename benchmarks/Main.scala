@@ -36,7 +36,7 @@ object Main extends App {
     val regexp = new dk.brics.automaton.RegExp(re)
     val auto = regexp.toAutomaton()
     val runauto = new dk.brics.automaton.RunAutomaton(auto, true)
-    val javaRegexp = java.util.regex.Pattern.compile("^"+re+"$")
+    val javaRegexp = java.util.regex.Pattern.compile(re)
     (other, runauto, javaRegexp)
   }
 
@@ -44,7 +44,7 @@ object Main extends App {
       for (i <- 0 to inputs.length-1; input = inputs(i)) {
         val dkResult = dk.run(input)
         val lmsResult = fullmatch(lms)(input)
-        val javResult = jav.matcher(input).find()
+        val javResult = jav.matcher(input).matches()
 
         assert(dkResult == lmsResult)
 
@@ -60,7 +60,7 @@ object Main extends App {
   for ((_,_,re) <- allRegexps) {
     for (iter <- 1 to ITERATIONS) {
       for (input <- inputs) {
-        val result = re.matcher(input).find()
+        val result = re.matcher(input).matches()
       }
     }
   }
