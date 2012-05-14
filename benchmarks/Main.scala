@@ -19,6 +19,7 @@ object Main extends App {
         "http://www.linux.com/",
         "http://www.thelinuxshow.com/main.php3",
         "usd 1234.00",
+        "   usd 1234.00",
         "he said she said he said no",
         "same same same",
         "{1:\n" + "this is some more text - and some more and some more and even more\n" +
@@ -26,34 +27,37 @@ object Main extends App {
         "this is some more text and some more and some more and even more at the end\n" + "-}\n"
   )
   val expected = Array(
-    Array(true, true, false, false, false, false, false, false, false),
-    Array(false, false, false, false, false, true, false, false, false))
+    Array(true, true, false, false, false, false, false, false, false, false),
+    Array(false, false, false, false, false, true, false, false, false, false))
   val ITERATIONS = 100000
   val debug = true
 
-  val autoRegexps = for ((other,re) <- regexps) yield {
+  val allRegexps = for ((other,re) <- regexps) yield {
     val regexp = new dk.brics.automaton.RegExp(re)
     val auto = regexp.toAutomaton()
     val runauto = new dk.brics.automaton.RunAutomaton(auto, true)
-    (other, runauto)
+    val javaRegexp = java.util.regex.Pattern.compile("^"+re+"$")
+    (other, runauto, javaRegexp)
   }
 
-  for (ri <- 0 to regexps.length-1; (lms,dk) = autoRegexps(ri)) {
+  for (ri <- 0 to regexps.length-1; (lms,dk,jav) = allRegexps(ri)) {
       for (i <- 0 to inputs.length-1; input = inputs(i)) {
         val dkResult = dk.run(input)
         val lmsResult = fullmatch(lms)(input)
+        val javResult = jav.matcher(input).find()
+
         assert(dkResult == lmsResult)
 
         val expectedResult = expected(ri)(i)
         assert(dkResult == expectedResult)
         assert(lmsResult == expectedResult)
+        assert(javResult == expectedResult)
       }
   }
 
   println("Testing java.util.regex ...")
-  val javaRegexps = for((_,re) <- regexps) yield java.util.regex.Pattern.compile(re)
   val javaStartTime = System.currentTimeMillis()
-  for (re <- javaRegexps) {
+  for ((_,_,re) <- allRegexps) {
     for (iter <- 1 to ITERATIONS) {
       for (input <- inputs) {
         val result = re.matcher(input).find()
@@ -65,7 +69,7 @@ object Main extends App {
 
   println("Testing dk.brics.automaton ...")
   val dkStartTime = System.currentTimeMillis()
-  for ((_,runauto) <- autoRegexps) {
+  for ((_,runauto,_) <- allRegexps) {
     for (iter <- 1 to ITERATIONS) {
       for (input <- inputs) {
         val result = runauto.run(input)
