@@ -1,7 +1,12 @@
 object Main extends App {
   def fullmatch(fc: Unit => scala.virtualization.lms.regexp.Automaton[Char,List[Any]])(input: String): Boolean = {
     var state = fc()
-    input.foreach(c => state = state.next(c))
+    var i = 0
+    val n = input.length
+    while (i < n) {
+      state = state.next(input(i))
+      i += 1
+    }
     !state.out.isEmpty
   }
   val regexps = Array(
