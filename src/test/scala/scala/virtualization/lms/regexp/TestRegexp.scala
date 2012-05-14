@@ -5,8 +5,7 @@ import org.scalatest._
 class TestRegexp extends Suite {
   trait Examples extends DSL {
     val aab = many(seq)(star(wildcard), c('A'), c('A'), c('B'))
-    // stackoverflow
-    // val aabany = many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(wildcard))
+    val aabx = many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(c('X')))
     val digit = in('0', '9')
     val usd = many(seq)(c('u'), c('s'), c('d'), c(' '), opt(alt(c('+'), c('-'))),
                         plus(digit), c('.'), digit, digit)
@@ -43,6 +42,18 @@ class TestRegexp extends Suite {
     expect(true){exs.fullmatch(fc)("XYZAAB")}
     expect(true){exs.fullmatch(fc)("XYZABAAB")}
     expect(false){exs.fullmatch(fc)("XYZAABX")}
+    expect(true){exs.begmatch(fc)("XYZAABX")}
+    expect(false){exs.begmatch(fc)("XYZABX")}
+  }
+
+  def testAABX = {
+    val exs = new Examples with Evaluator
+    val fc = exs.recompile(exs.aabx)
+
+    expect(true){exs.fullmatch(fc)("AAB")}
+    expect(true){exs.fullmatch(fc)("XYZAAB")}
+    expect(true){exs.fullmatch(fc)("XYZABAAB")}
+    expect(true){exs.fullmatch(fc)("XYZAABX")}
     expect(true){exs.begmatch(fc)("XYZAABX")}
     expect(false){exs.begmatch(fc)("XYZABX")}
   }

@@ -125,25 +125,27 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
 }
 
 trait RegexpToNFA { this: NFAtoDFA =>
-  type RE = (() => NIO) => NIO
+  type RE = (() => (NIO, Boolean)) => (NIO, Boolean)
 
-  def wrap(cset: CharSet): RE = { nio: (() => NIO) =>
-    guard(cset, nio() == Nil)(nio())
+  def wrap(cset: CharSet): RE = { nio: (() => (NIO, Boolean)) =>
+    (guard(cset, nio()._2)(nio()._1), false)
   }
 
   def c(c0: Char): RE = wrap(C(c0))
   def in(a: Char, b: Char): RE = wrap(r(a, b))
   val wildcard: RE = wrap(W)
 
-  def alt(x: RE, y: RE): RE = { nio: (() => NIO) =>
-    x(nio) ++ y(nio)
+  def alt(x: RE, y: RE): RE = { nio: (() => (NIO, Boolean)) =>
+    val (nx, ex) = x(nio)
+    val (ny, ey) = y(nio)
+    (nx ++ ny, ex || ey)
   }
 
-  def seq(x: RE, y: RE): RE = { nio: (() => NIO) =>
+  def seq(x: RE, y: RE): RE = { nio: (() => (NIO, Boolean)) =>
     x(() => y(nio))
   }
 
-  val id = {nio: (() => NIO) => nio()}
+  val id = {nio: (() => (NIO, Boolean)) => nio()}
 
   def many(f: (RE, RE) => RE)(xs: RE*): RE = xs.length match {
     case 0 => id
@@ -153,7 +155,11 @@ trait RegexpToNFA { this: NFAtoDFA =>
   }
 
   def star(x: RE): RE = {
-    def rec(nio: () => NIO): NIO = nio() ++ x(() => rec(nio))
+    def rec(nio: () => (NIO, Boolean)): (NIO, Boolean) = {
+      val (nn, en) = nio()
+      val (nx, ex) = x(() => rec(nio))
+      (nn ++ nx, en || ex)
+    }
     rec
   }
 
@@ -161,11 +167,13 @@ trait RegexpToNFA { this: NFAtoDFA =>
     seq(x, star(x))
   }
 
-  def opt(x: RE): RE = { nio: (() => NIO) =>
-    nio() ++ x(nio)
+  def opt(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
+    val (nn, en) = nio()
+    val (nx, ex) = x(nio)
+    (nn ++ nx, en || ex)
   }
 
-  def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => Nil))
+  def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => (Nil, true))._1)
 }
 
 trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
