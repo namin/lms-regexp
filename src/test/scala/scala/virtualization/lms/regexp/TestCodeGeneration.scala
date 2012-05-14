@@ -45,7 +45,7 @@ class TestCodeGeneration extends FileDiffSuite {
         }}} ++
         guard(W) { findAAB() } // in parallel ...
       }
-      convertNFAtoDFA(findAAB())
+      convertNFAtoDFA((findAAB(), false))
     }
   }
   def testGuardProg = (new GuardProg with Go).go("aab")

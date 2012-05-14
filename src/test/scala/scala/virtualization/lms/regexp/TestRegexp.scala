@@ -6,6 +6,8 @@ class TestRegexp extends Suite {
   trait Examples extends DSL {
     val aab = many(seq)(star(wildcard), c('A'), c('A'), c('B'))
     val aabx = many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(c('X')))
+    // stackoverflow
+    // val aabany = many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(wildcard))
     val digit = in('0', '9')
     val usd = many(seq)(c('u'), c('s'), c('d'), c(' '), opt(alt(c('+'), c('-'))),
                         plus(digit), c('.'), digit, digit)
@@ -19,7 +21,7 @@ class TestRegexp extends Suite {
     def begmatch(fc: Unit => DfaState)(input: String): Boolean = {
       var state = fc()
       var found = false
-      def update() = found = found || !state.out.isEmpty
+      def update() = found = found || state.out
       update()
       input.foreach { c =>
         state = state.next(c)
@@ -30,7 +32,7 @@ class TestRegexp extends Suite {
     def fullmatch(fc: Unit => DfaState)(input: String): Boolean = {
       var state = fc()
       input.foreach(c => state = state.next(c))
-      !state.out.isEmpty
+      state.out
     }
   }
 

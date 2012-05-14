@@ -1,5 +1,5 @@
 object Main extends App {
-  def fullmatch(fc: Unit => scala.virtualization.lms.regexp.Automaton[Char,List[Any]])(input: String): Boolean = {
+  def fullmatch(fc: Unit => scala.virtualization.lms.regexp.Automaton[Char,Boolean])(input: String): Boolean = {
     var state = fc()
     var i = 0
     val n = input.length
@@ -7,7 +7,7 @@ object Main extends App {
       state = state.next(input(i))
       i += 1
     }
-    !state.out.isEmpty
+    state.out
   }
   val regexps = Array(
     (new MatchAAB, ".*AAB"),

@@ -4,23 +4,20 @@ import scala.virtualization.lms.common._
 
 trait DFAOps extends Base {
 
-  type DfaState = Automaton[Char,List[Any]]
+  type DfaState = Automaton[Char,Boolean]
 
   type DIO = Rep[DfaState]
 
-  def dfa_flagged(e: Rep[Any])(rec: DIO): DIO
-  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(unit(Nil))(f)
-  def dfa_trans(e: Rep[List[Any]])(f: Rep[Char] => DIO): DIO
+  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(false)(f)
+  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO
 }
 
 
 trait DFAOpsExp extends BaseExp with DFAOps { this: Functions => 
 
-  case class DFAFlagged(e: Rep[Any], link: DIO) extends Def[DfaState]
-  case class DFAState(e: Rep[List[Any]], f: Rep[Char => DfaState]) extends Def[DfaState]
+  case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
   
-  def dfa_flagged(e: Rep[Any])(rec: DIO): DIO = DFAFlagged(e,rec)
-  def dfa_trans(e: Rep[List[Any]])(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
+  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
   
 }
 
@@ -30,8 +27,8 @@ trait ScalaGenDFAOps extends ScalaGenBase {
   import IR._
   
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case DFAState(e,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + quote(e) + "," + quote(f) + ")")
-    case DFAFlagged(e,l) => emitValDef(sym, quote(l) + ".copy(out = " + quote(e) + "::" + quote(l) + ".out)")
+    case DFAState(true,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(true," + quote(f) + ")")
+    case DFAState(false,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(false," + quote(f) + ")")
     case _ => super.emitNode(sym, rhs)
   }
 }
@@ -40,12 +37,12 @@ trait ScalaGenDFAOps extends ScalaGenBase {
 trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
   type NIO = List[NTrans]
   
-  case class NTrans(c: CharSet, e: () => Option[Rep[Unit]], s: () => NIO)
+  case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO)
   
-  def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => None, s))
+  def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => false, s))
 
   def guard(cond: CharSet, found: => Boolean = false)(e: => NIO): NIO = {
-    List(NTrans(cond, () => if (found) Some(unit("found").asInstanceOf[Rep[Unit]]) else None, () => e))
+    List(NTrans(cond, () => found, () => e))
   }
 
   def guards(conds: List[CharSet], found: Boolean = false)(e: => NIO): NIO = {
@@ -91,36 +88,32 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
     case _ => Some(s1)
   }
 
-  def exploreNFA[A:Manifest](xs: NIO, cin: Rep[Char])(flag: Rep[Any] => Rep[A] => Rep[A])(k: NIO => Rep[A]): Rep[A] = xs match {
-    case Nil => k(Nil)
+  def exploreNFA[A:Manifest](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
+    case Nil => k(false, Nil)
     case NTrans(W, e, s)::rest =>
-      val maybeFlag = e() map flag getOrElse ((x:Rep[A])=>x)
-      maybeFlag(exploreNFA(rest,cin)(flag)(acc => k(acc ++ s())))
+      exploreNFA(rest,cin)((flag, acc) => k(e() || flag, acc ++ s()))
     case NTrans(cset, e, s)::rest =>
       if (cset contains cin) {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
 		       kcset <- rcset knowing cset) yield
 			 NTrans(kcset,re,rs)
-        val maybeFlag = e() map flag getOrElse ((x:Rep[A])=>x)
-        maybeFlag(exploreNFA(xs1, cin)(flag)(acc => k(acc ++ s())))
+        exploreNFA(xs1, cin)((flag,acc) => k(e() || flag, acc ++ s()))
       } else {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
 		       kcset <- rcset knowing_not cset) yield
 			 NTrans(kcset,re,rs)
-        exploreNFA(xs1, cin)(flag)(k)
+        exploreNFA(xs1, cin)(k)
       }
   }
 
 
-  def convertNFAtoDFA(in: NIO): DIO = {
+  def convertNFAtoDFA(in: (NIO, Boolean)): DIO = {
 
-    def iterate(state: NIO): DIO = dfa_trans { c: Rep[Char] =>
-      exploreNFA(state, c)(dfa_flagged) { next =>
-        iterate(next)
-      }
+    def iterate(flag: Boolean, state: NIO): DIO = dfa_trans(flag){ c: Rep[Char] =>
+      exploreNFA(state, c) { iterate }
     }
 
-    iterate(in)
+    iterate(in._2, in._1)
   }
 }
 
@@ -154,10 +147,10 @@ trait RegexpToNFA { this: NFAtoDFA =>
     case n => f(xs(0), many(f)(xs.slice(1, n) : _*))
   }
 
-  def star(x: RE): RE = {
-    def rec(nio: () => (NIO, Boolean)): (NIO, Boolean) = {
-      val (nn, en) = nio()
-      val (nx, ex) = x(() => rec(nio))
+  def star(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
+    val (nn, en) = nio()
+    def rec: (NIO, Boolean) = {
+      val (nx, ex) = x(() => rec)
       (nn ++ nx, en || ex)
     }
     rec
@@ -173,7 +166,7 @@ trait RegexpToNFA { this: NFAtoDFA =>
     (nn ++ nx, en || ex)
   }
 
-  def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => (Nil, true))._1)
+  def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => (Nil, true)))
 }
 
 trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
