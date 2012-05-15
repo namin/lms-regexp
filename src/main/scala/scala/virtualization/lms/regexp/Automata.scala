@@ -28,8 +28,7 @@ trait ScalaGenDFAOps extends ScalaGenBase {
   import IR._
   
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case DFAState(true,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(true," + quote(f) + ")")
-    case DFAState(false,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(false," + quote(f) + ")")
+    case DFAState(b,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + b + "," + quote(f) + ")")
     case _ => super.emitNode(sym, rhs)
   }
 }
