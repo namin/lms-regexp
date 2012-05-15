@@ -72,8 +72,8 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
       case (_,W) => -1
       case (R(a1,b1),R(a2,b2)) if a1 == a2 => b1.compare(b2)
       case (R(a1,_),R(a2,_)) => a1.compare(a2)
-      case (R(_,_),_) => 1
-      case (_,R(_,_)) => -1
+      case (R(_,_),C(_)) => -1
+      case (C(_),R(_,_)) => 1
       case (C(c1),C(c2)) => c1.compare(c2)
     }
   }
@@ -140,6 +140,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
         state_sorted.head :: (for ((s,sn) <- (state_sorted zip state_sorted.tail)
              if s.compare(sn) != 0) yield sn)
       }
+      //println("// cooked state: " + state_cooked)
       dfa_trans(flag){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
     }}
 
