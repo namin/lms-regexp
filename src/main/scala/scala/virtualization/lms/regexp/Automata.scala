@@ -91,13 +91,13 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   def exploreNFA[A:Manifest](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
     case Nil => k(false, Nil)
     case NTrans(W, e, s)::rest =>
-      exploreNFA(rest,cin)((flag, acc) => k(e() || flag, acc ++ s()))
+      exploreNFA(rest,cin)((flag,acc) => k(flag || e(), acc ++ s()))
     case NTrans(cset, e, s)::rest =>
       if (cset contains cin) {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
 		       kcset <- rcset knowing cset) yield
 			 NTrans(kcset,re,rs)
-        exploreNFA(xs1, cin)((flag,acc) => k(e() || flag, acc ++ s()))
+        exploreNFA(xs1,cin)((flag,acc) => k(flag || e(), acc ++ s()))
       } else {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
 		       kcset <- rcset knowing_not cset) yield
@@ -149,11 +149,11 @@ trait RegexpToNFA { this: NFAtoDFA =>
 
   def star(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
     val (nn, en) = nio()
-    def rec: (NIO, Boolean) = {
-      val (nx, ex) = x(() => rec)
+    def rec(): (NIO, Boolean) = {
+      val (nx, ex) = x(rec)
       (nn ++ nx, en || ex)
     }
-    rec
+    rec()
   }
 
   def plus(x: RE): RE = {
