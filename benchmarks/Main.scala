@@ -4,7 +4,7 @@ object Main extends App {
     var i = 0
     val n = input.length
     while (i < n) {
-      state = state.next(input(i))
+      state = state.next(input.charAt(i))
       i += 1
     }
     state.out
