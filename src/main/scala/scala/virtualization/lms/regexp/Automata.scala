@@ -91,7 +91,8 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   def exploreNFA[A:Manifest](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
     case Nil => k(false, Nil)
     case NTrans(W, e, s)::rest =>
-      exploreNFA(rest,cin)((flag,acc) => k(flag || e(), acc ++ s()))
+      val (xs1, xs2) = xs.partition(_.c != W)
+      exploreNFA(xs1,cin)((flag,acc) => k(flag || xs2.exists(_.e()), acc ++ xs2.flatMap(_.s())))
     case NTrans(cset, e, s)::rest =>
       if (cset contains cin) {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
@@ -109,9 +110,10 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
 
   def convertNFAtoDFA(in: (NIO, Boolean)): DIO = {
 
-    def iterate(flag: Boolean, state: NIO): DIO = dfa_trans(flag){ c: Rep[Char] =>
-      exploreNFA(state, c) { iterate }
-    }
+    def iterate(flag: Boolean, state: NIO): DIO = {
+      //println(state.size + " " + state)
+      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state, c) { iterate }
+    }}
 
     iterate(in._2, in._1)
   }

@@ -56,6 +56,14 @@ class TestCodeGeneration extends FileDiffSuite {
     )
   }
   def testRegexpProg = (new RegexpProg with Go).go("aab")
+
+  trait SORegexpProg extends DSL {
+    def test(x: Rep[Unit]) = convertREtoDFA(
+      many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(wildcard))
+    )
+  }
+  // TODO
+  //def testSORegexpProg = (new SORegexpProg with Go).go("aabany")
 }
 
 trait FileDiffSuite extends Suite {
