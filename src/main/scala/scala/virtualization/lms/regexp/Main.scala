@@ -9,7 +9,7 @@ object Main extends App {
   }
   trait CodeGenerator extends DSL with Impl {
     def output(res: List[(RE, String)]) = {
-      val out = new java.io.PrintWriter("benchmarks/Out.scala")
+      val out = new java.io.PrintWriter("benchmark/src/main/scala/LMS.scala")
 
       for((re,suffix) <- res) {
         val f = (x: Rep[Unit]) => convertREtoDFA(re)
