@@ -65,12 +65,13 @@ class TestRegexp extends Suite {
 
   def testAABany = {
     val exs = new Examples with Evaluator
-    val fc = exs.recompile(exs.aabx) // TODO: replace final x with any
+    val fc = exs.recompile(exs.aabany)
 
     expect(true){exs.fullmatch(fc)("AAB")}
     expect(true){exs.fullmatch(fc)("XYZAAB")}
     expect(true){exs.fullmatch(fc)("XYZABAAB")}
     expect(true){exs.fullmatch(fc)("XYZAABX")}
+    expect(true){exs.fullmatch(fc)("XYZAABXYZ")}
     expect(true){exs.begmatch(fc)("XYZAABX")}
     expect(false){exs.begmatch(fc)("XYZABX")}
   }

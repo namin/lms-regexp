@@ -1,0 +1,140 @@
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+class Match extends ((Unit)=>(scala.virtualization.lms.regexp.Automaton[Char, Boolean])) {
+def apply(x0:Unit): scala.virtualization.lms.regexp.Automaton[Char, Boolean] = {
+var x23 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Boolean]]
+var x12 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Boolean]]]
+var x27 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Boolean]]
+var x15 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Boolean]]]
+var x21 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Boolean]]
+var x18 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Boolean]]]
+var x29 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Boolean]]
+var x1 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Boolean]]]
+var x33 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Boolean]]
+var x4 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Boolean]]]
+var x10 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Boolean]]
+var x7 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Boolean]]]
+x18 = {x19: (Char) => 
+val x20 = x19 == 'A'
+val x25 = if (x20) {
+x21
+} else {
+val x22 = x19 == 'B'
+val x24 = if (x22) {
+x23
+} else {
+x23
+}
+x24
+}
+x25
+}
+x21 = scala.virtualization.lms.regexp.Automaton(true,x18)
+x15 = {x16: (Char) => 
+val x17 = x16 == 'A'
+val x26 = if (x17) {
+x21
+} else {
+x23
+}
+x26
+}
+x27 = scala.virtualization.lms.regexp.Automaton(true,x15)
+x12 = {x13: (Char) => 
+val x14 = x13 == 'A'
+val x28 = if (x14) {
+x27
+} else {
+x23
+}
+x28
+}
+x23 = scala.virtualization.lms.regexp.Automaton(true,x12)
+x7 = {x8: (Char) => 
+val x9 = x8 == 'A'
+val x31 = if (x9) {
+x10
+} else {
+val x11 = x8 == 'B'
+val x30 = if (x11) {
+x23
+} else {
+x29
+}
+x30
+}
+x31
+}
+x10 = scala.virtualization.lms.regexp.Automaton(false,x7)
+x4 = {x5: (Char) => 
+val x6 = x5 == 'A'
+val x32 = if (x6) {
+x10
+} else {
+x29
+}
+x32
+}
+x33 = scala.virtualization.lms.regexp.Automaton(false,x4)
+x1 = {x2: (Char) => 
+val x3 = x2 == 'A'
+val x34 = if (x3) {
+x33
+} else {
+x29
+}
+x34
+}
+x29 = scala.virtualization.lms.regexp.Automaton(false,x1)
+x29
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+compilation: ok
+// idx:   0
+// out:   false
+// char:  X
+// idx:   1
+// out:   false
+// char:  A
+// idx:   2
+// out:   false
+// char:  B
+// idx:   3
+// out:   false
+// char:  Z
+// idx:   4
+// out:   false
+// char:  A
+// idx:   5
+// out:   false
+// char:  A
+// idx:   6
+// out:   false
+// char:  B
+// idx:   7
+// out:   true
+// char:  W
+// idx:   8
+// out:   true
+// char:  A
+// idx:   9
+// out:   true
+// char:  A
+// idx:   10
+// out:   true
+// char:  A
+// idx:   11
+// out:   true
+// char:  A
+// idx:   12
+// out:   true
+// char:  B
+// idx:   13
+// out:   true
+// char:  Q
+// idx:   14
+// out:   true

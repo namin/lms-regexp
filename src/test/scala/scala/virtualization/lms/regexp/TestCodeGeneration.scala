@@ -62,8 +62,7 @@ class TestCodeGeneration extends FileDiffSuite {
       many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(wildcard))
     )
   }
-  // TODO
-  //def testSORegexpProg = (new SORegexpProg with Go).go("aabany")
+  def testSORegexpProg = (new SORegexpProg with Go).go("aabany")
 }
 
 trait FileDiffSuite extends Suite {

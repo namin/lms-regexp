@@ -1,6 +1,7 @@
 package scala.virtualization.lms.regexp
 
 import scala.virtualization.lms.common._
+import scala.virtualization.lms.util.ClosureCompare
 
 trait DFAOps extends Base {
 
@@ -34,10 +35,22 @@ trait ScalaGenDFAOps extends ScalaGenBase {
 }
 
 
-trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
+trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
   type NIO = List[NTrans]
   
-  case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO)
+  case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO) extends Ordered[NTrans] {
+    override def compare(o: NTrans) = {
+      val i = this.c.compare(o.c)
+      if (i != 0) i else {
+        val i2 = this.e().compare(o.e())
+        if (i2 != 0) i2 else {
+          val tf = canonicalize(this.s())
+          val of = canonicalize(o.s())
+          if (tf == of) 0 else tf.compare(of)
+	}
+      }
+    }
+  }
   
   def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => false, s))
 
@@ -52,10 +65,21 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   def stop(): NIO = Nil
   
 
-  sealed abstract class CharSet
-  case object W extends CharSet
-  case class C(c: Char) extends CharSet
+  sealed abstract class CharSet extends Ordered[CharSet] {
+    override def compare(o: CharSet) = (this,o) match {
+      case (W,W) => 0
+      case (W,_) => 1
+      case (_,W) => -1
+      case (R(a1,b1),R(a2,b2)) if a1 == a2 => b1.compare(b2)
+      case (R(a1,_),R(a2,_)) => a1.compare(a2)
+      case (R(_,_),_) => 1
+      case (_,R(_,_)) => -1
+      case (C(c1),C(c2)) => c1.compare(c2)
+    }
+  }
   case class R(a: Char, b: Char) extends CharSet
+  case class C(c: Char) extends CharSet
+  case object W extends CharSet
 
   def r(a: Char, b: Char) = {
     assert(a <= b)
@@ -111,8 +135,12 @@ trait NFAtoDFA extends DFAOps { this: NumericOps with LiftNumeric with Functions
   def convertNFAtoDFA(in: (NIO, Boolean)): DIO = {
 
     def iterate(flag: Boolean, state: NIO): DIO = {
-      //println(state.size + " " + state)
-      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state, c) { iterate }
+      val state_cooked = if (state.isEmpty) state else {
+        val state_sorted = state.sorted
+        state_sorted.head :: (for ((s,sn) <- (state_sorted zip state_sorted.tail)
+             if s.compare(sn) != 0) yield sn)
+      }
+      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
     }}
 
     iterate(in._2, in._1)
