@@ -6,6 +6,11 @@ import scala.reflect.SourceContext
 trait FunctionsExternalDef extends FunctionsExp with BlockExp with ClosureCompare {
   case class DefineFun[A,B](res: Block[B])(val arg: Sym[A]) extends Def[A=>B]
 
+  override def syms(e: Any): List[Sym[Any]] = e match {
+    case DefineFun(y) => syms(y)
+    case _ => super.syms(e)
+  }
+
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
     case f@DefineFun(y) => f.arg::effectSyms(y)
     case _ => super.boundSyms(e)
@@ -16,23 +21,21 @@ trait FunctionsExternalDef extends FunctionsExp with BlockExp with ClosureCompar
     case _ => super.symsFreq(e)
   }
 
-  var funTable: List[(Function[_,_], Any, Sym[_])] = List()
+  var funTable: List[(Sym[_], Any)] = List()
   override def doLambda[A:Manifest,B:Manifest](f: Exp[A]=>Exp[B])(implicit pos: SourceContext): Exp[A=>B] = {
     var can = canonicalize(f)
 
     funTable.find(_._2 == can) match {
-      case Some((g, _, funSym)) =>
+      case Some((funSym, _)) =>
         funSym.asInstanceOf[Sym[A=>B]]
       case _ =>
+        val funSym = fresh[A=>B]
+        val argSym = fresh[A]
       
-        var funSym = fresh[A=>B]
-        var argSym = fresh[A]//Sym(-1)
-      
-        val g = (x: Exp[A]) => Apply(funSym, x): Exp[B]
-        funTable = (g,can,funSym)::funTable
+        funTable = (funSym,can)::funTable
         
-        val y = Block(f(argSym)) // should use reifyEffects!
-        
+        val y = reifyEffects(f(argSym))
+
         createDefinition(funSym, DefineFun[A,B](y)(argSym))
         funSym
     }
