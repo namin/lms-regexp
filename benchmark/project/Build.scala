@@ -33,8 +33,8 @@ object MyBuild extends Build {
   )
 
   def normalAndOptimised(dir: String) = Seq(
-    benchProject(dir, noAssertions ++ scalaAt(dir)),
-    benchProject(dir + "Opt", noAssertions ++ scalaAt(dir) ++ optimise)
+    benchProject(dir, /*noAssertions ++ */scalaAt(dir)),
+    benchProject(dir + "Opt", /*noAssertions ++ */scalaAt(dir) ++ optimise)
   )
 
   def benchProject(name: String, extraSettings: Seq[Setting[_]] = Seq.empty) =
@@ -45,7 +45,7 @@ object MyBuild extends Build {
   def scalaAt(dir: String) = Seq(scalaHome := Some(file(distPath) / dir))
 
   val optimise = scalacOptions += "-optimise"
-  val noAssertions = scalacOptions += "-Xdisable-assertions"
+  //val noAssertions = scalacOptions += "-Xdisable-assertions"
 
   val myDefaultSettings: Seq[Setting[_]] = Seq(
     organization := "com.example",
