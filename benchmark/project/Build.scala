@@ -33,7 +33,7 @@ object MyBuild extends Build {
   )
 
   def normalAndOptimised(dir: String) = Seq(
-    benchProject(dir, /*noAssertions ++ */scalaAt(dir)),
+    //benchProject(dir, /*noAssertions ++ */scalaAt(dir)),
     benchProject(dir + "Opt", /*noAssertions ++ */scalaAt(dir) ++ optimise)
   )
 
