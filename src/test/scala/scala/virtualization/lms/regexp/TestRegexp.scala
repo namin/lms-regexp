@@ -23,19 +23,25 @@ class TestRegexp extends Suite {
     }
     def begmatch(fc: Unit => DfaState)(input: String): Boolean = {
       var state = fc()
-      var found = false
-      def update() = found = found || state.out == 1
-      update()
-      input.foreach { c =>
-        state = state.next(c)
-        update()
+      var i = 0
+      val n = input.length
+      while (i < n) {
+        state = state.next(input.charAt(i))
+        if (state.out % 2 == 1) return true
+        i += 1
       }
-      found
+      return false
     }
     def fullmatch(fc: Unit => DfaState)(input: String): Boolean = {
       var state = fc()
-      input.foreach(c => state = state.next(c))
-      state.out == 1
+      var i = 0
+      val n = input.length
+      while (i < n) {
+        state = state.next(input.charAt(i))
+        if ((state.out & 2) == 2) return state.out % 2 == 1
+        i += 1
+      }
+      state.out % 2 == 1
     }
   }
 

@@ -24,11 +24,37 @@ trait DFAOpsExp extends BaseExp with DFAOps { this: Functions =>
 
 
 trait ScalaGenDFAOps extends ScalaGenBase {
-  val IR: DFAOpsExp
+  val IR: DFAOpsExp with FunctionsExternalDef
   import IR._
-  
+
+  private def stable(e: Boolean)(sym: Sym[Any], dfa: DFAState): Boolean = {
+    var processed = Set[Sym[Any]]()
+
+    def rec(x: (Sym[Any], DFAState)): Boolean = {
+      val sym = x._1
+      val dfa = x._2
+      if (processed.contains(sym)) return true
+      if ((dfa.e % 2 == 1) != e) return false
+      processed += sym
+      dfa.f match {
+        case Def(g@DefineFun(y)) =>
+          getFreeVarBlock(y.asInstanceOf[Block[Any]], List(g.arg)).collect{case sym@Def(dfa:DFAState) =>
+            (sym,dfa)}.forall(rec)
+      }
+    }
+
+    rec(sym, dfa)
+  }
+
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case DFAState(b,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + b + ".toByte," + quote(f) + ")")
+    case dfa@DFAState(b,f) =>
+      val s = b match {
+        case 0 => if (stable(false)(sym, dfa)) 2 else 0
+        case 1 => if (stable(true)(sym, dfa)) 3 else 1
+        case 2 => 2
+        case 3 => 3
+      }
+      emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + s + ".toByte," + quote(f) + ")")
     case _ => super.emitNode(sym, rhs)
   }
 }

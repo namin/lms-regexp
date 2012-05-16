@@ -24,7 +24,7 @@ x23
 }
 x24
 }
-x21 = scala.virtualization.lms.regexp.Automaton(1.toByte,x18)
+x21 = scala.virtualization.lms.regexp.Automaton(3.toByte,x18)
 x15 = {x16: (Char) => 
 val x17 = x16 == 'A'
 val x25 = if (x17) {
@@ -34,7 +34,7 @@ x23
 }
 x25
 }
-x26 = scala.virtualization.lms.regexp.Automaton(1.toByte,x15)
+x26 = scala.virtualization.lms.regexp.Automaton(3.toByte,x15)
 x12 = {x13: (Char) => 
 val x14 = x13 == 'A'
 val x27 = if (x14) {
@@ -44,7 +44,7 @@ x23
 }
 x27
 }
-x23 = scala.virtualization.lms.regexp.Automaton(1.toByte,x12)
+x23 = scala.virtualization.lms.regexp.Automaton(3.toByte,x12)
 x7 = {x8: (Char) => 
 val x9 = x8 == 'A'
 val x30 = if (x9) {
@@ -89,46 +89,46 @@ x28
 *******************************************/
 compilation: ok
 // idx:   0
-// out:   false
+// out:   0
 // char:  X
 // idx:   1
-// out:   false
+// out:   0
 // char:  A
 // idx:   2
-// out:   false
+// out:   0
 // char:  B
 // idx:   3
-// out:   false
+// out:   0
 // char:  Z
 // idx:   4
-// out:   false
+// out:   0
 // char:  A
 // idx:   5
-// out:   false
+// out:   0
 // char:  A
 // idx:   6
-// out:   false
+// out:   0
 // char:  B
 // idx:   7
-// out:   true
+// out:   3
 // char:  W
 // idx:   8
-// out:   true
+// out:   3
 // char:  A
 // idx:   9
-// out:   true
+// out:   3
 // char:  A
 // idx:   10
-// out:   true
+// out:   3
 // char:  A
 // idx:   11
-// out:   true
+// out:   3
 // char:  A
 // idx:   12
-// out:   true
+// out:   3
 // char:  B
 // idx:   13
-// out:   true
+// out:   3
 // char:  Q
 // idx:   14
-// out:   true
+// out:   3

@@ -5,10 +5,10 @@ class Benchmark extends SimpleScalaBenchmark {
     val n = input.length
     while (i < n) {
       state = state.next(input.charAt(i))
-      if (state.out == 2) return false
+      if ((state.out & 2) == 2) return state.out % 2 == 1
       i += 1
     }
-    state.out == 1
+    state.out % 2 == 1
   }
 
   def dkMatches(re: dk.brics.automaton.RunAutomaton)(input: String): Boolean = {
@@ -44,7 +44,8 @@ class Benchmark extends SimpleScalaBenchmark {
   override def setUp() {
     val regexps = Array(
       (new MatchAAB, ".*AAB"),
-      (new MatchUSD, "usd [+-]?[0-9]+.[0-9][0-9]"))
+      (new MatchUSD, "usd [+-]?[0-9]+.[0-9][0-9]"),
+      (new MatchAnything, ".*A?.*"))
     inputs = Array(
       "AAB",
       "hello AAB",
@@ -55,30 +56,32 @@ class Benchmark extends SimpleScalaBenchmark {
       "   usd 1234.00",
       "he said she said he said no",
       "same same same",
-      "{1:\n" + "this is some more text - and some more and some more and even more\n" +
-      //(1 to 40).map(_ => "this is some more text and some more and some more and even more\n").mkString +
-      "this is some more text and some more and some more and even more at the end\n" + "-}\n"
+      "{1:" + "this is some more text - and some more and some more and even more" +
+      //(1 to 40).map(_ => "this is some more text and some more and some more and even more").mkString +
+      "this is some more text and some more and some more and even more at the end" + "-}"
     )
     val expected = Array(
       Array(true, true, false, false, false, false, false, false, false, false),
-      Array(false, false, false, false, false, true, false, false, false, false))
+      Array(false, false, false, false, false, true, false, false, false, false),
+      Array(true, true, true, true, true, true, true, true, true, true))
     val allRegexps = for ((lmsRe,re) <- regexps) yield {
       val dkRe = new dk.brics.automaton.RunAutomaton(new dk.brics.automaton.RegExp(re).toAutomaton(), true)
       val javaRe = java.util.regex.Pattern.compile(re)
-      (lmsRe, dkRe, javaRe)
+      (lmsRe, dkRe, javaRe, re)
     }
 
-    for (ri <- 0 to regexps.length-1; (lmsRe,dkRe,javaRe) = allRegexps(ri)) {
+    for (ri <- 0 to regexps.length-1; (lmsRe,dkRe,javaRe, re) = allRegexps(ri)) {
       for (i <- 0 to inputs.length-1; input = inputs(i)) {
         val lmsResult = lmsMatches(lmsRe)(input)
         val dkResult = dkMatches(dkRe)(input)
         val dkStepResult = dkStepMatches(dkRe)(input)
         val javaResult = javaMatches(javaRe)(input)
         val expectedResult = expected(ri)(i)
-        assert(lmsResult == expectedResult)
-        assert(dkResult == expectedResult)
-        assert(dkStepResult == expectedResult)
-        assert(javaResult == expectedResult)
+        val debug = re + ":" + input + "->" + expectedResult
+        assert(lmsResult == expectedResult, debug)
+        assert(dkResult == expectedResult, debug)
+        assert(dkStepResult == expectedResult, debug)
+        assert(javaResult == expectedResult, debug)
       }
     }
 
