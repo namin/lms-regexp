@@ -24,7 +24,7 @@ class TestRegexp extends Suite {
     def begmatch(fc: Unit => DfaState)(input: String): Boolean = {
       var state = fc()
       var found = false
-      def update() = found = found || state.out
+      def update() = found = found || state.out == 1
       update()
       input.foreach { c =>
         state = state.next(c)
@@ -35,7 +35,7 @@ class TestRegexp extends Suite {
     def fullmatch(fc: Unit => DfaState)(input: String): Boolean = {
       var state = fc()
       input.foreach(c => state = state.next(c))
-      state.out
+      state.out == 1
     }
   }
 

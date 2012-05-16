@@ -5,20 +5,20 @@ import scala.virtualization.lms.util.ClosureCompare
 
 trait DFAOps extends Base {
 
-  type DfaState = Automaton[Char,Boolean]
+  type DfaState = Automaton[Char,Byte]
 
   type DIO = Rep[DfaState]
 
-  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(false)(f)
-  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO
+  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(0.toByte)(f)
+  def dfa_trans(e: Byte)(f: Rep[Char] => DIO): DIO
 }
 
 
 trait DFAOpsExp extends BaseExp with DFAOps { this: Functions => 
 
-  case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
+  case class DFAState(e: Byte, f: Rep[Char => DfaState]) extends Def[DfaState]
   
-  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
+  def dfa_trans(e: Byte)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
   
 }
 
@@ -28,7 +28,7 @@ trait ScalaGenDFAOps extends ScalaGenBase {
   import IR._
   
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case DFAState(b,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + b + "," + quote(f) + ")")
+    case DFAState(b,f) => emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + b + ".toByte," + quote(f) + ")")
     case _ => super.emitNode(sym, rhs)
   }
 }
@@ -140,7 +140,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
              if s.compare(sn) != 0) yield sn)
       }
       //println("// cooked state: " + state_cooked)
-      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
+      dfa_trans((if (flag) 1 else (if (state_cooked.isEmpty) 2 else 0)).toByte){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
     }}
 
     iterate(in._2, in._1)

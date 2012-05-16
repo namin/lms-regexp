@@ -1,13 +1,14 @@
 class Benchmark extends SimpleScalaBenchmark {
-  def lmsMatches(re: Unit => scala.virtualization.lms.regexp.Automaton[Char,Boolean])(input: String): Boolean = {
+  def lmsMatches(re: Unit => scala.virtualization.lms.regexp.Automaton[Char,Byte])(input: String): Boolean = {
     var state = re()
     var i = 0
     val n = input.length
     while (i < n) {
       state = state.next(input.charAt(i))
+      if (state.out == 2) return false
       i += 1
     }
-    state.out
+    state.out == 1
   }
 
   def dkMatches(re: dk.brics.automaton.RunAutomaton)(input: String): Boolean = {
@@ -34,7 +35,7 @@ class Benchmark extends SimpleScalaBenchmark {
     re.matcher(input).matches()
   }
 
-  var lmsRegexps: Array[Unit => scala.virtualization.lms.regexp.Automaton[Char,Boolean]] = _
+  var lmsRegexps: Array[Unit => scala.virtualization.lms.regexp.Automaton[Char,Byte]] = _
   var dkRegexps: Array[dk.brics.automaton.RunAutomaton] = _
   var javaRegexps: Array[java.util.regex.Pattern] = _
 

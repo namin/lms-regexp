@@ -19,7 +19,7 @@ class TestCodeGeneration extends FileDiffSuite {
           var idx = 0
           input foreach { c =>
             println("// idx:   " + idx)
-            println("// out:   " + state.out)
+            println("// out:   " + (state.out == 1))
             println("// char:  " + c)
 
             idx += 1
@@ -27,7 +27,7 @@ class TestCodeGeneration extends FileDiffSuite {
           }
       
           println("// idx:   " + idx)
-          println("// out:   " + state.out)
+          println("// out:   " + (state.out == 1))
         }
         run()
       }
