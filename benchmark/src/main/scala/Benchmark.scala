@@ -18,12 +18,16 @@ class Benchmark extends SimpleScalaBenchmark {
     var state = re.getInitialState()
     var i = 0
     val n = input.length
+    var dead = false
     while (i < n) {
-      // don't stop early
-      state = if (state == -1) -1 else re.step(state, input.charAt(i))
+      state = re.step(state, input.charAt(i))
+      if (state == -1) {
+        dead = true
+        state = re.getInitialState()
+      }
       i += 1
     }
-    state != -1 && re.isAccept(state)
+    !dead && re.isAccept(state)
   }
 
   def javaMatches(re: java.util.regex.Pattern)(input: String): Boolean = {
