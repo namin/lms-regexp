@@ -6,6 +6,7 @@ object Main extends App {
     val digit = in('0', '9')
     val usd = many(seq)(c('u'), c('s'), c('d'), c(' '), opt(alt(c('+'), c('-'))),
                         plus(digit), c('.'), digit, digit)
+    val anything = many(seq)(star(wildcard), opt(c('A')), star(wildcard))
   }
   trait CodeGenerator extends DSL with Impl {
     def output(res: List[(RE, String)]) = {
@@ -20,5 +21,5 @@ object Main extends App {
     }
   }
   val exs = new Examples with CodeGenerator
-  exs.output(List((exs.aab, "AAB"), (exs.usd, "USD")))
+  exs.output(List((exs.aab, "AAB"), (exs.usd, "USD"), (exs.anything, "Anything")))
 }

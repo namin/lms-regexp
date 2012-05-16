@@ -199,9 +199,15 @@ trait RegexpToNFA { this: NFAtoDFA =>
   def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => (Nil, true)))
 }
 
+trait IfThenElseExpExtra extends IfThenElseExp {
+  import scala.reflect.SourceContext
+  override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) =
+    if (thenp == elsep) thenp else super.__ifThenElse(cond, thenp, elsep)
+}
+
 trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
 
-trait Impl extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala { q =>
+trait Impl extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala { q =>
   override val verbosity = 1
   object codegen extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
     val IR: q.type = q
