@@ -59,7 +59,7 @@ class Benchmark extends SimpleScalaBenchmark {
       "he said she said he said no",
       "same same same",
       "{1:" + "this is some more text - and some more and some more and even more" +
-      //(1 to 40).map(_ => "this is some more text and some more and some more and even more").mkString +
+      (1 to 40).map(_ => "this is some more text and some more and some more and even more").mkString +
       "this is some more text and some more and some more and even more at the end" + "-}"
     )
     val expected = Array(
@@ -69,7 +69,7 @@ class Benchmark extends SimpleScalaBenchmark {
       Array(true, true, true, true, true, true, true, true, true, true, true))
     val allRegexps = for ((lmsRe,re) <- regexps) yield {
       val dkRe = new dk.brics.automaton.RunAutomaton(new dk.brics.automaton.RegExp(re).toAutomaton(), true)
-      val javaRe = java.util.regex.Pattern.compile(re)
+      val javaRe = java.util.regex.Pattern.compile(re, java.util.regex.Pattern.DOTALL)
       (lmsRe, dkRe, javaRe, re)
     }
 
