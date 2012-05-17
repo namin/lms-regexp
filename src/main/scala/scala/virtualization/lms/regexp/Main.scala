@@ -3,6 +3,7 @@ package scala.virtualization.lms.regexp
 object Main extends App {
   trait Examples extends DSL {
     val aab = many(seq)(star(wildcard), c('A'), c('A'), c('B'))
+    val aabany = many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(wildcard))
     val digit = in('0', '9')
     val usd = many(seq)(c('u'), c('s'), c('d'), c(' '), opt(alt(c('+'), c('-'))),
                         plus(digit), c('.'), digit, digit)
@@ -21,5 +22,5 @@ object Main extends App {
     }
   }
   val exs = new Examples with CodeGenerator
-  exs.output(List((exs.aab, "AAB"), (exs.usd, "USD"), (exs.anything, "Anything")))
+  exs.output(List((exs.aab, "AAB"), (exs.aabany, "AABany"), (exs.usd, "USD"), (exs.anything, "Anything")))
 }

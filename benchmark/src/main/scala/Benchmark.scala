@@ -44,12 +44,14 @@ class Benchmark extends SimpleScalaBenchmark {
   override def setUp() {
     val regexps = Array(
       (new MatchAAB, ".*AAB"),
+      (new MatchAABany, ".*AAB.*"),
       (new MatchUSD, "usd [+-]?[0-9]+.[0-9][0-9]"),
       (new MatchAnything, ".*A?.*"))
     inputs = Array(
       "AAB",
       "hello AAB",
       "AAB no",
+      "AAB " + (1 to 10).map(_ => "no no no"),
       "http://www.linux.com/",
       "http://www.thelinuxshow.com/main.php3",
       "usd 1234.00",
@@ -61,9 +63,10 @@ class Benchmark extends SimpleScalaBenchmark {
       "this is some more text and some more and some more and even more at the end" + "-}"
     )
     val expected = Array(
-      Array(true, true, false, false, false, false, false, false, false, false),
-      Array(false, false, false, false, false, true, false, false, false, false),
-      Array(true, true, true, true, true, true, true, true, true, true))
+      Array(true, true, false, false, false, false, false, false, false, false, false),
+      Array(true, true, true, true, false, false, false, false, false, false, false),
+      Array(false, false, false, false, false, false, true, false, false, false, false),
+      Array(true, true, true, true, true, true, true, true, true, true, true))
     val allRegexps = for ((lmsRe,re) <- regexps) yield {
       val dkRe = new dk.brics.automaton.RunAutomaton(new dk.brics.automaton.RegExp(re).toAutomaton(), true)
       val javaRe = java.util.regex.Pattern.compile(re)
