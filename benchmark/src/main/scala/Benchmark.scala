@@ -14,22 +14,6 @@ class Benchmark extends SimpleScalaBenchmark {
     re.run(input)
   }
 
-  def dkStepMatches(re: dk.brics.automaton.RunAutomaton)(input: String): Boolean = {
-    var state = re.getInitialState()
-    var i = 0
-    val n = input.length
-    var dead = false
-    while (i < n) {
-      state = re.step(state, input.charAt(i))
-      if (state == -1) {
-        dead = true
-        state = re.getInitialState()
-      }
-      i += 1
-    }
-    !dead && re.isAccept(state)
-  }
-
   def javaMatches(re: java.util.regex.Pattern)(input: String): Boolean = {
     re.matcher(input).matches()
   }
@@ -76,13 +60,11 @@ class Benchmark extends SimpleScalaBenchmark {
       for (i <- 0 to inputs.length-1; input = inputs(i)) {
         val lmsResult = lmsMatches(lmsRe)(input)
         val dkResult = dkMatches(dkRe)(input)
-        val dkStepResult = dkStepMatches(dkRe)(input)
         val javaResult = javaMatches(javaRe)(input)
         val expectedResult = expected(ri)(i)
         val debug = re + ":" + input + "->" + expectedResult
         assert(lmsResult == expectedResult, debug)
         assert(dkResult == expectedResult, debug)
-        assert(dkStepResult == expectedResult, debug)
         assert(javaResult == expectedResult, debug)
       }
     }
@@ -110,6 +92,5 @@ class Benchmark extends SimpleScalaBenchmark {
 
   def timeLMS(reps: Int) = repeatAll(lmsMatches, lmsRegexps)(reps)
   def timeDK(reps: Int) = repeatAll(dkMatches, dkRegexps)(reps)
-  def timeDKStep(reps: Int) = repeatAll(dkStepMatches, dkRegexps)(reps)
   def timeJava(reps: Int) = repeatAll(javaMatches, javaRegexps)(reps)
 }
