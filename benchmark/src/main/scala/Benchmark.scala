@@ -3,9 +3,8 @@ class Benchmark extends SimpleScalaBenchmark {
     var state = re()
     var i = 0
     val n = input.length
-    while (i < n) {
+    while ((state.out & 2) != 2 && (i < n)) {
       state = state.next(input.charAt(i))
-      if ((state.out & 2) == 2) return state.out % 2 == 1
       i += 1
     }
     state.out % 2 == 1
