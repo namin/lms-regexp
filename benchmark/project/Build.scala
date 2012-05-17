@@ -34,7 +34,7 @@ object MyBuild extends Build {
 
   def normalAndOptimised(dir: String) = Seq(
     //benchProject(dir, /*noAssertions ++ */scalaAt(dir)),
-    benchProject(dir + "Opt", /*noAssertions ++ */scalaAt(dir) ++ optimise)
+    benchProject(dir + "Opt", noAssertions ++ scalaAt(dir) ++ optimise)
   )
 
   def benchProject(name: String, extraSettings: Seq[Setting[_]] = Seq.empty) =
@@ -45,11 +45,11 @@ object MyBuild extends Build {
   def scalaAt(dir: String) = Seq(scalaHome := Some(file(distPath) / dir))
 
   val optimise = scalacOptions += "-optimise"
-  //val noAssertions = scalacOptions += "-Xdisable-assertions"
+  val noAssertions = scalacOptions += "-Xdisable-assertions"
 
   val myDefaultSettings: Seq[Setting[_]] = Seq(
-    organization := "com.example",
-    name := "scala-benchmarking-template",
+    organization := "EPFL",
+    name := "lms-regexp-benchmark",
     version := "1.0.0-SNAPSHOT",
     scalaVersion := "2.9.2",
     //javaOptions ++= Seq("-XX:+PrintCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+PrintAssembly",
@@ -65,9 +65,12 @@ object MyBuild extends Build {
         "com.google.code.java-allocation-instrumenter" % "java-allocation-instrumenter" % "2.0",
         "com.google.caliper" % "caliper" % "0.5-rc1",
         "com.google.code.gson" % "gson" % "1.7.1",
-        "dk.brics.automaton" % "automaton" % "1.11-8"
+        "dk.brics.automaton" % "automaton" % "1.11-8",
+        "org.scalatest" %% "scalatest" % "1.6.1" % "test"
     ),
     resolvers += "sonatypeSnapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
+
+    scalaSource in Test <<= baseDirectory(_ / "test"),
 
     cancelable := true,
 
