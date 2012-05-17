@@ -13,6 +13,7 @@ class TestRegexp extends Suite {
     val fool = alt(seq(wildcard, opt(c('B'))), seq(wildcard, opt(c('A'))))
     val fool2 = many(alt)(seq(wildcard, opt(c('B'))), seq(wildcard, opt(c('C'))), seq(wildcard, c('A')))
     val fool3 = many(alt)(seq(wildcard, opt(c('B'))), seq(wildcard, opt(c('C'))), seq(c('X'), c('A')))
+    val any = many(seq)(star(wildcard), opt(c('A')), star(wildcard))
   }
 
   trait Evaluator extends DSL with Impl {
@@ -30,7 +31,7 @@ class TestRegexp extends Suite {
         if (state.out % 2 == 1) return true
         i += 1
       }
-      return false
+      state.out % 2 == 1
     }
     def fullmatch(fc: Unit => DfaState)(input: String): Boolean = {
       var state = fc()
@@ -55,6 +56,8 @@ class TestRegexp extends Suite {
     expect(false){exs.fullmatch(fc)("XYZAABX")}
     expect(true){exs.begmatch(fc)("XYZAABX")}
     expect(false){exs.begmatch(fc)("XYZABX")}
+    expect(false){exs.begmatch(fc)("")}
+    expect(false){exs.fullmatch(fc)("")}
   }
 
   def testAABX = {
@@ -67,6 +70,8 @@ class TestRegexp extends Suite {
     expect(true){exs.fullmatch(fc)("XYZAABX")}
     expect(true){exs.begmatch(fc)("XYZAABX")}
     expect(false){exs.begmatch(fc)("XYZABX")}
+    expect(false){exs.begmatch(fc)("")}
+    expect(false){exs.fullmatch(fc)("")}
   }
 
   def testAABany = {
@@ -80,6 +85,8 @@ class TestRegexp extends Suite {
     expect(true){exs.fullmatch(fc)("XYZAABXYZ")}
     expect(true){exs.begmatch(fc)("XYZAABX")}
     expect(false){exs.begmatch(fc)("XYZABX")}
+    expect(false){exs.begmatch(fc)("")}
+    expect(false){exs.fullmatch(fc)("")}
   }
 
   def testUSD = {
@@ -93,12 +100,15 @@ class TestRegexp extends Suite {
     expect(false){exs.fullmatch(fc)("usd1234.00")}
     expect(false){exs.fullmatch(fc)("usd 1234")}
     expect(false){exs.begmatch(fc)("  usd 1234.01  ")}
+    expect(false){exs.begmatch(fc)("")}
+    expect(false){exs.fullmatch(fc)("")}
   }
 
   def testFool = {
     val exs = new Examples with Evaluator
     val fc = exs.recompile(exs.fool)
 
+    expect(false){exs.begmatch(fc)("")}
     expect(false){exs.fullmatch(fc)("")}
     expect(true){exs.fullmatch(fc)("X")}
     expect(true){exs.fullmatch(fc)("XA")}
@@ -110,6 +120,7 @@ class TestRegexp extends Suite {
     val exs = new Examples with Evaluator
     val fc = exs.recompile(exs.fool2)
 
+    expect(false){exs.begmatch(fc)("")}
     expect(false){exs.fullmatch(fc)("")}
     expect(true){exs.fullmatch(fc)("X")}
     expect(true){exs.fullmatch(fc)("XA")}
@@ -122,6 +133,7 @@ class TestRegexp extends Suite {
     val exs = new Examples with Evaluator
     val fc = exs.recompile(exs.fool3)
 
+    expect(false){exs.begmatch(fc)("")}
     expect(false){exs.fullmatch(fc)("")}
     expect(true){exs.fullmatch(fc)("X")}
     expect(true){exs.fullmatch(fc)("XA")}
@@ -131,5 +143,17 @@ class TestRegexp extends Suite {
     expect(true){exs.fullmatch(fc)("YB")}
     expect(true){exs.fullmatch(fc)("YC")}
     expect(false){exs.fullmatch(fc)("XD")}
+  }
+
+  def testAny = {
+    val exs = new Examples with Evaluator
+    val fc = exs.recompile(exs.any)
+
+    expect(true){exs.begmatch(fc)("")}
+    expect(true){exs.fullmatch(fc)("")}
+    expect(true){exs.begmatch(fc)("X")}
+    expect(true){exs.fullmatch(fc)("X")}
+    expect(true){exs.begmatch(fc)("XX")}
+    expect(true){exs.fullmatch(fc)("XX")}
   }
 }
