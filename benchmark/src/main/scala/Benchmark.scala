@@ -16,6 +16,6 @@ class Benchmark extends SimpleScalaBenchmark {
   }
 
   def timeMatching(reps: Int) = repeat(reps) {
-    regexp.matches(input)
+    if (regexp.matches(input)) reps else -reps
   }
 }
