@@ -3,7 +3,7 @@ public enum InputType {
     X_AAB ("hello AAB"),
     AAB_X ("AAB no"),
     AAB_GARBAGE ("AAB " + garbage(10)),
-    USD ("usd 1234.00"),
+    USD_EX ("usd 1234.00"),
     GARBAGE (garbage(20));
 
     public final String text;

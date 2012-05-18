@@ -1,12 +1,15 @@
 import org.scalatest._
 
 class TestConsistency extends Suite {
+  import RegexpType._
+  import InputType._
+
   private def spec(regexp: RegexpType, input: InputType) = {
-    (regexp.toString, input.toString) match {
-      case ("ANY_AAB" | "ANY_AAB_ANY", "AAB" | "X_AAB") => true
-      case ("ANY_AAB_ANY", "AAB_X" | "AAB_GARBAGE") => true
-      case ("USD", "USD") => true
-      case ("ANY", _) => true
+    (regexp, input) match {
+      case (ANY_AAB | ANY_AAB_ANY, AAB | X_AAB) => true
+      case (ANY_AAB_ANY, AAB_X | AAB_GARBAGE) => true
+      case (USD, USD_EX) => true
+      case (ANY, _) => true
       case _ => false
     }
   }

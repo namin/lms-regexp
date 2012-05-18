@@ -1,9 +1,11 @@
+import RegexpType._
+
 class MatcherLMS(regexp: RegexpType) extends RegexpMatcher(regexp) {
-  private val fc = regexp.toString match {
-    case "ANY_AAB" => new MatchAAB
-    case "ANY_AAB_ANY" => new MatchAABany
-    case "USD" => new MatchUSD
-    case "ANY" => new MatchAnything
+  private val fc = regexp match {
+    case ANY_AAB => new MatchAAB
+    case ANY_AAB_ANY => new MatchAABany
+    case USD => new MatchUSD
+    case ANY => new MatchAnything
   }
   private val initialState = fc()
 
