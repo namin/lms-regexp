@@ -12,14 +12,14 @@ class BenchmarkQuick extends SimpleScalaBenchmark {
   }
 
   def timeMatching(reps: Int) = repeat(reps) {
-    var count = false
+    var count = 0
     var i = 0
     val n = regexps.length
     val m = inputs.length
     while (i < n) {
       var j = 0
       while (j < m) {
-        count = regexps(i).matches(inputs(j))
+        if (regexps(i).matches(inputs(j))) count += 1 else count += -1
         j += 1
       }
       i += 1
