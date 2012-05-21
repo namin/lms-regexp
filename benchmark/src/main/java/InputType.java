@@ -1,6 +1,7 @@
 public enum InputType {
     AAB ("AAB"),
     X_AAB ("hello AAB"),
+    AABABBAAB ("AABABBAAB"),
     AAB_X ("AAB no"),
     AAB_GARBAGE ("AAB " + garbage(10)),
     USD_EX ("usd 1234.00"),

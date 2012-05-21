@@ -6,7 +6,8 @@ class TestConsistency extends Suite {
 
   private def spec(regexp: RegexpType, input: InputType) = {
     (regexp, input) match {
-      case (ANY_AAB | ANY_AAB_ANY, AAB | X_AAB) => true
+      case (ANY_AAB | ANY_AAB_ANY | COOK, AAB | AABABBAAB) => true
+      case (ANY_AAB | ANY_AAB_ANY, X_AAB) => true
       case (ANY_AAB_ANY, AAB_X | AAB_GARBAGE) => true
       case (USD, USD_EX) => true
       case (ANY, _) => true

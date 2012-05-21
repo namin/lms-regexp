@@ -8,7 +8,9 @@ object Main extends App {
     val usd = many(seq)(c('u'), c('s'), c('d'), c(' '), opt(alt(c('+'), c('-'))),
                         plus(digit), c('.'), digit, digit)
     val anything = many(seq)(star(wildcard), opt(c('A')), star(wildcard))
+    val cook = seq(star(alt(c('A'), c('B'))), alt(many(seq)(c('A'), c('B'), c('B')), alt(c('A'), c('B'))))
   }
+
   trait CodeGenerator extends DSL with Impl {
     def output(res: List[(RE, String)]) = {
       val out = new java.io.PrintWriter("benchmark/src/main/scala/LMS.scala")
@@ -22,5 +24,5 @@ object Main extends App {
     }
   }
   val exs = new Examples with CodeGenerator
-  exs.output(List((exs.aab, "AAB"), (exs.aabany, "AABany"), (exs.usd, "USD"), (exs.anything, "Anything")))
+  exs.output(List((exs.aab, "AAB"), (exs.aabany, "AABany"), (exs.usd, "USD"), (exs.anything, "Anything"), (exs.cook, "Cook")))
 }
