@@ -1,6 +1,7 @@
 package scala.virtualization.lms.regexp
 
 import scala.virtualization.lms.common._
+import scala.virtualization.lms.internal.NestedBlockTraversal
 import scala.virtualization.lms.util.ClosureCompare
 
 trait DFAOps extends Base {
@@ -23,7 +24,7 @@ trait DFAOpsExp extends BaseExp with DFAOps { this: Functions =>
 }
 
 
-trait ScalaGenDFAOps extends ScalaGenBase {
+trait StabilityCalculator extends NestedBlockTraversal {
   val IR: DFAOpsExp with FunctionsExternalDef
   import IR._
 
@@ -45,6 +46,11 @@ trait ScalaGenDFAOps extends ScalaGenBase {
 
     rec(sym, dfa)
   }
+}
+
+trait ScalaGenDFAOps extends StabilityCalculator with ScalaGenBase {
+  val IR: DFAOpsExp with FunctionsExternalDef
+  import IR._
 
   private def encodeOut(b: Boolean, sym: Sym[Any], dfa: DFAState): Byte = {
     var r = if (b) 1 else 0
@@ -251,7 +257,6 @@ trait Impl extends ImplBase { q =>
 trait AutomataCodegenOpt extends AutomataCodegenBase {
   import java.io.{File, FileWriter, PrintWriter}
   import scala.reflect.SourceContext
-  import scala.virtualization.lms.internal.NestedBlockTraversal
 
   import IR._
 
@@ -264,34 +269,79 @@ trait AutomataCodegenOpt extends AutomataCodegenBase {
     List()
   }
 
-  class Collector extends NestedBlockTraversal {
+  class Collector extends NestedBlockTraversal with StabilityCalculator {
     val IR: AutomataCodegenOpt.this.IR.type = AutomataCodegenOpt.this.IR
 
-    var states = Set[Sym[Any]]()
-    var funs = Set[Sym[Any]]()
-
+    var stableStates = Set[Sym[Any]]()
     override def traverseStm(stm: Stm) = stm match {
       case TP(sym, rhs) => rhs match {
-        case g@DefineFun(y) => funs += sym
-        case dfa@DFAState(b, f) => states += sym
+        case dfa@DFAState(b, f) =>
+          if (stable(b, sym, dfa)) stableStates += sym
         case _ =>
       }
     }
+  }
+
+  var dfaStableStates: Set[Sym[Any]] = _
+  var firstFun: Boolean = true
+  var booleanStage: Boolean = false
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case g@DefineFun(y) =>
+      stream.println((if (firstFun) "if" else "else if")+" (id == "+sym.id+") {")
+      firstFun = false
+      emitValDef(g.arg, "c")
+      emitBlock(y)
+      stream.println(quote(getBlockResult(y)))
+      stream.println("}")
+    case dfa@DFAState(b,f) =>
+    case _ => super.emitNode(sym, rhs)
+  }
+
+  override def quote(x: Exp[Any]) : String = x match {
+    case Def(dfa@DFAState(b,Sym(fn))) =>
+      if (booleanStage) b.toString
+      else if (dfaStableStates.contains(x.asInstanceOf[Sym[Any]])) { "return " + b }
+      else fn.toString
+    case _ => super.quote(x)
+  }
+
+  override def emitForwardDef(sym: Sym[Any]): Unit = {
   }
 
   def emitAutomata(automaton: DIO, className: String, out: PrintWriter) {
     val block = reifyBlock(automaton)
     val collector = new Collector()
     collector.traverseBlock(block)
-    val dfaStates = collector.states
-    val dfaFuns = collector.funs
+    dfaStableStates = collector.stableStates
 
     withStream(out) {
-      println("// dfaStates : " + dfaStates)
-      println("// dfaFuns : " + dfaFuns)
       stream.println("class "+className+" extends (String=>Boolean) {")
       stream.println("def apply(input: String): Boolean = {")
-      stream.println("true")
+      stream.println("val n = input.length")
+      booleanStage = true
+      stream.println("if (n == 0) return " + quote(getBlockResult(block)))
+      booleanStage = false
+      stream.println("var id = " + quote(getBlockResult(block)))
+      stream.println("var i = 0")
+      stream.println("val n_dec = n-1")
+      stream.println("while (i < n_dec) {")
+      stream.println("val c = input.charAt(i)")
+      stream.println("id =")
+
+      firstFun = true
+      booleanStage = false
+      emitBlock(block)
+      stream.println("else { throw new RuntimeException(\"invalid state \" + id) }")
+      stream.println("i += 1")
+      stream.println("}")
+
+      stream.println("val c = input.charAt(i)")
+      firstFun = true
+      booleanStage = true
+      emitBlock(block)
+      stream.println("else { throw new RuntimeException(\"invalid state \" + id) }")
+
       stream.println("}")
       stream.println("}")
     }

@@ -24,12 +24,28 @@ class TestOpt extends FileDiffSuite {
     }
   }
 
-  // def testEvalAAB = {
-  //   val exs = new Examples with Evaluator
-  //   val fc = exs.recompile(exs.aab)
-  //
-  //   expect(true)(fc("AAB"))
-  // }
+  def testEvalAAB = {
+    val exs = new Examples with Evaluator
+    val fc = exs.recompile(exs.aab)
+
+    expect(true){fc("AAB")}
+    expect(true){fc("XYZAAB")}
+    expect(true){fc("XYZABAAB")}
+    expect(false){fc("XYZAABX")}
+    expect(false){fc("")}
+  }
+
+  def testEvalAABany = {
+    val exs = new Examples with Evaluator
+    val fc = exs.recompile(exs.aabany)
+
+    expect(true){fc("AAB")}
+    expect(true){fc("XYZAAB")}
+    expect(true){fc("XYZABAAB")}
+    expect(true){fc("XYZAABX")}
+    expect(false){fc("XYZABX")}
+    expect(false){fc("")}
+  }
 
   def testCompileAAB = {
     val exs = new Examples with Go
