@@ -1,3 +1,5 @@
+// dfaStates : Set(Sym(11), Sym(9), Sym(16), Sym(12))
+// dfaFuns : Set(Sym(0), Sym(6), Sym(3))
 class Match extends (String=>Boolean) {
 def apply(input: String): Boolean = {
 true

@@ -27,7 +27,7 @@ trait ScalaGenDFAOps extends ScalaGenBase {
   val IR: DFAOpsExp with FunctionsExternalDef
   import IR._
 
-  private def stable(e: Boolean, sym: Sym[Any], dfa: DFAState): Boolean = {
+  def stable(e: Boolean, sym: Sym[Any], dfa: DFAState): Boolean = {
     var processed = Set[Sym[Any]]()
 
     def rec(x: (Sym[Any], DFAState)): Boolean = {
@@ -248,9 +248,10 @@ trait Impl extends ImplBase { q =>
   }
 }
 
-trait AutomataCodegenOpt extends scala.virtualization.lms.internal.ScalaNestedCodegen with AutomataCodegenBase {
+trait AutomataCodegenOpt extends AutomataCodegenBase {
   import java.io.{File, FileWriter, PrintWriter}
   import scala.reflect.SourceContext
+  import scala.virtualization.lms.internal.NestedBlockTraversal
 
   import IR._
 
@@ -259,15 +260,35 @@ trait AutomataCodegenOpt extends scala.virtualization.lms.internal.ScalaNestedCo
     (x: Exp[String]) => dio.asInstanceOf[Exp[Boolean]]
   }
   override def emitSource[A,B](f: Exp[A] => Exp[B], className: String, out: PrintWriter)(implicit mA: Manifest[A], mB: Manifest[B]): List[(Sym[Any], Any)] = {
-    emitAutomata((x:Exp[Unit]) => f(null).asInstanceOf[DIO], className, out)
+    emitAutomata(f(null).asInstanceOf[DIO], className, out)
     List()
   }
 
-  def emitAutomata(f: Exp[Unit] => DIO, className: String, out: PrintWriter) {
-    val x = fresh[Unit]
-    val y = reifyBlock(f(x))
+  class Collector extends NestedBlockTraversal {
+    val IR: AutomataCodegenOpt.this.IR.type = AutomataCodegenOpt.this.IR
+
+    var states = Set[Sym[Any]]()
+    var funs = Set[Sym[Any]]()
+
+    override def traverseStm(stm: Stm) = stm match {
+      case TP(sym, rhs) => rhs match {
+        case g@DefineFun(y) => funs += sym
+        case dfa@DFAState(b, f) => states += sym
+        case _ =>
+      }
+    }
+  }
+
+  def emitAutomata(automaton: DIO, className: String, out: PrintWriter) {
+    val block = reifyBlock(automaton)
+    val collector = new Collector()
+    collector.traverseBlock(block)
+    val dfaStates = collector.states
+    val dfaFuns = collector.funs
 
     withStream(out) {
+      println("// dfaStates : " + dfaStates)
+      println("// dfaFuns : " + dfaFuns)
       stream.println("class "+className+" extends (String=>Boolean) {")
       stream.println("def apply(input: String): Boolean = {")
       stream.println("true")
