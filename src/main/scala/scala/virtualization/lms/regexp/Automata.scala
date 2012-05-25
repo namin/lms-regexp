@@ -234,9 +234,51 @@ trait IfThenElseExpExtra extends IfThenElseExp {
 
 trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
 
-trait Impl extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala { q =>
+trait ImplBase extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala {
   override val verbosity = 1
-  object codegen extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
+}
+
+trait AutomataCodegenBase extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
+  val IR: ImplBase
+}
+
+trait Impl extends ImplBase { q =>
+  object codegen extends AutomataCodegenBase {
+    val IR: q.type = q
+  }
+}
+
+trait AutomataCodegenOpt extends scala.virtualization.lms.internal.ScalaNestedCodegen with AutomataCodegenBase {
+  import java.io.{File, FileWriter, PrintWriter}
+  import scala.reflect.SourceContext
+
+  import IR._
+
+  // hack to work with CompileScala
+  def pack(dio: => DIO): (Exp[String] => Exp[Boolean]) = {
+    (x: Exp[String]) => dio.asInstanceOf[Exp[Boolean]]
+  }
+  override def emitSource[A,B](f: Exp[A] => Exp[B], className: String, out: PrintWriter)(implicit mA: Manifest[A], mB: Manifest[B]): List[(Sym[Any], Any)] = {
+    emitAutomata((x:Exp[Unit]) => f(null).asInstanceOf[DIO], className, out)
+    List()
+  }
+
+  def emitAutomata(f: Exp[Unit] => DIO, className: String, out: PrintWriter) {
+    val x = fresh[Unit]
+    val y = reifyBlock(f(x))
+
+    withStream(out) {
+      stream.println("class "+className+" extends (String=>Boolean) {")
+      stream.println("def apply(input: String): Boolean = {")
+      stream.println("true")
+      stream.println("}")
+      stream.println("}")
+    }
+  }
+}
+
+trait ImplOpt extends ImplBase { q =>
+  object codegen extends AutomataCodegenOpt {
     val IR: q.type = q
   }
 }
