@@ -9,16 +9,16 @@ trait DFAOps extends Base {
 
   type DIO = Rep[DfaState]
 
-  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(0.toByte)(f)
-  def dfa_trans(e: Byte)(f: Rep[Char] => DIO): DIO
+  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(false)(f)
+  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO
 }
 
 
 trait DFAOpsExp extends BaseExp with DFAOps { this: Functions => 
 
-  case class DFAState(e: Byte, f: Rep[Char => DfaState]) extends Def[DfaState]
+  case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
   
-  def dfa_trans(e: Byte)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
+  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
   
 }
 
@@ -27,30 +27,35 @@ trait ScalaGenDFAOps extends ScalaGenBase {
   val IR: DFAOpsExp with FunctionsExternalDef
   import IR._
 
-  private def stabilize(b: Byte, sym: Sym[Any], dfa: DFAState): Byte = {
+  private def stable(e: Boolean, sym: Sym[Any], dfa: DFAState): Boolean = {
     var processed = Set[Sym[Any]]()
-    val e = (b % 2) == 1
 
-    def stable(x: (Sym[Any], DFAState)): Boolean = {
+    def rec(x: (Sym[Any], DFAState)): Boolean = {
       val sym = x._1
       val dfa = x._2
       if (processed.contains(sym)) return true
-      if ((dfa.e % 2 == 1) != e) return false
+      if (dfa.e != e) return false
       processed += sym
       dfa.f match {
         case Def(g@DefineFun(y)) =>
           getFreeVarBlock(y.asInstanceOf[Block[Any]], List(g.arg)).collect{case sym@Def(dfa:DFAState) =>
-            (sym,dfa)}.forall(stable)
+            (sym,dfa)}.forall(rec)
       }
     }
 
-    if (((b & 2) != 2) && stable(sym, dfa)) (b | 2).toByte
-    else b
+    rec(sym, dfa)
+  }
+
+  private def encodeOut(b: Boolean, sym: Sym[Any], dfa: DFAState): Byte = {
+    var r = if (b) 1 else 0
+    if (stable(b, sym, dfa))
+      r = (r | 2)
+    r.toByte
   }
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case dfa@DFAState(b,f) =>
-      emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + stabilize(b, sym, dfa) + ".toByte," + quote(f) + ")")
+      emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + encodeOut(b, sym, dfa) + ".toByte," + quote(f) + ")")
     case _ => super.emitNode(sym, rhs)
   }
 }
@@ -162,7 +167,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
              if s.compare(sn) != 0) yield sn)
       }
       //println("// cooked state: " + state_cooked)
-      dfa_trans((if (flag) 1 else (if (state_cooked.isEmpty) 2 else 0)).toByte){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
+      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
     }}
 
     iterate(in._2, in._1)
