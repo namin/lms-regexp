@@ -3,7 +3,7 @@ import com.google.caliper.Param
 class Benchmark extends SimpleScalaBenchmark {
   @Param
   val matcherType : MatcherType = null
-  @Param
+  @Param(Array("ANY_AAB", "ANY_AAB_ANY", "USD", "COOK")) // all but ANY
   val regexpType : RegexpType = null
   @Param
   val inputType : InputType = null
