@@ -1,5 +1,7 @@
 package scala.virtualization.lms.regexp
 
+import scala.reflect.SourceContext
+
 import scala.virtualization.lms.common._
 import scala.virtualization.lms.internal.NestedBlockTraversal
 import scala.virtualization.lms.util.ClosureCompare
@@ -15,12 +17,11 @@ trait DFAOps extends Base {
 }
 
 
-trait DFAOpsExp extends BaseExp with DFAOps { this: Functions => 
+trait DFAOpsExp extends BaseExp with DFAOps { this: Functions =>
 
   case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
-  
+
   def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
-  
 }
 
 
@@ -69,7 +70,7 @@ trait ScalaGenDFAOps extends StabilityCalculator with ScalaGenBase {
 
 trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
   type NIO = List[NTrans]
-  
+
   case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO) extends Ordered[NTrans] {
     override def compare(o: NTrans) = {
       val i = this.c.compare(o.c)
@@ -79,11 +80,11 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
           val tf = canonicalize(this.s())
           val of = canonicalize(o.s())
           if (tf == of) 0 else tf.compare(of)
-	}
+        }
       }
     }
   }
-  
+
   def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => false, s))
 
   def guard(cond: CharSet, found: => Boolean = false)(e: => NIO): NIO = {
@@ -95,7 +96,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
   }
 
   def stop(): NIO = Nil
-  
+
 
   sealed abstract class CharSet extends Ordered[CharSet] {
     override def compare(o: CharSet) = (this,o) match {
@@ -152,13 +153,13 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
     case NTrans(cset, e, s)::rest =>
       if (cset contains cin) {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
-		       kcset <- rcset knowing cset) yield
-			 NTrans(kcset,re,rs)
+                       kcset <- rcset knowing cset) yield
+                         NTrans(kcset,re,rs)
         exploreNFA(xs1,cin)((flag,acc) => k(flag || e(), acc ++ s()))
       } else {
         val xs1 = for (NTrans(rcset, re, rs) <- rest;
-		       kcset <- rcset knowing_not cset) yield
-			 NTrans(kcset,re,rs)
+                       kcset <- rcset knowing_not cset) yield
+                         NTrans(kcset,re,rs)
         exploreNFA(xs1, cin)(k)
       }
   }
@@ -254,7 +255,20 @@ trait Impl extends ImplBase { q =>
   }
 }
 
-trait AutomataCodegenOpt extends AutomataCodegenBase {
+trait StabilityCollector extends StabilityCalculator {
+  import IR._
+
+  var stableStates = Set[Sym[Any]]()
+  override def traverseStm(stm: Stm) = stm match {
+    case TP(sym, rhs) => rhs match {
+    case dfa@DFAState(b, f) =>
+      if (stable(b, sym, dfa)) stableStates += sym
+    case _ =>
+    }
+  }
+}
+
+trait AutomataCodegenOpt extends AutomataCodegenBase { self =>
   import java.io.{File, FileWriter, PrintWriter}
   import scala.reflect.SourceContext
 
@@ -267,19 +281,6 @@ trait AutomataCodegenOpt extends AutomataCodegenBase {
   override def emitSource[A,B](f: Exp[A] => Exp[B], className: String, out: PrintWriter)(implicit mA: Manifest[A], mB: Manifest[B]): List[(Sym[Any], Any)] = {
     emitAutomata(f(null).asInstanceOf[DIO], className, out)
     List()
-  }
-
-  class Collector extends NestedBlockTraversal with StabilityCalculator {
-    val IR: AutomataCodegenOpt.this.IR.type = AutomataCodegenOpt.this.IR
-
-    var stableStates = Set[Sym[Any]]()
-    override def traverseStm(stm: Stm) = stm match {
-      case TP(sym, rhs) => rhs match {
-        case dfa@DFAState(b, f) =>
-          if (stable(b, sym, dfa)) stableStates += sym
-        case _ =>
-      }
-    }
   }
 
   var dfaStableStates: Set[Sym[Any]] = _
@@ -311,7 +312,9 @@ trait AutomataCodegenOpt extends AutomataCodegenBase {
 
   def emitAutomata(automaton: DIO, className: String, out: PrintWriter) {
     val block = reifyBlock(automaton)
-    val collector = new Collector()
+    val collector = new StabilityCollector {
+      val IR: self.IR.type = self.IR
+    }
     collector.traverseBlock(block)
     dfaStableStates = collector.stableStates
 
@@ -352,4 +355,69 @@ trait ImplOpt extends ImplBase { q =>
   object codegen extends AutomataCodegenOpt {
     val IR: q.type = q
   }
+}
+
+
+trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { q =>
+  val IR: ImplTrans
+  import IR._
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case AutomatonState(id, block) =>
+      emitValDef(sym, "state: " + id + ", block: " + block)
+      emitBlock(block)
+      stream.println(quote(getBlockResult(block)))
+    case AutomatonStatus(out, stop, id, f) =>
+      emitValDef(sym, "status: " + id + ", " + stop)
+    case _ => super.emitNode(sym, rhs)
+  }
+}
+
+trait ImplTrans extends ImplBase with LoopsFatExp { q =>
+  case class AutomatonState(id: Int, res: Block[DfaState])(val arg: Sym[Char]) extends Def[Char => DfaState]
+  case class AutomatonStatus(out: Boolean, stop: Boolean, id: Int, f: Exp[Char => DfaState]) extends Def[DfaState]
+
+  override def syms(e: Any): List[Sym[Any]] = e match {
+    case AutomatonState(n, y) => syms(y)
+    case _ => super.syms(e)
+  }
+
+  override def boundSyms(e: Any): List[Sym[Any]] = e match {
+    case f@AutomatonState(n, y) => f.arg::effectSyms(y)
+    case _ => super.boundSyms(e)
+  }
+
+  override def symsFreq(e: Any): List[(Sym[Any], Double)] = e match {
+    case AutomatonState(n, y) => freqHot(y)
+    case _ => super.symsFreq(e)
+  }
+
+  object codegen extends AutomataCodegenTrans {
+    val IR: q.type = q
+  }
+}
+
+trait OptTransformer extends RecursiveTransformer { self =>
+  val IR: ImplTrans
+  import IR._
+
+  var dfaStableStates: Set[Sym[Any]] = _
+
+  override def run[A:Manifest](s: Block[A]): Block[A] = {
+    val collector = new StabilityCollector {
+      val IR: self.IR.type = self.IR
+    }
+    collector.traverseBlock(s)
+    dfaStableStates = collector.stableStates
+    super.run(s)
+  }
+
+
+  override def transformDef[A](lhs: Sym[A], rhs: Def[A]) = (rhs match {
+    case g@DefineFun(y) => Some(() =>
+      AutomatonState(lhs.id, apply(y.asInstanceOf[Block[DfaState]]))(g.arg.asInstanceOf[Sym[Char]]))
+    case dfa@DFAState(b,f@Sym(n)) => Some(() =>
+      AutomatonStatus(b, dfaStableStates.contains(lhs), n, apply(f)))
+    case _ => super.transformDef(lhs, rhs)
+  }).asInstanceOf[Option[() => Def[A]]]
 }
