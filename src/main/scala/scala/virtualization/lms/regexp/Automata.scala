@@ -367,7 +367,7 @@ trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { q
       emitValDef(sym, "state: " + id + ", block: " + block)
       emitBlock(block)
       stream.println(quote(getBlockResult(block)))
-    case AutomatonStatus(out, stop, id, f) =>
+    case AutomatonStatus(out, stop, id, _) =>
       emitValDef(sym, "status: " + id + ", " + stop)
     case _ => super.emitNode(sym, rhs)
   }
@@ -376,6 +376,7 @@ trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { q
 trait ImplTrans extends ImplBase with LoopsFatExp { q =>
   case class AutomatonState(id: Int, res: Block[DfaState])(val arg: Sym[Char]) extends Def[Char => DfaState]
   case class AutomatonStatus(out: Boolean, stop: Boolean, id: Int, f: Exp[Char => DfaState]) extends Def[DfaState]
+  case class TopLevelAutomaton[A:Manifest](states: List[AutomatonState], start: AutomatonStatus) extends Def[A]
 
   override def syms(e: Any): List[Sym[Any]] = e match {
     case AutomatonState(n, y) => syms(y)
@@ -397,7 +398,7 @@ trait ImplTrans extends ImplBase with LoopsFatExp { q =>
   }
 }
 
-trait OptTransformer extends RecursiveTransformer { self =>
+trait OptTransformer1 extends RecursiveTransformer { self =>
   val IR: ImplTrans
   import IR._
 
@@ -412,7 +413,6 @@ trait OptTransformer extends RecursiveTransformer { self =>
     super.run(s)
   }
 
-
   override def transformDef[A](lhs: Sym[A], rhs: Def[A]) = (rhs match {
     case g@DefineFun(y) => Some(() =>
       AutomatonState(lhs.id, apply(y.asInstanceOf[Block[DfaState]]))(g.arg.asInstanceOf[Sym[Char]]))
@@ -420,4 +420,29 @@ trait OptTransformer extends RecursiveTransformer { self =>
       AutomatonStatus(b, dfaStableStates.contains(lhs), n, apply(f)))
     case _ => super.transformDef(lhs, rhs)
   }).asInstanceOf[Option[() => Def[A]]]
+}
+
+trait OptTransformer2 extends NestedBlockTraversal {
+  val IR: ImplTrans
+  import IR._
+
+  var topLevelDone: Boolean = _
+  var states: List[AutomatonState] = _
+
+  def findStart[A](s: Block[A]) = {
+    getBlockResult(s) match {
+      case Def(status@AutomatonStatus(out, stop, id, _)) => status
+    }
+  }
+
+  def run[A:Manifest](s: Block[A]): Def[A] = {
+    states = List.empty
+    super.traverseBlock(s)
+    TopLevelAutomaton(states, findStart(s))
+  }
+
+  override def traverseStm(stm: Stm): Unit = stm match {
+    case TP(lhs, g@AutomatonState(id, y)) => states = g::states
+    case _ => super.traverseStm(stm)
+  }
 }
