@@ -357,39 +357,21 @@ trait ImplOpt extends ImplBase { q =>
   }
 }
 
-
-trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { q =>
-  val IR: ImplTrans
-  import IR._
-
-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case AutomatonState(id, block) =>
-      emitValDef(sym, "state: " + id + ", block: " + block)
-      emitBlock(block)
-      stream.println(quote(getBlockResult(block)))
-    case AutomatonStatus(out, stop, id, _) =>
-      emitValDef(sym, "status: " + id + ", " + stop)
-    case _ => super.emitNode(sym, rhs)
-  }
-}
-
 trait ImplTrans extends ImplBase with LoopsFatExp { q =>
   case class AutomatonState(id: Int, res: Block[DfaState])(val arg: Sym[Char]) extends Def[Char => DfaState]
-  case class AutomatonStatus(out: Boolean, stop: Boolean, id: Int, f: Exp[Char => DfaState]) extends Def[DfaState]
-  case class TopLevelAutomaton[A:Manifest](states: List[AutomatonState], start: AutomatonStatus) extends Def[A]
+  case class AutomatonStatus(out: Boolean, stop: Boolean, id: Int) extends Def[DfaState]
+  case class TopLevelAutomaton(states: List[AutomatonState], start: AutomatonStatus, char: Sym[Char])
 
   override def syms(e: Any): List[Sym[Any]] = e match {
-    case AutomatonState(n, y) => syms(y)
     case _ => super.syms(e)
   }
 
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
-    case f@AutomatonState(n, y) => f.arg::effectSyms(y)
+    case g@AutomatonState(id, res) => g.arg::effectSyms(res)
     case _ => super.boundSyms(e)
   }
 
   override def symsFreq(e: Any): List[(Sym[Any], Double)] = e match {
-    case AutomatonState(n, y) => freqHot(y)
     case _ => super.symsFreq(e)
   }
 
@@ -398,11 +380,19 @@ trait ImplTrans extends ImplBase with LoopsFatExp { q =>
   }
 }
 
-trait OptTransformer1 extends RecursiveTransformer { self =>
+trait OptTransformer extends RecursiveTransformer { self =>
   val IR: ImplTrans
   import IR._
-
+  
+  var states: List[AutomatonState] = _
   var dfaStableStates: Set[Sym[Any]] = _
+  var c: Sym[Char] = _
+  var auto: TopLevelAutomaton = _
+  def findStart[A](s: Block[A]) = {
+    getBlockResult(s) match {
+      case Def(status@AutomatonStatus(out, stop, id)) => status
+    }
+  }
 
   override def run[A:Manifest](s: Block[A]): Block[A] = {
     val collector = new StabilityCollector {
@@ -410,39 +400,111 @@ trait OptTransformer1 extends RecursiveTransformer { self =>
     }
     collector.traverseBlock(s)
     dfaStableStates = collector.stableStates
-    super.run(s)
+
+    c = fresh[Char]
+    states = List.empty
+    val r = super.run(s)
+    auto = TopLevelAutomaton(states, findStart(r), c)
+    r
   }
 
   override def transformDef[A](lhs: Sym[A], rhs: Def[A]) = (rhs match {
-    case g@DefineFun(y) => Some(() =>
-      AutomatonState(lhs.id, apply(y.asInstanceOf[Block[DfaState]]))(g.arg.asInstanceOf[Sym[Char]]))
     case dfa@DFAState(b,f@Sym(n)) => Some(() =>
-      AutomatonStatus(b, dfaStableStates.contains(lhs), n, apply(f)))
+      AutomatonStatus(b, dfaStableStates.contains(lhs), n))
     case _ => super.transformDef(lhs, rhs)
   }).asInstanceOf[Option[() => Def[A]]]
+
+  override def traverseStm(stm: Stm): Unit = stm match {
+    case TP(lhs, g@DefineFun(y)) =>
+      subst += (g.arg -> c)
+      val state = AutomatonState(lhs.id, apply(y.asInstanceOf[Block[DfaState]]))(c)
+      states = state::states
+    case _ => super.traverseStm(stm)
+  }
 }
 
-trait OptTransformer2 extends NestedBlockTraversal {
+trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { self =>
+  import java.io.{File, FileWriter, PrintWriter}
+  import scala.reflect.SourceContext
+
   val IR: ImplTrans
   import IR._
 
-  var topLevelDone: Boolean = _
-  var states: List[AutomatonState] = _
+  // hack to work with CompileScala
+  def pack(dio: => DIO): (Exp[String] => Exp[Boolean]) = {
+    (x: Exp[String]) => dio.asInstanceOf[Exp[Boolean]]
+  }
+  override def emitSource[A,B](f: Exp[A] => Exp[B], className: String, out: PrintWriter)(implicit mA: Manifest[A], mB: Manifest[B]): List[(Sym[Any], Any)] = {
+    emitAutomata(f(null).asInstanceOf[DIO], className, out)
+    List()
+  }
 
-  def findStart[A](s: Block[A]) = {
-    getBlockResult(s) match {
-      case Def(status@AutomatonStatus(out, stop, id, _)) => status
+  var firstFun: Boolean = true
+  var booleanStage: Boolean = false
+
+  override def quote(x: Exp[Any]) : String = x match {
+    case Def(dfa@AutomatonStatus(out, stop, id)) =>
+      if (booleanStage) out.toString
+      else if (stop) { "return " + out }
+      else id.toString
+    case _ => super.quote(x)
+  }
+
+  override def emitForwardDef(sym: Sym[Any]): Unit = {
+  }
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case dfa@AutomatonStatus(out, stop, id) =>
+    case _ => super.emitNode(sym, rhs)
+  }
+
+  def emitState(state: AutomatonState) {
+    stream.println((if (firstFun) "if" else "else if")+" (id == "+state.id+") {")
+    firstFun = false
+    emitBlock(state.res)
+    stream.println(quote(getBlockResult(state.res)))
+    stream.println("}")
+  }
+
+  def emitAutomata(automaton: DIO, className: String, out: PrintWriter) {
+    val trans = new OptTransformer { val IR: self.IR.type = self.IR }
+    val block = trans.run(reifyBlock(automaton))
+    val auto = trans.auto
+    val c = quote(trans.auto.char)
+
+    withStream(out) {
+      stream.println("class "+className+" extends (String=>Boolean) {")
+      stream.println("def apply(input: String): Boolean = {")
+      stream.println("val n = input.length")
+      booleanStage = true
+      stream.println("if (n == 0) return " + quote(getBlockResult(block)))
+      booleanStage = false
+      stream.println("var id = " + quote(getBlockResult(block)))
+      stream.println("var i = 0")
+      stream.println("val n_dec = n-1")
+      stream.println("while (i < n_dec) {")
+      stream.println("val " + c + " = input.charAt(i)")
+      stream.println("id =")
+
+      booleanStage = false
+      firstFun = true
+      for (state <- auto.states)
+        emitState(state)
+
+      stream.println("else { throw new RuntimeException(\"invalid state \" + id) }")
+      stream.println("i += 1")
+      stream.println("}")
+
+      stream.println("val " + c + " = input.charAt(i)")
+      booleanStage = true
+      firstFun = true
+      for (state <- auto.states)
+        emitState(state)
+
+      stream.println("else { throw new RuntimeException(\"invalid state \" + id) }")
+
+      stream.println("}")
+      stream.println("}")
     }
-  }
-
-  def run[A:Manifest](s: Block[A]): Def[A] = {
-    states = List.empty
-    super.traverseBlock(s)
-    TopLevelAutomaton(states, findStart(s))
-  }
-
-  override def traverseStm(stm: Stm): Unit = stm match {
-    case TP(lhs, g@AutomatonState(id, y)) => states = g::states
-    case _ => super.traverseStm(stm)
   }
 }
