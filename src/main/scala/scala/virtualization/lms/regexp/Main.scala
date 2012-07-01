@@ -11,7 +11,7 @@ object Main extends App {
     val cook = seq(star(alt(c('A'), c('B'))), alt(many(seq)(c('A'), c('B'), c('B')), alt(c('A'), c('B'))))
   }
 
-  trait CodeGenerator extends DSL with ImplOpt {
+  trait CodeGenerator extends DSL with ImplTrans {
     def output(res: List[(RE, String)]) = {
       val out = new java.io.PrintWriter("benchmark/src/main/scala/LMS.scala")
 
