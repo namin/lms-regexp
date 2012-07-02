@@ -1,0 +1,137 @@
+class Match extends (String=>Boolean) {
+def apply(input: String): Boolean = {
+val n = input.length
+if (n == 0) return false
+var id = 0
+var i = 0
+val n_dec = n-1
+while (i < n_dec) {
+val x33 = input.charAt(i)
+id =
+if (id == 0) {
+val x46 = x33 == 'A'
+val x53 = if (x46) {
+3
+} else {
+0
+}
+x53
+}
+else if (id == 3) {
+val x46 = x33 == 'A'
+val x52 = if (x46) {
+6
+} else {
+0
+}
+x52
+}
+else if (id == 6) {
+val x46 = x33 == 'A'
+val x51 = if (x46) {
+6
+} else {
+val x49 = x33 == 'B'
+val x50 = if (x49) {
+return true
+} else {
+0
+}
+x50
+}
+x51
+}
+else if (id == 11) {
+val x46 = x33 == 'A'
+val x48 = if (x46) {
+return true
+} else {
+return true
+}
+x48
+}
+else if (id == 14) {
+val x46 = x33 == 'A'
+val x47 = if (x46) {
+return true
+} else {
+return true
+}
+x47
+}
+else if (id == 17) {
+val x46 = x33 == 'A'
+val x47 = if (x46) {
+return true
+} else {
+return true
+}
+x47
+}
+else { throw new RuntimeException("invalid state " + id) }
+i += 1
+}
+val x33 = input.charAt(i)
+if (id == 0) {
+val x46 = x33 == 'A'
+val x53 = if (x46) {
+false
+} else {
+false
+}
+x53
+}
+else if (id == 3) {
+val x46 = x33 == 'A'
+val x52 = if (x46) {
+false
+} else {
+false
+}
+x52
+}
+else if (id == 6) {
+val x46 = x33 == 'A'
+val x51 = if (x46) {
+false
+} else {
+val x49 = x33 == 'B'
+val x50 = if (x49) {
+true
+} else {
+false
+}
+x50
+}
+x51
+}
+else if (id == 11) {
+val x46 = x33 == 'A'
+val x48 = if (x46) {
+true
+} else {
+true
+}
+x48
+}
+else if (id == 14) {
+val x46 = x33 == 'A'
+val x47 = if (x46) {
+true
+} else {
+true
+}
+x47
+}
+else if (id == 17) {
+val x46 = x33 == 'A'
+val x47 = if (x46) {
+true
+} else {
+true
+}
+x47
+}
+else { throw new RuntimeException("invalid state " + id) }
+}
+}
