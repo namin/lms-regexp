@@ -404,7 +404,7 @@ trait OptTransformer extends RecursiveTransformer { self =>
     c = fresh[Char]
     states = List.empty
     val r = super.run(s)
-    auto = TopLevelAutomaton(states, findStart(r), c)
+    auto = TopLevelAutomaton(states.reverse, findStart(r), c)
     r
   }
 
