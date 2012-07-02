@@ -388,6 +388,8 @@ trait OptTransformer extends RecursiveTransformer { self =>
   var dfaStableStates: Set[Sym[Any]] = _
   var c: Sym[Char] = _
   var auto: TopLevelAutomaton = _
+  var idCounter: Int = _
+  var idMap: Map[Int, Int] = _
   def findStart[A](s: Block[A]) = {
     getBlockResult(s) match {
       case Def(status@AutomatonStatus(out, stop, id)) => status
@@ -401,23 +403,32 @@ trait OptTransformer extends RecursiveTransformer { self =>
     collector.traverseBlock(s)
     dfaStableStates = collector.stableStates
 
+    idCounter = 0
+    idMap = Map.empty
     c = fresh[Char]
     states = List.empty
     val r = super.run(s)
-    auto = TopLevelAutomaton(states, findStart(r), c)
+    auto = TopLevelAutomaton(states.reverse, findStart(r), c)
     r
+  }
+
+  def idfy(symId: Int) = {
+    idMap.get(symId) match {
+      case None => val id = idCounter; idMap += (symId -> id); idCounter += 1; id
+      case Some(id) => id
+    }
   }
 
   override def transformDef[A](lhs: Sym[A], rhs: Def[A]) = (rhs match {
     case dfa@DFAState(b,f@Sym(n)) => Some(() =>
-      AutomatonStatus(b, dfaStableStates.contains(lhs), n))
+      AutomatonStatus(b, dfaStableStates.contains(lhs), idfy(n)))
     case _ => super.transformDef(lhs, rhs)
   }).asInstanceOf[Option[() => Def[A]]]
 
   override def traverseStm(stm: Stm): Unit = stm match {
     case TP(lhs, g@DefineFun(y)) =>
       subst += (g.arg -> c)
-      val state = AutomatonState(lhs.id, apply(y.asInstanceOf[Block[DfaState]]))(c)
+      val state = AutomatonState(idfy(lhs.id), apply(y.asInstanceOf[Block[DfaState]]))(c)
       states = state::states
     case _ => super.traverseStm(stm)
   }
@@ -439,7 +450,6 @@ trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { s
     List()
   }
 
-  var firstFun: Boolean = true
   var booleanStage: Boolean = false
 
   override def quote(x: Exp[Any]) : String = x match {
@@ -459,8 +469,7 @@ trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { s
   }
 
   def emitState(state: AutomatonState) {
-    stream.println((if (firstFun) "if" else "else if")+" (id == "+state.id+") {")
-    firstFun = false
+    stream.println("case "+state.id+" => {")
     emitBlock(state.res)
     stream.println(quote(getBlockResult(state.res)))
     stream.println("}")
@@ -479,29 +488,29 @@ trait AutomataCodegenTrans extends AutomataCodegenBase with ScalaGenLoopsFat { s
       booleanStage = true
       stream.println("if (n == 0) return " + quote(getBlockResult(block)))
       booleanStage = false
-      stream.println("var id = " + quote(getBlockResult(block)))
+      stream.println("var id: Int = " + quote(getBlockResult(block)))
       stream.println("var i = 0")
       stream.println("val n_dec = n-1")
       stream.println("while (i < n_dec) {")
       stream.println("val " + c + " = input.charAt(i)")
-      stream.println("id =")
+      stream.println("id = id match {")
 
       booleanStage = false
-      firstFun = true
       for (state <- auto.states)
         emitState(state)
 
-      stream.println("else { throw new RuntimeException(\"invalid state \" + id) }")
+      stream.println("}")
       stream.println("i += 1")
       stream.println("}")
 
       stream.println("val " + c + " = input.charAt(i)")
+      stream.println("id match {")
+
       booleanStage = true
-      firstFun = true
       for (state <- auto.states)
         emitState(state)
 
-      stream.println("else { throw new RuntimeException(\"invalid state \" + id) }")
+      stream.println("}")
 
       stream.println("}")
       stream.println("}")
