@@ -8,8 +8,16 @@ class MatcherLMS(regexp: RegexpType) extends RegexpMatcher(regexp) {
     case COOK => new MatchCook
     case ANY => new MatchAnything
   }
+  private val initialState = fc()
 
   override def matches(input: String): Boolean = {
-    fc.apply(input)
+    var state = initialState
+    var i = 0
+    val n = input.length
+    while ((state.out & 2) != 2 && (i < n)) {
+      state = state.next(input.charAt(i))
+      i += 1
+    }
+    state.out % 2 == 1
   }
 }
