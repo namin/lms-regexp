@@ -1,4 +1,9 @@
 public enum MatcherType {
+    UNSTAGED {
+	@Override public RegexpMatcher create(RegexpType regexp) {
+	    return new MatcherUnstaged(regexp);
+	}
+    },
     LMS {
 	@Override public RegexpMatcher create(RegexpType regexp) {
 	    return new MatcherLMS(regexp);
