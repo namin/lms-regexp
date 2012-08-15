@@ -1,0 +1,99 @@
+<html>
+<head>
+  <style>
+    body {
+      color: black;
+    };
+  </style>
+  <script src="v8regexp.js"></script>
+  <script type="text/javascript">
+    function print(s) {
+      var div = document.createElement("pre")
+      div.appendChild(document.createTextNode(s))
+      document.body.appendChild(div)
+    }    
+
+    var success = true;
+
+    function PrintResult(name, result) {
+      print(name + ': ' + result);
+    }
+
+
+    function PrintError(name, error) {
+      PrintResult(name, error);
+      success = false;
+    }
+
+
+    function PrintScore(score) {
+      if (success) {
+        print('----');
+        print('Score (version ' + BenchmarkSuite.version + '): ' + score);
+      }
+    }
+
+    function Run() {
+      //BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+      //                           NotifyError: PrintError,
+      //                           NotifyScore: PrintScore });
+      RegExpSetup()
+    }
+
+    function load() {
+      
+      print("loading...")
+      
+      var count = 0
+      var seen = {}
+      
+      var printKey = true
+      var printRes = true
+      
+      function log(key, res) {
+        if (count < 50000 && !(key in seen)) {
+          //seen[key] = true
+          count++
+          if (printKey) print(key)
+          if (printRes) print("res "+res)
+        }
+        return res
+      }
+      
+      RegExp.prototype.oldExec = RegExp.prototype.exec
+      RegExp.prototype.exec = function (s) {
+        var key = "exec " + this + " @ " + s
+        return log(key, this.oldExec(s))
+      }
+
+      String.prototype.oldSplit = String.prototype.split
+      String.prototype.split = function (r) {
+        var key = "split " + r + " @ " + this
+        return log(key, this.oldSplit(r))
+      }
+
+      String.prototype.oldMatch = String.prototype.match
+      String.prototype.match = function (r) {
+        var key = "match " + r + " @ " + this
+        return log(key, this.oldMatch(r))
+      }
+
+      String.prototype.oldReplace = String.prototype.replace
+      String.prototype.replace = function (r,s) {
+        var key = "replace " + r + " @ " + this + " -- " + s
+        return log(key, this.oldReplace(r,s))
+      }
+      
+      setTimeout(function() {
+        print("running ...")
+        Run()
+        print("done: " + count)
+      }, 100)
+    }
+  </script>
+</head>
+<body onLoad="load();">
+  <h1>Regexp bench</h1>
+  
+</body>
+</html>
