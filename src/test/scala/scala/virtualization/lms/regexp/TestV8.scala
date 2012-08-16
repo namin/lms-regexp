@@ -20,29 +20,138 @@ def log[T](key: String, res: T): T = {
   res
 }
 
+import java.util.regex._
+
+
 def infix_R(s: String): Regexp = new Regexp(s)
 
-class Regexp(patternString: String) {
-  override def toString = patternString
+class Regexp(val patternString: String) {
+  
+  var global = patternString.substring(patternString.lastIndexOf("/")).contains("g")
+  var lastIndex = 0
+  
+  def special(s: String) = s match {
+    case """/^[\s[]?shapgvba/""" => """^[\s\[]?shapgvba"""
+    case _ => 
+      s.substring(1, s.lastIndexOf("/"))
+  }
+  
+  def unspecial(s: String) = {
+    if (special(patternString) == s) patternString
+    else s
+  }
+  
+  val pat = try { 
+    Right(Pattern.compile(special(patternString))) 
+  } catch { case ex => Left(ex) }
+  
+  override def toString = pat match { case Right(p) => unspecial(p.toString) case Left(p) => p.toString }
+    //patternString + " " + pat
 }
+
+class MatchResult(val index: Int, val input: String, val array: Array[String]) {
+  override def toString = array.map(s=>if (s eq null) "" else s).mkString(",")
+}
+
 
 def infix_exec(r: Regexp, s: String): Any = {
   val key = "exec " + r + " @ " + s
-  log(key, "TODO")
+  
+  def run(): Any = {
+    // return an array with the first match of each group (/g does not return multiple matches)
+    // starts at lastIndex!!!! if /g
+  
+    // if global flag, exec starts from 'lastIndex'
+    // check str is long enough if we are going from 'lastIndex'
+ 
+    if (r.global && r.lastIndex >= s.length()) { 
+      r.lastIndex = 0 
+      return null
+    }
+ 
+    val m = r.pat.right.get.matcher(s) 
+    if (!m.find(r.lastIndex)) {
+      r.lastIndex = 0
+      return null
+    }
+ 
+    // update 'lastIndex' if global
+    if (r.global) {
+      r.lastIndex = m.end();
+    }
+ 
+ 
+    val groupCount = 1 + r.patternString.replace("(?", "").count(_ == '(')
+ 
+    // put results into array
+    val data = new Array[String](groupCount) // m.groupCount may be off ... (?)
+    
+//    if (data.length != m.groupCount)
+//      println("pad: " + r + " @ " + s)
+ 
+    for (i <- 0 until data.length) {
+      data(i) = try { m.group(i) } catch { case _ => null: String }
+    }
+ 
+    // put 'index' and 'input' 
+    new MatchResult(m.start(), s, data)
+  }
+  
+  log(key, run())
 }
+
 def infix_split(s: String, r: Regexp): Any = {
   val key = "split " + r + " @ " + s
-  log(key, "TODO")
+  
+  def run(): Any = {
+    val data = s.split(r.patternString)
+    new MatchResult(0,s,data)
+  }
+  
+  log(key, run())
 }
 
 def infix_matches(s: String, r: Regexp): Any = {
   val key = "match " + r + " @ " + s
-  log(key, "TODO")
+  
+  // without /g, same as r.exec(s): return array with first match of each group
+  // with /g, return all matches of whole expr
+  
+  def run(): Any = {
+    // str.match(regexp)
+    // if not global flag, then RegExp.exec, else array with all matches
+    if (!r.global) {
+        return r.exec(s)
+    }
+
+    // array with all matches
+    val m = r.pat.right.get.matcher(s);
+    val data = new scala.collection.mutable.ArrayBuffer[String]
+    while (m.find()) {
+      data += m.group()
+    }
+    
+    if (data.isEmpty) return null
+    new MatchResult(0,s,data.toArray)
+  }
+
+  log(key, run())
 }
 
 def infix_replace(s: String, r: Regexp, s2: String): Any = {
   val key = "replace " + r + " @ " + s + " -- " + s2
-  log(key, "TODO")
+
+  def run(): Any = {
+    // str.match(regexp)
+    // if not global flag, then RegExp.exec, else array with all matches
+    
+    val m = r.pat.right.get.matcher(s);
+    
+    val res = if (!r.global) m.replaceFirst(s2) else m.replaceAll(s2)
+    res
+  }
+
+  log(key, run())
 }
 
 }

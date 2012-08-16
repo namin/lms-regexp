@@ -1,0 +1,28 @@
+23075c23075
+< exec /^[\s\[]?shapgvba/ @ [bowrpg tybony]
+---
+> exec /^[\s[]?shapgvba/ @ [bowrpg tybony]
+23205c23205
+< exec /^[\s\[]?shapgvba/ @ [bowrpg tybony]
+---
+> exec /^[\s[]?shapgvba/ @ [bowrpg tybony]
+23335c23335
+< exec /^[\s\[]?shapgvba/ @ [bowrpg tybony]
+---
+> exec /^[\s[]?shapgvba/ @ [bowrpg tybony]
+23465c23465
+< exec /^[\s\[]?shapgvba/ @ [bowrpg tybony]
+---
+> exec /^[\s[]?shapgvba/ @ [bowrpg tybony]
+24328,24329c24328,24329
+< exec /^[\s\[]?shapgvba/ @ shapgvba (){Cuk.Nccyvpngvba.Frghc.Pber();Cuk.Nccyvpngvba.Frghc.Nwnk();Cuk.Nccyvpngvba.Frghc.Synfu();Cuk.Nccyvpngvba.Frghc.Zbqhyrf()}
+< exec /^[\s\[]?shapgvba/ @ shapgvba sbphf() { [angvir pbqr] }
+---
+> exec /^[\s[]?shapgvba/ @ shapgvba (){Cuk.Nccyvpngvba.Frghc.Pber();Cuk.Nccyvpngvba.Frghc.Nwnk();Cuk.Nccyvpngvba.Frghc.Synfu();Cuk.Nccyvpngvba.Frghc.Zbqhyrf()}
+> exec /^[\s[]?shapgvba/ @ shapgvba sbphf() { [angvir pbqr] }
+24775,24776c24775,24776
+< exec /^[\s\[]?shapgvba/ @ shapgvba (){Cuk.Nccyvpngvba.Frghc.Pber();Cuk.Nccyvpngvba.Frghc.Nwnk();Cuk.Nccyvpngvba.Frghc.Synfu();Cuk.Nccyvpngvba.Frghc.Zbqhyrf()}
+< exec /^[\s\[]?shapgvba/ @ shapgvba sbphf() { [angvir pbqr] }
+---
+> exec /^[\s[]?shapgvba/ @ shapgvba (){Cuk.Nccyvpngvba.Frghc.Pber();Cuk.Nccyvpngvba.Frghc.Nwnk();Cuk.Nccyvpngvba.Frghc.Synfu();Cuk.Nccyvpngvba.Frghc.Zbqhyrf()}
+> exec /^[\s[]?shapgvba/ @ shapgvba sbphf() { [angvir pbqr] }

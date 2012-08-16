@@ -1,0 +1,2 @@
+diff test-out/v8regexp0 test-out/v8regexp0.check > test-out/v8regexp0.diff
+diff test-out/v8regexp1 test-out/v8regexp1.check > test-out/v8regexp1.diff
