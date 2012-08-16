@@ -1426,8 +1426,21 @@ class TestV8 extends FileDiffSuite {
       var str96 = "ZFPhygher=VC=74.125.75.1&VCPhygher=ra-HF&CersreerqPhygher=ra-HF&CersreerqPhygherCraqvat=&Pbhagel=IIZ=&SbeprqRkcvengvba=633669341278771470&gvzrMbar=0&HFEYBP=DKWyLHAiMTH9AwHjWxAcqUx9GJ91oaEunJ4tIzyyqlMQo3IhqUW5D29xMG1IHlMQo3IhqUW5GzSgMG1Iozy0MJDtH3EuqTImWxEgLHAiMTH9BQN3WxkuqTy0qJEyCGZ3YwDkBGVzGT9hM2y0qJEyCF0kZwVhZQH3APMDo3A0LJkQo2EyCGx0ZQDmWyWyM2yiox5uoJH9D0R=";
       var str97 = "ZFPhygher=VC=74.125.75.1&VCPhygher=ra-HF&CersreerqPhygher=ra-HF&CersreerqPhygherCraqvat=&Pbhagel=IIZ=&SbeprqRkcvengvba=633669350559478880&gvzrMbar=0&HFEYBP=DKWyLHAiMTH9AwHjWxAcqUx9GJ91oaEunJ4tIzyyqlMQo3IhqUW5D29xMG1IHlMQo3IhqUW5GzSgMG1Iozy0MJDtH3EuqTImWxEgLHAiMTH9BQN3WxkuqTy0qJEyCGZ3YwDkBGVzGT9hM2y0qJEyCF0kZwVhZQH3APMDo3A0LJkQo2EyCGx0ZQDmWyWyM2yiox5uoJH9D0R=";
       var str98 = "shapgvba (){Cuk.Nccyvpngvba.Frghc.Pber();Cuk.Nccyvpngvba.Frghc.Nwnk();Cuk.Nccyvpngvba.Frghc.Synfu();Cuk.Nccyvpngvba.Frghc.Zbqhyrf()}";
+
+
+      // TR: hitting max allowed method args (66?), needed to split
+      
+      var runBlock11A = () => ()
+      var runBlock11B = () => ()
+
       def runBlock11() {
         for (i <- 0 until 2) {
+          runBlock11A()
+          runBlock11B()
+        }
+      }
+
+      runBlock11A = { () =>
           " .pybfr".replace(re18, "");
           " n.svryqOgaPnapry".replace(re18, "");
           " qg".replace(re18, "");
@@ -1441,18 +1454,18 @@ class TestV8 extends FileDiffSuite {
           "*".replace(re18, "");
           ".pybfr".replace(re68, "");
           ".pybfr".replace(re18, "");
-/*          "//vzt.jro.qr/vij/FC/tzk_uc/fperra/${inyhr}?gf=${abj}".replace(re87, "");
+          "//vzt.jro.qr/vij/FC/tzk_uc/fperra/${inyhr}?gf=${abj}".replace(re87, "");
           "//vzt.jro.qr/vij/FC/tzk_uc/fperra/1024?gf=${abj}".replace(re88, "");
           "//vzt.jro.qr/vij/FC/tzk_uc/jvafvmr/${inyhr}?gf=${abj}".replace(re87, "");
           "//vzt.jro.qr/vij/FC/tzk_uc/jvafvmr/992/608?gf=${abj}".replace(re88, "");
-*/          "300k120".replace(re30, "");
+          "300k120".replace(re30, "");
           "300k250".replace(re30, "");
           "310k120".replace(re30, "");
           "310k170".replace(re30, "");
           "310k250".replace(re30, "");
           "9.0  e115".replace("""/^.*\.(.*)\s.*$/""".R, "");
           "Nppbeqvba".replace(re2, "");
-/*          "Nxghryy\n".replace(re89, "");
+          "Nxghryy\n".replace(re89, "");
           "Nxghryy\n".replace(re90, "");
           "Nccyvpngvba".replace(re2, "");
           "Oyvpxchaxg\n".replace(re89, "");
@@ -1491,7 +1504,7 @@ class TestV8 extends FileDiffSuite {
           "Ivqrb\n".replace(re90, "");
           "Jrggre\n".replace(re89, "");
           "Jrggre\n".replace(re90, "");
-*/          str82.replace(re68, "");
+          str82.replace(re68, "");
           str82.replace(re18, "");
           str83.replace(re68, "");
           str83.replace(re18, "");
@@ -1569,15 +1582,15 @@ class TestV8 extends FileDiffSuite {
           "ubebfxbc".replace(re48, "");
           "uc_cebzbobk_ugzy%2Puc_cebzbobk_vzt".replace(re30, "");
           "uc_erpgnatyr".replace(re30, "");
-//          str87.replace(re33, "");
-//          str88.replace(re33, "");
+          str87.replace(re33, "");
+          str88.replace(re33, "");
           "uggc://wf.hv-cbegny.qr/tzk/ubzr/wf/20080602/onfr.wf${4}${5}".replace(re71, "");
           "uggc://wf.hv-cbegny.qr/tzk/ubzr/wf/20080602/onfr.wf${5}".replace(re72, "");
           "uggc://wf.hv-cbegny.qr/tzk/ubzr/wf/20080602/qlaYvo.wf${4}${5}".replace(re71, "");
           "uggc://wf.hv-cbegny.qr/tzk/ubzr/wf/20080602/qlaYvo.wf${5}".replace(re72, "");
           "uggc://wf.hv-cbegny.qr/tzk/ubzr/wf/20080602/rssrpgYvo.wf${4}${5}".replace(re71, "");
           "uggc://wf.hv-cbegny.qr/tzk/ubzr/wf/20080602/rssrpgYvo.wf${5}".replace(re72, "");
-//          str89.replace(re73, "");
+          str89.replace(re73, "");
           "uggc://zfacbegny.112.2b7.arg/o/ff/zfacbegnyubzr/1/U.7-cqi-2/f55023338617756?[NDO]&{1}&{2}&[NDR]".replace(re69, "");
           str6.replace(re23, "");
           "xvab".replace(re40, "");
@@ -1607,6 +1620,11 @@ class TestV8 extends FileDiffSuite {
           "zhfvx".replace(re47, "");
           "zhfvx".replace(re48, "");
           "zlfcnpr_nccf_pnainf".replace(re52, "");
+          
+        }
+
+        runBlock11B = { () =>
+          
           str91.replace(re40, "");
           str91.replace(re41, "");
           str91.replace(re42, "");
@@ -1845,36 +1863,35 @@ class TestV8 extends FileDiffSuite {
           """/fnsnev/""".R.exec(str63);
           """/jva/""".R.exec("jva32");
           """/jvaqbjf/""".R.exec(str63);
-        }
       }
       
       
       
       def run() {
         for (i <- 0 until 1 /*TR was 5*/) {
-          println("block0-"+i)
+          //println("block0-"+i)
           runBlock0();
-          println("block1-"+i)
+          //println("block1-"+i)
           runBlock1();
-          println("block2-"+i)
+          //println("block2-"+i)
           runBlock2();
-          println("block3-"+i)
+          //println("block3-"+i)
           runBlock3();
-          println("block4-"+i)
+          //println("block4-"+i)
           runBlock4();
-          println("block5-"+i)
+          //println("block5-"+i)
           runBlock5();
-          println("block6-"+i)
+          //println("block6-"+i)
           runBlock6();
-          println("block7-"+i)
+          //println("block7-"+i)
           runBlock7();
-          println("block8-"+i)
+          //println("block8-"+i)
           runBlock8();
-          println("block9-"+i)
+          //println("block9-"+i)
           runBlock9();
-          println("block10-"+i)
+          //println("block10-"+i)
           runBlock10();
-          println("block11-"+i)
+          //println("block11-"+i)
           runBlock11();
         }
       }
