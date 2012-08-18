@@ -27,6 +27,10 @@ def infix_R(s: String): Regexp = new Regexp(s)
 
 class Regexp(val patternString: String) {
   
+  val rno = Rhino.compileRE(new Context, special(patternString), patternString.substring(patternString.lastIndexOf("/")+1), false)
+  
+  
+  
   var global = patternString.substring(patternString.lastIndexOf("/")).contains("g")
   var lastIndex = 0
   
@@ -57,6 +61,7 @@ class MatchResult(val index: Int, val input: String, val array: Array[String]) {
 def infix_exec(r: Regexp, s: String): Any = {
   val key = "exec " + r + " @ " + s
   
+  
   def run(): Any = {
     // return an array with the first match of each group (/g does not return multiple matches)
     // starts at lastIndex!!!! if /g
@@ -64,7 +69,7 @@ def infix_exec(r: Regexp, s: String): Any = {
     // if global flag, exec starts from 'lastIndex'
     // check str is long enough if we are going from 'lastIndex'
  
-    if (r.global && r.lastIndex >= s.length()) { 
+    if (r.global && r.lastIndex > s.length()) { 
       r.lastIndex = 0 
       return null
     }
@@ -81,7 +86,7 @@ def infix_exec(r: Regexp, s: String): Any = {
     }
  
  
-    val groupCount = 1 + r.patternString.replace("(?", "").count(_ == '(')
+    val groupCount = 1 + r.patternString.replace("(?"/*)*/, "").count(_ == '('/*)*/)
  
     // put results into array
     val data = new Array[String](groupCount) // m.groupCount may be off ... (?)
@@ -97,14 +102,38 @@ def infix_exec(r: Regexp, s: String): Any = {
     new MatchResult(m.start(), s, data)
   }
   
-  log(key, run())
+  
+  def run2(): Any = {
+    
+    if (r.global && r.lastIndex > s.length()) { 
+      r.lastIndex = 0 
+      return null
+    }
+
+    val gData = Rhino.matchNaive(r.rno, s, r.lastIndex)
+    if (gData == null) {
+      r.lastIndex = 0
+      return null
+    }
+    
+    if (r.global)
+      r.lastIndex = gData.cp
+    
+    val groups = gData.groups(s)
+    
+    //println(gData)
+    
+    new MatchResult(gData.skipped, s, groups)
+  }
+  
+  log(key, run2())
 }
 
 def infix_split(s: String, r: Regexp): Any = {
   val key = "split " + r + " @ " + s
   
   def run(): Any = {
-    val data = s.split(r.patternString)
+    val data = s.split(r.special(r.patternString))
     new MatchResult(0,s,data)
   }
   
@@ -142,13 +171,11 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
   val key = "replace " + r + " @ " + s + " -- " + s2
 
   def run(): Any = {
-    // str.match(regexp)
-    // if not global flag, then RegExp.exec, else array with all matches
     
     val m = r.pat.right.get.matcher(s);
     
     val res = if (!r.global) m.replaceFirst(s2) else m.replaceAll(s2)
-    res
+    if (res.nonEmpty && res.last == '\n') res.init else res
   }
 
   log(key, run())
@@ -165,12 +192,14 @@ class TestV8 extends FileDiffSuite {
   
   def testV80 = withOutFileChecked("test-out/v8regexp0") {
     // output doesn't match check file 100% -- non printing chars?
+    Util.count = 0
     Util.printKey = true
     Util.printRes = false
     runSuite()
   }
 
   def testV81 = withOutFileChecked("test-out/v8regexp1") {
+    Util.count = 0
     Util.printKey = true
     Util.printRes = true
     runSuite()
@@ -513,7 +542,8 @@ class TestV8 extends FileDiffSuite {
       }
       var re22 = """/\bso_zrah\b/""".R;
       var re23 = """/^(?:(?:[^:\/?#]+):)?(?:\/\/(?:[^\/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?/""".R;
-      var re24 = """/uggcf?:\/\/([^\/]+\.)?snprobbx\.pbz\//""".R;
+      //TRvar re24 = """/uggcf?:\/\/([^\/]+\.)?snprobbx\.pbz\//""".R;
+      var re24 = """/uggcf?:\/\/([^\/]+\.)?snprobbx\.pbz/""".R;
       var re25 = """/"/g""".R;
       var re26 = """/^([^?#]+)(?:\?([^#]*))?(#.*)?/""".R;
       var s57a = computeInputVariants("fryrpgrq", 40);

@@ -50,6 +50,8 @@
       var printKey = true
       var printRes = true
       
+      var profile = true
+      
       function log(key, res) {
         if (count < 50000 && !(key in seen)) {
           //seen[key] = true
@@ -63,7 +65,13 @@
       RegExp.prototype.oldExec = RegExp.prototype.exec
       RegExp.prototype.exec = function (s) {
         var key = "exec " + this + " @ " + s
-        return log(key, this.oldExec(s))
+        
+        var skey = ""+this
+        if (profile) console.time(skey)
+        var res = this.oldExec(s)
+        if (profile) console.timeEnd(skey)
+        
+        return log(key, res)
       }
 
       String.prototype.oldSplit = String.prototype.split
