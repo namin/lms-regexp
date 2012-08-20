@@ -30,7 +30,7 @@ class Regexp(val patternString: String) {
   val rno = Rhino.compileRE(new Context, special(patternString), patternString.substring(patternString.lastIndexOf("/")+1), false)
   
   
-  
+  var caseInsensitive = patternString.substring(patternString.lastIndexOf("/")).contains("i")
   var global = patternString.substring(patternString.lastIndexOf("/")).contains("g")
   var lastIndex = 0
   
@@ -46,7 +46,8 @@ class Regexp(val patternString: String) {
   }
   
   val pat = try { 
-    Right(Pattern.compile(special(patternString))) 
+    if (caseInsensitive) Right(Pattern.compile(special(patternString), Pattern.CASE_INSENSITIVE))
+    else Right(Pattern.compile(special(patternString))) 
   } catch { case ex => Left(ex) }
   
   override def toString = pat match { case Right(p) => unspecial(p.toString) case Left(p) => p.toString }
@@ -150,7 +151,8 @@ def infix_matches(s: String, r: Regexp): Any = {
     // str.match(regexp)
     // if not global flag, then RegExp.exec, else array with all matches
     if (!r.global) {
-        return r.exec(s)
+        assert(false)
+        return r.exec(s) // this will cause an extra line of output: 'exec ...'
     }
 
     // array with all matches
@@ -542,8 +544,7 @@ class TestV8 extends FileDiffSuite {
       }
       var re22 = """/\bso_zrah\b/""".R;
       var re23 = """/^(?:(?:[^:\/?#]+):)?(?:\/\/(?:[^\/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?/""".R;
-      //TRvar re24 = """/uggcf?:\/\/([^\/]+\.)?snprobbx\.pbz\//""".R;
-      var re24 = """/uggcf?:\/\/([^\/]+\.)?snprobbx\.pbz/""".R;
+      var re24 = """/uggcf?:\/\/([^\/]+\.)?snprobbx\.pbz\//""".R;
       var re25 = """/"/g""".R;
       var re26 = """/^([^?#]+)(?:\?([^#]*))?(#.*)?/""".R;
       var s57a = computeInputVariants("fryrpgrq", 40);

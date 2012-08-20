@@ -103,7 +103,7 @@ object Rhino {
     final val MATCH = 1;
     final val PREFIX = 2;
 
-    final val debug = false;
+    final var debug = false;
 
     final val REOP_SIMPLE_START  : Byte = 1;  /* start of 'simple opcodes' */
     final val REOP_EMPTY         : Byte = 1;  /* match rest of input against rest of r.e. */
@@ -1061,7 +1061,7 @@ object Rhino {
                 */
                 
                 state.cp += 1
-                if (state.cp < src.length && isDigit(c = src(state.cp))) {
+                if (state.cp < src.length && { c = src(state.cp); isDigit(c) } ) {
                     state.cp += 1
                     min = getDecimalValue(c, state, 0xFFFF,
                                           "msg.overlarge.min");
@@ -1125,6 +1125,9 @@ object Rhino {
 
   def matchNaive(re: RECompiled, input: String, inp: Int = 0): REGlobalData = {
     
+    debug = false //new String(re.source).contains("\\|") && input.startsWith("m:94")
+    if (debug) println("debug on: " + new String(re.source) + " @ " + inp + " @ " + input)
+    
     val t = re.startNode
     
     for (i <- inp to input.length) { // need to include last index: may match empty string
@@ -1161,8 +1164,13 @@ object Rhino {
 
     var end = input.length
     
-  def matchNode(t: RENode): Boolean = {
-    if (t == null) return true
+  def matchNode(t: RENode)(k: Boolean => Boolean): Boolean = {
+    if (t == null) return k(true)
+    
+    if (debug)
+      println("match " + t + " at " + input.substring(gData.cp))
+    
+    val k1 = (x: Boolean) => if (x) matchNode(t.next)(k) else k(false)
     
     val matching = t.op match {
         case REOP_EMPTY =>
@@ -1206,47 +1214,20 @@ object Rhino {
             (gData.cp != end && !isREWhiteSpace(input.charAt(gData.cp))) && {
                 gData.cp+=1; true
             }
-        case REOP_BACKREF =>
-            backrefMatcher(gData, t.parenIndex, input, end);
-        
-            
-        case REOP_ALTPREREQ
-         | REOP_ALTPREREQi
-         | REOP_ALTPREREQ2
-         | REOP_ALT =>
-            val prefix = if (t.op != REOP_ALT) {
-              val t2 = t.asInstanceOf[RESeqNode]
+        case REOP_CLASS =>
+            val t2 = t.asInstanceOf[REClassNode]
+            //if (!t2.sense)
+            //    program(pc - 1) = REOP_NCLASS;
+            assert(t2.index < re.classCount, t2.index + " >= " + re.classCount)
+            re.classList(t2.index) = new RECharSet(t2.bmsize, t2.startIndex,
+                                                  t2.kidlen, t2.sense);
 
-              val ignoreCase = t.op == REOP_ALTPREREQi;
+            val index = t2.index
+            (gData.cp != end) && (classMatcher(gData, re.classList(index),
+                    input.charAt(gData.cp))) && {
+                      gData.cp += 1; true
+                    }
 
-              val matchCh1 = if (ignoreCase) upcase(t2.chr) else t2.chr
-              val matchCh2 = if (ignoreCase) upcase(t2.index.toChar) else t2.index.toChar
-
-              (gData.cp != end) && {
-                var c = input.charAt(gData.cp);
-                if (t.op == REOP_ALTPREREQ2) {
-                    ! ((c != matchCh1 &&
-                        !classMatcher(gData, gData.regexp.classList(matchCh2), c)))
-                } else {
-                    if (t.op == REOP_ALTPREREQi)
-                        c = upcase(c);
-                    ! (c != matchCh1 && c != matchCh2)
-                }
-              }
-            } else true
-            
-            //if (input.startsWith("Eqqq")) {
-            //  println("alt: " + t.kid + " | " + t.kid2 + " at " + input.substring(gData.cp))
-            //}
-            
-            prefix && {
-              val saveCp = gData.cp
-              val saveParens = if (gData.parens == null) null else gData.parens.toList
-              matchNode(t.kid) || {
-                gData.cp = saveCp
-                gData.parens = if (saveParens == null) null else saveParens.toArray
-                matchNode(t.kid2) }}
-            
         case REOP_FLAT =>
             /*
              * Consecutize FLAT's if possible.
@@ -1277,32 +1258,69 @@ object Rhino {
                     }
                 }
             }
+        
+        case REOP_BACKREF =>
+            backrefMatcher(gData, t.parenIndex, input, end);
+        
+            
+        case REOP_ALTPREREQ
+         | REOP_ALTPREREQi
+         | REOP_ALTPREREQ2
+         | REOP_ALT =>
+            val prefix = if (t.op != REOP_ALT) {
+              val t2 = t.asInstanceOf[RESeqNode]
+
+              val ignoreCase = t.op == REOP_ALTPREREQi;
+
+              val matchCh1 = if (ignoreCase) upcase(t2.chr) else t2.chr
+              val matchCh2 = if (ignoreCase) upcase(t2.index.toChar) else t2.index.toChar
+
+              (gData.cp != end) && {
+                var c = input.charAt(gData.cp);
+                if (t.op == REOP_ALTPREREQ2) {
+                    ! ((c != matchCh1 &&
+                        !classMatcher(gData, gData.regexp.classList(matchCh2), c)))
+                } else {
+                    if (t.op == REOP_ALTPREREQi)
+                        c = upcase(c);
+                    ! (c != matchCh1 && c != matchCh2)
+                }
+              }
+            } else true
+            
+            return prefix && {
+              val saveCp = gData.cp
+              val saveParens = if (gData.parens == null) null else gData.parens.toList
+              matchNode(t.kid)(r => k1(r) || {
+                gData.cp = saveCp
+                gData.parens = if (saveParens == null) null else saveParens.toArray
+                matchNode(t.kid2)(k1) })}
+            
+
         case REOP_LPAREN =>
             gData.setParens(t.parenIndex, gData.cp, 0);
-            matchNode(t.kid) && {
+            return matchNode(t.kid)(r => k1(r && {
               val cap_index = gData.parensIndex(t.parenIndex);
               gData.setParens(t.parenIndex, cap_index,
                       gData.cp - cap_index);
-              
-              //println("-- group " + t.parenIndex + ": " + cap_index + "-" + gData.cp)
               true
-            }
+            }))
         case REOP_ASSERT =>
             val saveCp = gData.cp
             println("not properly handling assert")
-            matchNode(t.kid) && {
+            return matchNode(t.kid)(r => k1(r && {
               // backtrack state
               gData.cp = saveCp
               true
-            }
+            }))
         case REOP_ASSERT_NOT =>
             val saveCp = gData.cp
             println("not properly handling assert")
-            !matchNode(t.kid) && {
+            return matchNode(t.kid)(r => k1(!r && {
               // backtrack state
               gData.cp = saveCp
               true
-            }
+            }))
             
         case REOP_QUANT => // repetition
             val t2 = t.asInstanceOf[RERangeNode]
@@ -1310,38 +1328,40 @@ object Rhino {
             if (t2.greedy) {
               // (kid.match && this.match) || next.match 
               
-              // FIXME: this implements 'possessive' mode, which is excessively greedy
-              // consider /.+xyz/ for input xxxxxxxyz
-              // we'll consume the whole input using .+, but we need to back up again to match xyz
-              
               val parenIndex = t2.parenIndex
             
-              var i = 0
-              while ((t2.max < 0 || i < t2.max) && {
-              
-                // save and reset parens
-                val saveParens = if (gData.parens == null) null else gData.parens.toList
-                val saveCp = gData.cp
-              
-                for (k <- parenIndex until re.parenCount) {
-                    gData.setParens(k, -1, 0);
-                }
-              
-                val res = matchNode(t.kid)
-              
-                if (!res) {
-                  gData.parens = if (saveParens == null) null else saveParens.toArray
-                  gData.cp = saveCp
-                }
-              
-                res
-              }) {
-                i += 1
+              def loop(i: Int)(k: Boolean => Boolean): Boolean = {
+                
+                if (debug)
+                  println("try loop " + i + " {" + t2.min + ".." + t2.max +  "} of "+ t.kid + " at " + input.substring(gData.cp))
+                
+                if (t2.max < 0 || i < t2.max) {
+                  
+                  // save and reset parens
+                  val saveParens = if (gData.parens == null) null else gData.parens.toList
+                  val saveCp = gData.cp
+
+                  for (k <- parenIndex until re.parenCount) {
+                      gData.setParens(k, -1, 0);
+                  }
+
+                  matchNode(t.kid) { res => 
+                    if (debug)
+                      println(res)
+                      
+                    (res && loop(i+1)(k)) || {
+                      gData.parens = if (saveParens == null) null else saveParens.toArray
+                      gData.cp = saveCp
+                      k(i >= t2.min)
+                    }
+                  }
+                } else
+                  k(i >= t2.min)
               }
+              return loop(0)(k1)
             
-              i >= t2.min
             } else { // not greedy
-              println("not greedy: " + t + " / " + t.kid + " / " + input.substring(gData.cp))
+              if (debug) println("not greedy: " + t + " / " + t.kid + " / " + input.substring(gData.cp))
               assert(t2.max < 0 && t2.min == 0) // TODO: generalize
               // next.match || (kid.match && this.match)
 
@@ -1349,41 +1369,29 @@ object Rhino {
               val saveCp = gData.cp
               
               // FIXME: this doesn't work, maybe we're inside parens -- we need to run the *full* continuation!
-              val res = matchNode(t.next) 
-              println("next: " + res)
-              if (res) return true
+              val res = k1(true);
+              return {
+                if (debug) println("next: " + res)
+                if (res) true else {              
+                  gData.parens = if (saveParens == null) null else saveParens.toArray
+                  gData.cp = saveCp
               
-              gData.parens = if (saveParens == null) null else saveParens.toArray
-              gData.cp = saveCp
-              
-              return matchNode(t.kid) && matchNode(t)
+                  matchNode(t.kid)(r => r && matchNode(t)(k))
+                }
+              }
             }
-            
-        case REOP_CLASS =>
-            val t2 = t.asInstanceOf[REClassNode]
-            //if (!t2.sense)
-            //    program(pc - 1) = REOP_NCLASS;
-            assert(t2.index < re.classCount, t2.index + " >= " + re.classCount)
-            re.classList(t2.index) = new RECharSet(t2.bmsize, t2.startIndex,
-                                                  t2.kidlen, t2.sense);
-                                                  
-            val index = t2.index
-            (gData.cp != end) && (classMatcher(gData, re.classList(index),
-                    input.charAt(gData.cp))) && {
-                      gData.cp += 1; true
-                    }
 
         case _ =>
           println("don't know how to match " + t)
           true
     }
    
-    matching && matchNode(t.next)
+    k1(matching)
   }
   
   
   
-    val res = matchNode(t)
+    val res = matchNode(t)(x=>x)
     (gData, res)
   }
 
@@ -1603,10 +1611,12 @@ object Rhino {
     {
         if ((gData.cp + length) > end)
             return false;
-        for (i <- 0 until length) {
+        var i = 0
+        while (i < length) {
             if (gData.regexp.source(matchChars + i) != input.charAt(gData.cp + i)) {
                 return false;
             }
+            i += 1
         }
         gData.cp += length;
         return true;
@@ -1618,12 +1628,14 @@ object Rhino {
         if ((gData.cp + length) > end)
             return false;
         val source = gData.regexp.source;
-        for (i <- 0 until length) {
+        var i = 0
+        while (i < length) {
             val c1 = source(matchChars + i);
             val c2 = input.charAt(gData.cp + i);
             if (c1 != c2 && upcase(c1) != upcase(c2)) {
                 return false;
             }
+            i += 1
         }
         gData.cp += length;
         return true;
