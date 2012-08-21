@@ -8,69 +8,6 @@ package scala.virtualization.lms.regexp
 
 import java.io.Serializable;
 
-class Context
-
-object Kit {
-  /**
-   * If character <tt>c</tt> is a hexadecimal digit, return
-   * <tt>accumulator</tt> * 16 plus corresponding
-   * number. Otherise return -1.
-   */
-  def xDigitToInt(c: Int, accumulator: Int): Int = {
-      // Use 0..9 < A..Z < a..z
-      if (c <= '9') {
-          val d = c - '0';
-          if (0 <= d) { 
-            (accumulator << 4) | d;
-          }
-      } else if (c <= 'F') {
-          if ('A' <= c) {
-              val d = c - ('A' - 10);
-              (accumulator << 4) | d;
-          }
-      } else if (c <= 'f') {
-          if ('a' <= c) {
-              val d = c - ('a' - 10);
-              (accumulator << 4) | d;
-          }
-      }
-      return -1;
-  }
-
-}
-
-object ScriptRuntime {
-  def isJSLineTerminator(c: Int): Boolean = {
-    // Optimization for faster check for eol character:
-    // they do not have 0xDFD0 bits set
-    if ((c & 0xDFD0) != 0) {
-        return false;
-    }
-    return c == '\n' || c == '\r' || c == 0x2028 || c == 0x2029;
-  }
-
-  def isStrWhiteSpaceChar(c: Int): Boolean = c match {
-  		case ' ' // <SP>
-  		| '\n' // <LF>
-  		| '\r' // <CR>
-  		| '\t' // <TAB>
-  		| '\u00A0' // <NBSP>
-  		| '\u000C' // <FF>
-  		| '\u000B' // <VT>
-  		| '\u2028' // <LS>
-  		| '\u2029' // <PS>
-      | '\uFEFF' => // <BOM>
-  			true;
-  		case _ =>
-  			Character.getType(c) == Character.SPACE_SEPARATOR;
-  }
-
-  def isJSWhitespaceOrLineTerminator(c: Int) = {
-    (isStrWhiteSpaceChar(c) || isJSLineTerminator(c));
-  }
-}
-
-
 /**
  * This class implements the RegExp native object.
  *
@@ -222,13 +159,357 @@ object Rhino {
       case _ => op.toString
     }
 
+    def isDigit(c: Char): Boolean =
+    {
+        return '0' <= c && c <= '9';
+    }
+
+    def isWord(c: Char): Boolean =
+    {
+        return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || isDigit(c) || c == '_';
+    }
+
+    def isControlLetter(c: Char): Boolean =
+    {
+        return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+    }
+
+    def isLineTerm(c: Char): Boolean =
+    {
+        return isJSLineTerminator(c);
+    }
+
+    def isREWhiteSpace(c: Int): Boolean =
+    {
+        return isJSWhitespaceOrLineTerminator(c);
+    }
+
+    /*
+     *
+     * 1. If IgnoreCase is false, return ch.
+     * 2. Let u be ch converted to upper case as if by calling
+     *    String.prototype.toUpperCase on the one-character string ch.
+     * 3. If u does not consist of a single character, return ch.
+     * 4. Let cu be u's character.
+     * 5. If ch's code point value is greater than or equal to decimal 128 and cu's
+     *    code point value is less than decimal 128, then return ch.
+     * 6. Return cu.
+     */
+    def upcase(ch: Char): Char =
+    {
+        if (ch < 128) {
+            if ('a' <= ch && ch <= 'z') {
+                return (ch + ('A' - 'a')).toChar;
+            }
+            return ch;
+        }
+        val cu = Character.toUpperCase(ch);
+        return if (cu < 128) ch else cu;
+    }
+
+    def downcase(ch: Char): Char =
+    {
+        if (ch < 128) {
+            if ('A' <= ch && ch <= 'Z') {
+                return (ch + ('a' - 'A')).toChar;
+            }
+            return ch;
+        }
+        val cl = Character.toLowerCase(ch);
+        return if (cl < 128) ch else cl;
+    }
+
+  /*
+  * Validates and converts hex ascii value.
+  */
+    def toASCIIHexDigit(c0: Int): Int =
+    {
+        var c = c0
+        if (c < '0')
+            return -1;
+        if (c <= '9') {
+            return c - '0';
+        }
+        c |= 0x20;
+        if ('a' <= c && c <= 'f') {
+            return c - 'a' + 10;
+        }
+        return -1;
+    }
 
 
+    /**
+     * If character <tt>c</tt> is a hexadecimal digit, return
+     * <tt>accumulator</tt> * 16 plus corresponding
+     * number. Otherise return -1.
+     */
+    def xDigitToInt(c: Int, accumulator: Int): Int = {
+        // Use 0..9 < A..Z < a..z
+        if (c <= '9') {
+            val d = c - '0';
+            if (0 <= d) { 
+              (accumulator << 4) | d;
+            }
+        } else if (c <= 'F') {
+            if ('A' <= c) {
+                val d = c - ('A' - 10);
+                (accumulator << 4) | d;
+            }
+        } else if (c <= 'f') {
+            if ('a' <= c) {
+                val d = c - ('a' - 10);
+                (accumulator << 4) | d;
+            }
+        }
+        return -1;
+    }
+
+    def isJSLineTerminator(c: Int): Boolean = {
+      // Optimization for faster check for eol character:
+      // they do not have 0xDFD0 bits set
+      if ((c & 0xDFD0) != 0) {
+          return false;
+      }
+      return c == '\n' || c == '\r' || c == 0x2028 || c == 0x2029;
+    }
+
+    def isStrWhiteSpaceChar(c: Int): Boolean = c match {
+    		case ' ' // <SP>
+    		| '\n' // <LF>
+    		| '\r' // <CR>
+    		| '\t' // <TAB>
+    		| '\u00A0' // <NBSP>
+    		| '\u000C' // <FF>
+    		| '\u000B' // <VT>
+    		| '\u2028' // <LS>
+    		| '\u2029' // <PS>
+        | '\uFEFF' => // <BOM>
+    			true;
+    		case _ =>
+    			Character.getType(c) == Character.SPACE_SEPARATOR;
+    }
+
+    def isJSWhitespaceOrLineTerminator(c: Int) = {
+      (isStrWhiteSpaceChar(c) || isJSLineTerminator(c));
+    }
+
+
+
+    def reportWarning(messageId: String, arg: String): Unit =
+    {
+  /*        if (cx.hasFeature(Context.FEATURE_STRICT_MODE)) {
+            String msg = ScriptRuntime.getMessage1(messageId, arg);
+            Context.reportWarning(msg);
+        }
+  */        
+        println("WARNING: " + messageId + " / " + arg)
+    }
+
+    def reportError(messageId: String, arg: String)
+    {
+  /*        String msg = ScriptRuntime.getMessage1(messageId, arg);
+        throw ScriptRuntime.constructError("SyntaxError", msg);
+  */
+        println("ERROR: " + messageId + " / " + arg)
+    }
+
+
+}
+
+
+trait REGrammar {
+
+  type RENode
+
+  def empty: RENode
+  
+  def bol: RENode
+  def eol: RENode
+
+  def wordBoundary: RENode
+  def nonWordBoundary: RENode
+
+  def digit: RENode
+  def nonDigit: RENode
+
+  def space: RENode
+  def nonSpace: RENode
+
+  def alnum: RENode
+  def nonAlnum: RENode
+  
+  def dot: RENode
+
+
+  def clazz(startIndex: Int, index: Int, kidlen: Int): RENode
+
+
+  def paren(parenIndex: Int, kid: RENode): RENode
+
+  def assert(kid: RENode): RENode
+
+  def assertNot(kid: RENode): RENode
+
+
+  def seq(kids: List[RENode]): RENode
+
+  def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int): RENode
+
+
+  def backref(parenIndex: Int): RENode
+  
+  def flat(chr: Char): RENode
+  
+  def flat(chr: Char, length: Int, flatIndex: Int): RENode
+
+  def alt(kid1: RENode, kid2: RENode): RENode
+  
+}
+
+
+
+object RhinoNodes extends REGrammar {
+  
+  import Rhino._
+  
+  type RENode = scala.virtualization.lms.regexp.RENode
+  
+  def empty: RENode = new RENode(REOP_EMPTY)
+  
+  def bol: RENode = new RENode(REOP_BOL)
+  def eol: RENode = new RENode(REOP_EOL)
+
+  def wordBoundary: RENode = new RENode(REOP_WBDRY)
+  def nonWordBoundary: RENode = new RENode(REOP_WNONBDRY)
+
+  def digit: RENode = new RENode(REOP_DIGIT)
+  def nonDigit: RENode = new RENode(REOP_NONDIGIT)
+
+  def space: RENode = new RENode(REOP_SPACE)
+  def nonSpace: RENode = new RENode(REOP_NONSPACE)
+
+  def alnum: RENode = new RENode(REOP_ALNUM)
+  def nonAlnum: RENode = new RENode(REOP_NONALNUM)
+  
+  def dot: RENode = new RENode(REOP_DOT)
+
+
+  def clazz(startIndex: Int, index: Int, kidlen: Int): REClassNode = {
+    val res = new REClassNode(REOP_CLASS)
+    res.startIndex = startIndex
+    res.index = index
+    res.kidlen = kidlen
+    res
+  }
+
+
+  def paren(parenIndex: Int, kid: RENode): RENode = {
+    val res = new RENode(REOP_LPAREN);
+    res.kid = kid
+    res.parenIndex = parenIndex
+    res    
+  }
+
+  def assert(kid: RENode): RENode = {
+    val res = new RENode(REOP_ASSERT);
+    res.kid = kid
+    res    
+  }
+
+  def assertNot(kid: RENode): RENode = {
+    val res = new RENode(REOP_ASSERT_NOT);
+    res.kid = kid
+    res    
+  }
+
+  def seq(kids: List[RENode]): RENode = {
+    if (kids.isEmpty) return empty
+    
+    val first = kids.head
+    var head = kids.head
+    var tail = kids.tail
+    while (tail.nonEmpty) {
+      head.next = tail.head
+      head = tail.head
+      tail = tail.tail
+    }
+    first
+  }
+
+  def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int): RERangeNode = {
+    val res = new RERangeNode(REOP_QUANT)
+    res.kid = kid
+    res.min = min
+    res.max = max
+    res.greedy = greedy
+    res.parenIndex = parenIndex
+    res.parenCount = parenCount
+    res
+  }
+
+
+  def backref(parenIndex: Int): RENode = {
+    val res = new RENode(REOP_BACKREF)
+    res.parenIndex = parenIndex
+    res
+  }
+  
+  def flat(chr: Char): RENode = { // whole regexp (flatIndex = 0) ?
+    val res = new RESeqNode(REOP_FLAT)
+    res.chr = chr
+    res.length = 1
+    res.flatIndex = -1
+    res
+  }
+  
+  def flat(chr: Char, length: Int, flatIndex: Int): RENode = { // whole regexp (flatIndex = 0) ?
+    val res = new RESeqNode(REOP_FLAT)
+    res.chr = chr
+    res.length = length
+    res.flatIndex = flatIndex
+    res
+  }
+
+  def alt(kid1: RENode, kid2: RENode): RENode = {
+    val res = new RESeqNode(REOP_ALT)
+    res.kid = kid1
+    res.kid2 = kid2
+    res
+  }
+  
+  
+}
+
+
+object RhinoParser {
+  
+    import Rhino._
+  
+    val RhinoNodes: REGrammar = scala.virtualization.lms.regexp.RhinoNodes
+    type RENode = RhinoNodes.RENode
+  
+    def infix_externalize(x: RENode) = x.asInstanceOf[scala.virtualization.lms.regexp.RENode]
+    def nullNode = null.asInstanceOf[RENode]
+  
+    // TODO: val RhinoNodes: REGrammar = 
+  
 // TR compile entry point
 
-    def compileRE(cx: Context, str: String, global: String, flat: Boolean): RECompiled =
-    {
-        val regexp = new RECompiled(str);
+    class ParserState(var source: Array[Char], var length: Int, var flags: Int) {
+
+        def cpbegin = source
+        def cpend: Int = length;
+        var cp: Int = 0;
+        var parenCount: Int = 0;
+        var parenNesting: Int = _;
+        var classCount: Int = 0;   /* number of [] encountered */
+        var progLength: Int = 0;   /* estimated bytecode length */
+        var result: RENode = _;
+    }
+
+
+
+    def parseRE(str: String, global: String, flat: Boolean): ParserState = {
         val length = str.length();
         var flags = 0;
         if (global != null) {
@@ -245,28 +526,43 @@ object Rhino {
                 }
             }
         }
-        regexp.flags = flags;
 
-        val state = new CompilerState(cx, regexp.source, length, flags);
+        val state = new ParserState(str.toCharArray, length, flags);
         if (flat && length > 0) {
             if (debug) {
                 System.out.println("flat = \"" + str + "\"");
             }
-            val result = new RESeqNode(REOP_FLAT);
-            result.chr = state.cpbegin(0);
-            result.length = length;
-            result.flatIndex = 0;
-            state.result = result
+            state.result = RhinoNodes.flat(state.cpbegin(0), length, 0)
             state.progLength += 5;
         }
         else
             if (!parseDisjunction(state))
                 return null;
         
+        return state
+    }
+
+
+    def compileRE(str: String, global: String, flat: Boolean): RECompiled =
+    {
+        val pstate = parseRE(str, global, flat)
+        
+        val state = new CompilerState(pstate.source, pstate.length, pstate.flags)
+        state.cp = pstate.cp
+        state.parenCount = pstate.parenCount
+        state.parenNesting = pstate.parenNesting
+        state.classCount = pstate.classCount
+        state.progLength = pstate.progLength
+        state.result = pstate.result.externalize
+        
+        val regexp = new RECompiled(pstate.source)
+        regexp.flags = pstate.flags
         regexp.startNode = state.result
+        
+        import RhinoBytecodeEmitter._
 
         regexp.program = new Array[Byte](state.progLength + 1);
-        if (state.classCount != 0) {
+        if (state.classCount != 0) { // TR FIXME: need to do for non-compiled case, too
             regexp.classList = new Array[RECharSet](state.classCount);
             regexp.classCount = state.classCount;
         }
@@ -312,95 +608,7 @@ object Rhino {
         return regexp;
     }
 
-    // TR stub
-    def emitREBytecodeStub(state: CompilerState, re: RECompiled, pc: Int, t0: RENode): Int = {
-      var t = t0
-      while (t ne null) {
-        println(t)
-        t = t.next
-      }
-      
-      0
-    }
 
-
-    def isDigit(c: Char): Boolean =
-    {
-        return '0' <= c && c <= '9';
-    }
-
-    def isWord(c: Char): Boolean =
-    {
-        return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || isDigit(c) || c == '_';
-    }
-
-    def isControlLetter(c: Char): Boolean =
-    {
-        return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-    }
-
-    def isLineTerm(c: Char): Boolean =
-    {
-        return ScriptRuntime.isJSLineTerminator(c);
-    }
-
-    def isREWhiteSpace(c: Int): Boolean =
-    {
-        return ScriptRuntime.isJSWhitespaceOrLineTerminator(c);
-    }
-
-    /*
-     *
-     * 1. If IgnoreCase is false, return ch.
-     * 2. Let u be ch converted to upper case as if by calling
-     *    String.prototype.toUpperCase on the one-character string ch.
-     * 3. If u does not consist of a single character, return ch.
-     * 4. Let cu be u's character.
-     * 5. If ch's code point value is greater than or equal to decimal 128 and cu's
-     *    code point value is less than decimal 128, then return ch.
-     * 6. Return cu.
-     */
-    def upcase(ch: Char): Char =
-    {
-        if (ch < 128) {
-            if ('a' <= ch && ch <= 'z') {
-                return (ch + ('A' - 'a')).toChar;
-            }
-            return ch;
-        }
-        val cu = Character.toUpperCase(ch);
-        return if (cu < 128) ch else cu;
-    }
-
-    def downcase(ch: Char): Char =
-    {
-        if (ch < 128) {
-            if ('A' <= ch && ch <= 'Z') {
-                return (ch + ('a' - 'A')).toChar;
-            }
-            return ch;
-        }
-        val cl = Character.toLowerCase(ch);
-        return if (cl < 128) ch else cl;
-    }
-
-/*
- * Validates and converts hex ascii value.
- */
-    def toASCIIHexDigit(c0: Int): Int =
-    {
-        var c = c0
-        if (c < '0')
-            return -1;
-        if (c <= '9') {
-            return c - '0';
-        }
-        c |= 0x20;
-        if ('a' <= c && c <= 'f') {
-            return c - 'a' + 10;
-        }
-        return -1;
-    }
 
 /*
  * Top-down regular expression grammar, based closely on Perl4.
@@ -408,7 +616,7 @@ object Rhino {
  *  regexp:     altern                  A regular expression is one or more
  *              altern '|' regexp       alternatives separated by vertical bar.
  */
-    def parseDisjunction(state: CompilerState): Boolean =
+    def parseDisjunction(state: ParserState): Boolean =
     {
         if (!parseAlternative(state))
             return false;
@@ -416,12 +624,11 @@ object Rhino {
         var index = state.cp;
         if (index != source.length && source(index) == '|') {
             state.cp += 1;
-            val result = new RESeqNode(REOP_ALT);
-            result.kid = state.result;
+            val kid1 = state.result;
             if (!parseDisjunction(state))
                 return false;
-            result.kid2 = state.result;
-            state.result = result;
+            val kid2 = state.result;
+            state.result = RhinoNodes.alt(kid1, kid2);
             /*
              * Look at both alternates to see if there's a FLAT or a CLASS at
              * the start of each. If so, use a prerequisite match.
@@ -462,37 +669,31 @@ object Rhino {
  *  altern:     item                    An alternative is one or more items,
  *              item altern             concatenated together.
  */
-    def parseAlternative(state: CompilerState): Boolean =
+    def parseAlternative(state: ParserState): Boolean =
     {
-        var headTerm: RENode = null;
-        var tailTerm: RENode = null;
+        var terms = new collection.mutable.ListBuffer[RENode]
         var source = state.cpbegin;
         while (true) {
             if (state.cp == state.cpend || source(state.cp) == '|'
                 || (state.parenNesting != 0 && source(state.cp) == ')'))
             {
-                if (headTerm == null) {
-                    state.result = new RENode(REOP_EMPTY);
-                }
+                if (terms.isEmpty)
+                    state.result = RhinoNodes.empty
                 else
-                    state.result = headTerm;
+                    state.result = RhinoNodes.seq(terms.toList)
                 return true;
             }
             if (!parseTerm(state))
                 return false;
-            if (headTerm == null) {
-                headTerm = state.result;
-                tailTerm = headTerm;
-            }
-            else
-                tailTerm.next = state.result;
-            while (tailTerm.next != null) tailTerm = tailTerm.next;
+            terms += state.result
         }
         false // never reached
     }
 
+
+
     /* calculate the total size of the bitmap required for a class expression */
-    def calculateBitmapSize(state: CompilerState, target: REClassNode, src: Array[Char],
+    def calculateBitmapSize(state: ParserState, target: REClassNode, src: Array[Char],
                         index0: Int, end: Int): Boolean =
     {
         var index = index0
@@ -555,7 +756,7 @@ object Rhino {
                     while ((i < nDigits) && (index < end) && !break) {
                         c = src(index)
                         index += 1
-                        n = Kit.xDigitToInt(c, n);
+                        n = xDigitToInt(c, n);
                         if (n < 0) {
                             // Back off to accepting the original
                             // '\' as a literal
@@ -696,17 +897,13 @@ object Rhino {
      *                                      atom right-hand sides.
      */
 
-    def doFlat(state: CompilerState, c: Char): Unit =
+    def doFlat(state: ParserState, c: Char): Unit =
     {
-        val result = new RESeqNode(REOP_FLAT);
-        result.chr = c;
-        result.length = 1;
-        result.flatIndex = -1;
-        state.result = result
+        state.result = RhinoNodes.flat(c)
         state.progLength += 3;
     }
 
-    def getDecimalValue(c0: Char, state: CompilerState, maxValue: Int,
+    def getDecimalValue(c0: Char, state: ParserState, maxValue: Int,
                     overflowMessageId: String): Int =
     {
         var c = c0
@@ -740,7 +937,7 @@ object Rhino {
         return value;
     }
 
-    def parseTerm(state: CompilerState): Boolean =
+    def parseTerm(state: ParserState): Boolean =
     {
         val src = state.cpbegin;
         var c = src(state.cp);
@@ -748,17 +945,23 @@ object Rhino {
         var nDigits = 2;
         var parenBaseCount = state.parenCount;
         var num, tmp: Int = 0;
-        var term: RENode = null;
+        var term: RENode = nullNode;
         var termStart: Int = 0;
+        
+        /*def emit(n: RENode) = {
+          state.result = n
+          state.progLength += 1
+          true
+        }*/
 
         c match {
         /* assertions and atoms */
         case '^' =>
-            state.result = new RENode(REOP_BOL);
+            state.result = RhinoNodes.bol;
             state.progLength += 1;
             return true;
         case '$' =>
-            state.result = new RENode(REOP_EOL);
+            state.result = RhinoNodes.eol
             state.progLength += 1;
             return true;
         case '\\' =>
@@ -768,11 +971,11 @@ object Rhino {
                 c match {
                 /* assertion escapes */
                 case 'b' =>
-                    state.result = new RENode(REOP_WBDRY);
+                    state.result = RhinoNodes.wordBoundary
                     state.progLength += 1
                     return true;
                 case 'B' =>
-                    state.result = new RENode(REOP_WNONBDRY);
+                    state.result = RhinoNodes.nonWordBoundary
                     state.progLength += 1
                     return true;
                 /* Decimal escape */
@@ -784,7 +987,7 @@ object Rhino {
  * (see http://bugzilla.mozilla.org/show_bug.cgi?id=141078)
  *
  */
-                    reportWarning(state.cx, "msg.bad.backref", "");
+                    reportWarning("msg.bad.backref", "");
                     /* octal escape */
                     num = 0;
                     var break = false
@@ -808,7 +1011,7 @@ object Rhino {
                     num = getDecimalValue(c, state, 0xFFFF,
                                           "msg.overlarge.backref");
                     if (num > state.parenCount)
-                        reportWarning(state.cx, "msg.bad.backref", "");
+                        reportWarning("msg.bad.backref", "");
                     /*
                      * n > 9 or > count of parentheses,
                      * then treat as octal instead.
@@ -834,8 +1037,7 @@ object Rhino {
                         doFlat(state, c);
                     } else {
                     /* otherwise, it's a back-reference */
-                    state.result = new RENode(REOP_BACKREF);
-                    state.result.parenIndex = num - 1;
+                    state.result = RhinoNodes.backref(num - 1);
                     state.progLength += 3;
                     }
                 /* Control escape */
@@ -880,7 +1082,7 @@ object Rhino {
                                 && (state.cp < state.cpend) && !break) {
                             c = src(state.cp)
                             state.cp += 1
-                            n = Kit.xDigitToInt(c, n);
+                            n = xDigitToInt(c, n);
                             if (n < 0) {
                                 // Back off to accepting the original
                                 // 'u' or 'x' as a literal
@@ -896,30 +1098,26 @@ object Rhino {
                     doFlat(state, c);
                 /* Character class escapes */
                 case 'd' =>
-                    state.result = new RENode(REOP_DIGIT);
+                    state.result = RhinoNodes.digit
                     state.progLength += 1;
                 case 'D' =>
-                    state.result = new RENode(REOP_NONDIGIT);
+                    state.result = RhinoNodes.nonDigit
                     state.progLength += 1;
                 case 's' =>
-                    state.result = new RENode(REOP_SPACE);
+                    state.result = RhinoNodes.space
                     state.progLength += 1;
                 case 'S' =>
-                    state.result = new RENode(REOP_NONSPACE);
+                    state.result = RhinoNodes.nonSpace
                     state.progLength += 1;
                 case 'w' =>
-                    state.result = new RENode(REOP_ALNUM);
+                    state.result = RhinoNodes.alnum
                     state.progLength += 1;
                 case 'W' =>
-                    state.result = new RENode(REOP_NONALNUM);
+                    state.result = RhinoNodes.nonAlnum
                     state.progLength += 1;
                 /* IdentityEscape */
                 case _ =>
-                    val result = new RESeqNode(REOP_FLAT);
-                    result.chr = c;
-                    result.length = 1;
-                    result.flatIndex = state.cp - 1;
-                    state.result = result
+                    state.result = RhinoNodes.flat(c,1,state.cp-1)
                     state.progLength += 3;
                 }
             }
@@ -929,26 +1127,28 @@ object Rhino {
                 return false;
             }
         case '(' => {
-            var result: RENode = null;
+            var op = REOP_EMPTY
+            var parenIndex = -1
+            var result: RENode = nullNode;
             termStart = state.cp;
             if (state.cp + 1 < state.cpend && src(state.cp) == '?'
                 && (({ c = src(state.cp + 1); c}) == '=' || c == '!' || c == ':'))
             {
                 state.cp += 2;
                 if (c == '=') {
-                    result = new RENode(REOP_ASSERT);
+                    op = REOP_ASSERT;
                     /* ASSERT, <next>, ... ASSERTTEST */
                     state.progLength += 4;
                 } else if (c == '!') {
-                    result = new RENode(REOP_ASSERT_NOT);
+                    op = REOP_ASSERT_NOT;
                     /* ASSERTNOT, <next>, ... ASSERTNOTTEST */
                     state.progLength += 4;
                 }
             } else {
-                result = new RENode(REOP_LPAREN);
+                op = REOP_LPAREN;
                 /* LPAREN, <index>, ... RPAREN, <index> */
                 state.progLength += 6;
-                result.parenIndex = state.parenCount;
+                parenIndex = state.parenCount;
                 state.parenCount += 1;
             }
             state.parenNesting += 1;
@@ -960,19 +1160,26 @@ object Rhino {
             }
             state.cp += 1;
             state.parenNesting -= 1;
-            if (result != null) {
-                result.kid = state.result;
-                state.result = result;
+            val kid = state.result
+            op match {
+              case REOP_ASSERT =>
+                state.result = RhinoNodes.assert(kid)
+              case REOP_ASSERT_NOT =>
+                state.result = RhinoNodes.assertNot(kid)
+              case REOP_LPAREN =>
+                state.result = RhinoNodes.paren(parenIndex, kid)
+              case _ =>
             }
         }
         case ')' =>
           reportError("msg.re.unmatched.right.paren", "");
           return false;
         case '[' =>
-            val result = new REClassNode(REOP_CLASS);
-            state.result = result
+            //val result = new REClassNode(REOP_CLASS);
+            //state.result = result
             termStart = state.cp;
-            result.startIndex = termStart;
+            val startIndex = termStart;
+            var kidlen = -1
             var break = false
             while (!break) {
                 if (state.cp == state.cpend) {
@@ -983,20 +1190,24 @@ object Rhino {
                     state.cp+=1;
                 else {
                     if (src(state.cp) == ']') {
-                        result.kidlen = state.cp - termStart;
+                        kidlen = state.cp - termStart;
                         break = true;
                     }
                 }
                 if (!break)
                   state.cp+=1;
             }
-            result.index = state.classCount;
+            val index = state.classCount;
             state.classCount+=1;
+            
+            val result = RhinoNodes.clazz(startIndex, index, kidlen)
+            state.result = result
             /*
              * Call calculateBitmapSize now as we want any errors it finds
              * to be reported during the parse phase, not at execution.
              */
-            if (!calculateBitmapSize(state, result, src, termStart, state.cp)) {
+            // TR FIXME should get rid of this and handle char classes properly
+            if (!calculateBitmapSize(state, result.asInstanceOf[REClassNode], src, termStart, state.cp)) {
                 state.cp += 1 //TR necessary?
                 return false;
             }
@@ -1004,17 +1215,13 @@ object Rhino {
             state.progLength += 3; /* CLASS, <index> */
 
         case '.' =>
-            state.result = new RENode(REOP_DOT);
+            state.result = RhinoNodes.dot
             state.progLength += 1;
         case '*'|'+'|'?' =>
             reportError("msg.bad.quant", String.valueOf(src(state.cp - 1)));
             return false;
         case _ =>
-            val result = new RESeqNode(REOP_FLAT);
-            state.result = result
-            result.chr = c;
-            result.length = 1;
-            result.flatIndex = state.cp - 1;
+            state.result = RhinoNodes.flat(c,1,state.cp-1)
             state.progLength += 3;
         }
 
@@ -1023,35 +1230,31 @@ object Rhino {
             return true;
         }
         var hasQ = false;
+        var min = -1
+        var max = -1
         src(state.cp) match {
             case '+' =>
-                val result = new RERangeNode(REOP_QUANT);
-                state.result = result
-                result.min = 1;
-                result.max = -1;
+                min = 1
+                max = -1
                 /* <PLUS>, <parencount>, <parenindex>, <next> ... <ENDCHILD> */
                 state.progLength += 8;
                 hasQ = true;
             case '*' =>
-                val result = new RERangeNode(REOP_QUANT);
-                state.result = result
-                result.min = 0;
-                result.max = -1;
+                min = 0
+                max = -1
                 /* <STAR>, <parencount>, <parenindex>, <next> ... <ENDCHILD> */
                 state.progLength += 8;
                 hasQ = true;
             case '?' =>
-                val result = new RERangeNode(REOP_QUANT);
-                state.result = result
-                result.min = 0;
-                result.max = 1;
+                min = 0
+                max = 1
                 /* <OPT>, <parencount>, <parenindex>, <next> ... <ENDCHILD> */
                 state.progLength += 8;
                 hasQ = true;
             case '{' =>  /* balance '}' */
             {
-                var min = 0;
-                var max = -1;
+                min = 0;
+                max = -1;
                 var leftCurl = state.cp;
 
                /* For Perl etc. compatibility, if quntifier does not match
@@ -1085,10 +1288,6 @@ object Rhino {
                     }
                     /* balance '{' */
                     if (c == '}') {
-                        val result = new RERangeNode(REOP_QUANT);
-                        state.result = result
-                        result.min = min;
-                        result.max = max;
                         // QUANT, <min>, <max>, <parencount>,
                         // <parenindex>, <next> ... <ENDCHILD>
                         state.progLength += 12;
@@ -1104,24 +1303,33 @@ object Rhino {
         }
         if (!hasQ)
             return true;
-
-        val result = state.result.asInstanceOf[RERangeNode]
-
+        
         state.cp += 1;
-        result.kid = term;
-        result.parenIndex = parenBaseCount;
-        result.parenCount = state.parenCount - parenBaseCount;
+
+        var greedy = true
         if ((state.cp < state.cpend) && (src(state.cp) == '?')) {
             state.cp += 1;
-            result.greedy = false;
+            greedy = false;
         }
-        else
-            result.greedy = true;
+        
+        val parenIndex = parenBaseCount;
+        val parenCount = state.parenCount - parenBaseCount;
+        
+        state.result = RhinoNodes.repeat(term, min, max, greedy, parenIndex, parenCount)
+        
         return true;
     }
 
+}
+
 //TR match naive 
 
+
+
+object RhinoMatcher {
+  
+  import Rhino._
+  import RhinoMatchUtil._
 
   def matchNaive(re: RECompiled, input: String, inp: Int = 0): REGlobalData = {
     
@@ -1233,14 +1441,15 @@ object Rhino {
              * Consecutize FLAT's if possible.
              */
             val t2 = t.asInstanceOf[RESeqNode]
-            if (t2.flatIndex != -1) {
+            /*if (t2.flatIndex != -1) {
                 while ((t.next != null) && (t.next.op == REOP_FLAT)
                         && ((t2.flatIndex + t2.length)
                                         == t.next.asInstanceOf[RESeqNode].flatIndex)) {
                     t2.length += t.next.asInstanceOf[RESeqNode].length;
                     t.next = t.next.next;
                 }
-            }
+            }*/ //TR TODO: re-enable
+            
             if ((t2.flatIndex != -1) && (t2.length > 1)) {
                 if ((re.flags & JSREG_FOLD) != 0) //REOP_FLATi
                     flatNIMatcher(gData, t2.flatIndex, t2.length, input, end);
@@ -1395,7 +1604,12 @@ object Rhino {
     (gData, res)
   }
 
+}
 
+
+object RhinoBytecodeEmitter {
+  
+  import Rhino._
 
 //TR emit bytecode
 
@@ -1486,6 +1700,7 @@ object Rhino {
                         t.next = t.next.next;
                     }
                 }
+                
                 if ((t2.flatIndex != -1) && (t2.length > 1)) {
                     if ((state.flags & JSREG_FOLD) != 0)
                         program(pc - 1) = REOP_FLATi;
@@ -1571,6 +1786,14 @@ object Rhino {
         }
         return pc;
     }
+
+}
+
+
+object RhinoMatchUtil {
+
+  import Rhino._
+
 
     def pushProgState(gData: REGlobalData, min: Int, max: Int, cp: Int,
                    backTrackLastToSave: REBackTrackData,
@@ -1970,6 +2193,16 @@ object Rhino {
                 ch >= charSet.length ||
                 (charSet.bits(byteIndex) & (1 << (ch & 0x7))) == 0) ^ charSet.sense;
     }
+
+}
+
+
+object RhinoBytecodeMatcher {
+  
+  import Rhino._
+  import RhinoMatchUtil._
+  import RhinoBytecodeEmitter._
+
 
     def reopIsSimple(op: Int): Boolean =  {
         return op >= REOP_SIMPLE_START && op <= REOP_SIMPLE_END;
@@ -2591,236 +2824,26 @@ object Rhino {
         result
     }
 
-    def matchRegExp(gData: REGlobalData,  re: RECompiled,
-                input: String, start: Int, end: Int,  multiline: Boolean): Boolean = 
-    {
-        if (re.parenCount != 0) {
-            gData.parens = new Array[Long](re.parenCount);
-        } else {
-            gData.parens = null;
-        }
-
-        gData.backTrackStackTop = null;
-        gData.stateStackTop = null;
-
-        gData.multiline = multiline || (re.flags & JSREG_MULTILINE) != 0;
-        gData.regexp = re;
-
-        val anchorCh = gData.regexp.anchorCh;
-        //
-        // have to include the position beyond the last character
-        //  in order to detect end-of-input/line condition
-        //
-        var i = start
-        while (i <= end) {
-            //
-            // If the first node is a literal match, step the index into
-            // the string until that match is made, or fail if it can't be
-            // found at all.
-            //
-            if (anchorCh >= 0) {
-                var break = false
-                while (!break) {
-                    if (i == end) {
-                        return false;
-                    }
-                    val matchCh = input.charAt(i);
-                    if (matchCh == anchorCh ||
-                            ((gData.regexp.flags & JSREG_FOLD) != 0
-                             && upcase(matchCh) == upcase(anchorCh.toChar)))
-                    {
-                        break = true;
-                    }
-                    if (break) i += 1;
-                }
-            }
-            gData.cp = i;
-            gData.skipped = i - start;
-            for (j <- 0 until re.parenCount) {
-                gData.parens(j) = -1l;
-            }
-            val result = executeREBytecode(gData, input, end);
-
-            gData.backTrackStackTop = null;
-            gData.stateStackTop = null;
-            if (result) {
-                return true;
-            }
-            if (anchorCh == ANCHOR_BOL && !gData.multiline) {
-                gData.skipped = end;
-                return false;
-            }
-            i = start + gData.skipped;
-            i += 1 //TR not sure this is correct, was ++i
-        }
-        return false;
-    }
 
 
-/*
-    /*
-     * indexp is assumed to be an array of length 1
-     */
-    Object executeRegExp(Context cx, Scriptable scope, RegExpImpl res,
-                         String str, int indexp[], int matchType)
-    {
-        REGlobalData gData = new REGlobalData();
 
-        int start = indexp[0];
-        int end = str.length();
-        if (start > end)
-            start = end;
-        //
-        // Call the recursive matcher to do the real work.
-        //
-        boolean matches = matchRegExp(gData, re, str, start, end,
-                                      res.multiline);
-        if (!matches) {
-            if (matchType != PREFIX) return null;
-            return Undefined.instance;
-        }
-        int index = gData.cp;
-        int ep = indexp[0] = index;
-        int matchlen = ep - (start + gData.skipped);
-        index -= matchlen;
-        Object result;
-        Scriptable obj;
 
-        if (matchType == TEST) {
-            /*
-             * Testing for a match and updating cx.regExpImpl: don't allocate
-             * an array object, do return true.
-             */
-            result = Boolean.TRUE;
-            obj = null;
-        }
-        else {
-            /*
-             * The array returned on match has element 0 bound to the matched
-             * string, elements 1 through re.parenCount bound to the paren
-             * matches, an index property telling the length of the left context,
-             * and an input property referring to the input string.
-             */
-            result = cx.newArray(scope, 0);
-            obj = (Scriptable) result;
-
-            String matchstr = str.substring(index, index + matchlen);
-            obj.put(0, obj, matchstr);
-        }
-
-        if (re.parenCount == 0) {
-            res.parens = null;
-            res.lastParen = SubString.emptySubString;
-        } else {
-            SubString parsub = null;
-            int num;
-            res.parens = new SubString[re.parenCount];
-            for (num = 0; num < re.parenCount; num++) {
-                int cap_index = gData.parensIndex(num);
-                String parstr;
-                if (cap_index != -1) {
-                    int cap_length = gData.parensLength(num);
-                    parsub = new SubString(str, cap_index, cap_length);
-                    res.parens[num] = parsub;
-                    if (matchType != TEST)
-                        obj.put(num+1, obj, parsub.toString());
-                }
-                else {
-                    if (matchType != TEST)
-                        obj.put(num+1, obj, Undefined.instance);
-                }
-            }
-            res.lastParen = parsub;
-        }
-
-        if (! (matchType == TEST)) {
-            /*
-             * Define the index and input properties last for better for/in loop
-             * order (so they come after the elements).
-             */
-            obj.put("index", obj, Integer.valueOf(start + gData.skipped));
-            obj.put("input", obj, str);
-        }
-
-        if (res.lastMatch == null) {
-            res.lastMatch = new SubString();
-            res.leftContext = new SubString();
-            res.rightContext = new SubString();
-        }
-        res.lastMatch.str = str;
-        res.lastMatch.index = index;
-        res.lastMatch.length = matchlen;
-
-        res.leftContext.str = str;
-        if (cx.getLanguageVersion() == Context.VERSION_1_2) {
-            /*
-             * JS1.2 emulated Perl4.0.1.8 (patch level 36) for global regexps used
-             * in scalar contexts, and unintentionally for the string.match "list"
-             * psuedo-context.  On "hi there bye", the following would result:
-             *
-             * Language     while(/ /g){print("$`");}   s/ /$`/g
-             * perl4.036    "hi", "there"               "hihitherehi therebye"
-             * perl5        "hi", "hi there"            "hihitherehi therebye"
-             * js1.2        "hi", "there"               "hihitheretherebye"
-             *
-             * Insofar as JS1.2 always defined $` as "left context from the last
-             * match" for global regexps, it was more consistent than perl4.
-             */
-            res.leftContext.index = start;
-            res.leftContext.length = gData.skipped;
-        } else {
-            /*
-             * For JS1.3 and ECMAv2, emulate Perl5 exactly:
-             *
-             * js1.3        "hi", "hi there"            "hihitherehi therebye"
-             */
-            res.leftContext.index = 0;
-            res.leftContext.length = start + gData.skipped;
-        }
-
-        res.rightContext.str = str;
-        res.rightContext.index = ep;
-        res.rightContext.length = end - ep;
-
-        return result;
-    }
-
-*/
-
-    def getFlags(): Int =
+    /*def getFlags(): Int =
     {
         return re.flags;
-    }
+    }*/
 
-    def reportWarning(cx: Context, messageId: String, arg: String): Unit =
-    {
-/*        if (cx.hasFeature(Context.FEATURE_STRICT_MODE)) {
-            String msg = ScriptRuntime.getMessage1(messageId, arg);
-            Context.reportWarning(msg);
-        }
-*/        
-        println("WARNING: " + messageId + " / " + arg)
-    }
-
-    def reportError(messageId: String, arg: String)
-    {
-/*        String msg = ScriptRuntime.getMessage1(messageId, arg);
-        throw ScriptRuntime.constructError("SyntaxError", msg);
-*/
-        println("ERROR: " + messageId + " / " + arg)
-    }
-
-
-    var re: RECompiled = _
-    var lastIndex: Double = _;          /* index after last match, for //g iterator */
+    //var re: RECompiled = _
+    //var lastIndex: Double = _;          /* index after last match, for //g iterator */
 
 }       // class NativeRegExp
 
-class RECompiled(str: String) //extends Serializable
+
+class RECompiled(str: Array[Char]) //extends Serializable
 {
     var startNode: RENode = _
   
-    val source: Array[Char] = str.toCharArray();    /* locked source string, sans // */
+    val source: Array[Char] = str;    /* locked source string, sans // */
     var parenCount: Int = _;         /* number of parenthesized submatches */
     var flags: Int = _;              /* flags  */
     var program: Array[Byte] = _;         /* regular expression bytecode */
@@ -2890,11 +2913,12 @@ class RESeqNode(op: Byte) extends RENode(op) {
 
 
 
-class CompilerState(var cx: Context, var source: Array[Char], var length: Int, var flags: Int) {
+class CompilerState(var source: Array[Char], var length: Int, var flags: Int) {
 
     //var cx: Context;
-    var cpbegin: Array[Char] = source
-    var cpend: Int = length;
+    //var cpbegin: Array[Char] = source
+    def cpbegin = source
+    def cpend: Int = length;
     var cp: Int = 0;
     //var flags: Int;
     var parenCount: Int = 0;

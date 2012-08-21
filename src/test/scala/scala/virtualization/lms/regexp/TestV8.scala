@@ -27,7 +27,7 @@ def infix_R(s: String): Regexp = new Regexp(s)
 
 class Regexp(val patternString: String) {
   
-  val rno = Rhino.compileRE(new Context, special(patternString), patternString.substring(patternString.lastIndexOf("/")+1), false)
+  val rno = RhinoParser.compileRE(special(patternString), patternString.substring(patternString.lastIndexOf("/")+1), false)
   
   
   var caseInsensitive = patternString.substring(patternString.lastIndexOf("/")).contains("i")
@@ -111,7 +111,7 @@ def infix_exec(r: Regexp, s: String): Any = {
       return null
     }
 
-    val gData = Rhino.matchNaive(r.rno, s, r.lastIndex)
+    val gData = RhinoMatcher.matchNaive(r.rno, s, r.lastIndex)
     if (gData == null) {
       r.lastIndex = 0
       return null
