@@ -1,0 +1,49 @@
+aab|aac @ aaac
+REGlobalData(1,4 / null)/aac
+----aab|aac
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+import scala.virtualization.lms.regexp._
+import RhinoMatcher.matcher
+class staged$0 extends ((Unit)=>(Boolean)) {
+def apply(x0:Unit): Boolean = {
+val x1 = matcher.gData
+val x2 = x1.cp
+val x3 = matcher.gData
+val x4 = if (x3.parens == null) null else x3.parens.toList.toArray //copy
+val x7 = matcher.gData
+val x8 = matcher.input
+val x9 = matcher.input
+val x10 = x9.length
+val x11 = RhinoMatchUtil.flatNMatcher(x7,0,3,x8,x10) // aab
+val x5 = {x6: (Boolean) => 
+x6
+}
+val x12 = x5(x11)
+val x24 = if (x12) {
+true
+} else {
+val x13 = matcher.gData
+val x14 = x13.cp = x2
+val x15 = matcher.gData
+val x16 = x15.parens = x4
+val x17 = matcher.gData
+val x18 = matcher.input
+val x19 = matcher.input
+val x20 = x19.length
+val x21 = RhinoMatchUtil.flatNMatcher(x17,4,3,x18,x20) // aac
+val x22 = x5(x21)
+x22
+}
+x24
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+
+compilation: ok
+---- took 823ms
+REGlobalData(1,4 / null)/aac
+done

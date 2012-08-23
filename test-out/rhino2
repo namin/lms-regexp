@@ -1,0 +1,117 @@
+\w*b @ aaabc
+REGlobalData(0,4 / null)/aaab
+----\w*b
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+import scala.virtualization.lms.regexp._
+import RhinoMatcher.matcher
+class staged$1 extends ((Unit)=>(Boolean)) {
+def apply(x26:Unit): Boolean = {
+var x27 = null.asInstanceOf[scala.Function1[Int, Boolean]]
+val x5 = {x6: (Boolean) => 
+x6
+}
+val x57 = {x58: (Boolean) => 
+val x80 = if (x58) {
+val x59 = matcher.gData
+val x60 = x59.cp
+val x61 = matcher.input
+val x62 = x61.length
+val x63 = x60 != x62
+val x75 = if (x63) {
+val x64 = matcher.input
+val x65 = matcher.gData
+val x66 = x65.cp
+val x67 = x64.charAt(x66)
+val x68 = 'b' == x67
+val x69 = if (x68) {
+true
+} else {
+x68
+}
+val x73 = if (x69) {
+val x70 = matcher.gData
+val x71 = x70.cp += 1
+true
+} else {
+false
+}
+x73
+} else {
+false
+}
+val x76 = x5(x75)
+x76
+} else {
+val x78 = x5(false)
+x78
+}
+x80
+}
+x27 = {x28: (Int) => 
+val x89 = if (true) {
+val x29 = matcher.gData
+val x30 = if (x29.parens == null) null else x29.parens.toList.toArray //copy
+val x31 = matcher.gData
+val x32 = x31.cp
+val x33 = matcher.gData
+val x34 = x33.cp
+val x35 = matcher.input
+val x36 = x35.length
+val x37 = x34 != x36
+val x44 = if (x37) {
+val x38 = matcher.input
+val x39 = matcher.gData
+val x40 = x39.cp
+val x41 = x38.charAt(x40)
+val x42 = Rhino.isWord(x41)
+x42
+} else {
+false
+}
+val x48 = if (x44) {
+val x45 = matcher.gData
+val x46 = x45.cp += 1
+true
+} else {
+false
+}
+val x52 = if (x48) {
+val x49 = x28 + 1
+val x50 = x27(x49)
+x50
+} else {
+false
+}
+val x85 = if (x52) {
+true
+} else {
+val x53 = matcher.gData
+val x54 = x53.parens = x30
+val x55 = matcher.gData
+val x56 = x55.cp = x32
+val x82 = x28 >= 0
+val x83 = x57(x82)
+x83
+}
+x85
+} else {
+val x82 = x28 >= 0
+val x87 = x57(x82)
+x87
+}
+x89
+}
+val x91 = x27(0)
+x91
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+
+compilation: ok
+---- took 656ms
+REGlobalData(0,4 / null)/aaab
+done

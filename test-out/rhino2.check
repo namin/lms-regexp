@@ -1,0 +1,148 @@
+\w*b @ aaabc
+REGlobalData(0,4 / null)/aaab
+----\w*b
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+import scala.virtualization.lms.regexp._
+import RhinoMatcher.matcher
+class staged$1 extends ((Unit)=>(Boolean)) {
+def apply(x22:Unit): Boolean = {
+var x23 = null.asInstanceOf[scala.Function1[Int, Boolean]]
+x23 = {x24: (Int) => 
+val x98 = if (true) {
+val x25 = matcher.gData
+val x26 = if (x25.parens == null) null else x25.parens.toList.toArray //copy
+val x27 = matcher.gData
+val x28 = x27.cp
+val x29 = matcher.gData
+val x30 = x29.cp
+val x31 = matcher.input
+val x32 = x31.length
+val x33 = x30 != x32
+val x40 = if (x33) {
+val x34 = matcher.input
+val x35 = matcher.gData
+val x36 = x35.cp
+val x37 = x34.charAt(x36)
+val x38 = Rhino.isWord(x37)
+x38
+} else {
+false
+}
+val x44 = if (x40) {
+val x41 = matcher.gData
+val x42 = x41.cp += 1
+true
+} else {
+false
+}
+val x48 = if (x44) {
+val x45 = x24 + 1
+val x46 = x23(x45)
+x46
+} else {
+false
+}
+val x75 = if (x48) {
+true
+} else {
+val x49 = matcher.gData
+val x50 = x49.parens = x26
+val x51 = matcher.gData
+val x52 = x51.cp = x28
+val x53 = x24 >= 0
+val x73 = if (x53) {
+val x54 = matcher.gData
+val x55 = x54.cp
+val x56 = matcher.input
+val x57 = x56.length
+val x58 = x55 != x57
+val x70 = if (x58) {
+val x59 = matcher.input
+val x60 = matcher.gData
+val x61 = x60.cp
+val x62 = x59.charAt(x61)
+val x63 = 'b' == x62
+val x64 = if (x63) {
+true
+} else {
+x63
+}
+val x68 = if (x64) {
+val x65 = matcher.gData
+val x66 = x65.cp += 1
+true
+} else {
+false
+}
+x68
+} else {
+false
+}
+val x71 = if (x70) {
+true
+} else {
+false
+}
+x71
+} else {
+false
+}
+x73
+}
+x75
+} else {
+val x53 = x24 >= 0
+val x96 = if (x53) {
+val x77 = matcher.gData
+val x78 = x77.cp
+val x79 = matcher.input
+val x80 = x79.length
+val x81 = x78 != x80
+val x93 = if (x81) {
+val x82 = matcher.input
+val x83 = matcher.gData
+val x84 = x83.cp
+val x85 = x82.charAt(x84)
+val x86 = 'b' == x85
+val x87 = if (x86) {
+true
+} else {
+x86
+}
+val x91 = if (x87) {
+val x88 = matcher.gData
+val x89 = x88.cp += 1
+true
+} else {
+false
+}
+x91
+} else {
+false
+}
+val x94 = if (x93) {
+true
+} else {
+false
+}
+x94
+} else {
+false
+}
+x96
+}
+x98
+}
+val x100 = x23(0)
+x100
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+
+compilation: ok
+REGlobalData(0,4 / null)/aaab
+done

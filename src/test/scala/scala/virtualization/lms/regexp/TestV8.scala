@@ -9,6 +9,7 @@ var count = 0
 
 var printKey = true
 var printRes = false
+var printElapsed = false
 
 def log[T](key: String, res: T): T = {
   if (count < 50000 && !(seen contains key)) {
@@ -23,11 +24,14 @@ def log[T](key: String, res: T): T = {
 import java.util.regex._
 
 
+val cache = new scala.collection.mutable.HashMap[String, RECompiled]
+
+
 def infix_R(s: String): Regexp = new Regexp(s)
 
 class Regexp(val patternString: String) {
   
-  val rno = RhinoParser.compileRE(special(patternString), patternString.substring(patternString.lastIndexOf("/")+1), false)
+  val rno = cache.getOrElseUpdate(patternString, RhinoParser.compileREStub(special(patternString), patternString.substring(patternString.lastIndexOf("/")+1), false))
   
   
   var caseInsensitive = patternString.substring(patternString.lastIndexOf("/")).contains("i")
@@ -45,7 +49,7 @@ class Regexp(val patternString: String) {
     else s
   }
   
-  val pat = try { 
+  lazy val pat = try { 
     if (caseInsensitive) Right(Pattern.compile(special(patternString), Pattern.CASE_INSENSITIVE))
     else Right(Pattern.compile(special(patternString))) 
   } catch { case ex => Left(ex) }
@@ -59,9 +63,7 @@ class MatchResult(val index: Int, val input: String, val array: Array[String]) {
 }
 
 
-def infix_exec(r: Regexp, s: String): Any = {
-  val key = "exec " + r + " @ " + s
-  
+def infix_exec(r: Regexp, s: String): Any = {  
   
   def run(): Any = {
     // return an array with the first match of each group (/g does not return multiple matches)
@@ -111,7 +113,8 @@ def infix_exec(r: Regexp, s: String): Any = {
       return null
     }
 
-    val gData = RhinoMatcher.matchNaive(r.rno, s, r.lastIndex)
+//    val gData = RhinoMatcher.matchNaive(r.rno, s, r.lastIndex)
+    val gData = RhinoMatcher.matchStaged(r.rno, s, r.lastIndex)
     if (gData == null) {
       r.lastIndex = 0
       return null
@@ -126,23 +129,26 @@ def infix_exec(r: Regexp, s: String): Any = {
     
     new MatchResult(gData.skipped, s, groups)
   }
+
+  if (!printKey) return run2()
   
+  val key = "exec " + r + " @ " + s
   log(key, run2())
 }
 
 def infix_split(s: String, r: Regexp): Any = {
-  val key = "split " + r + " @ " + s
-  
   def run(): Any = {
     val data = s.split(r.special(r.patternString))
     new MatchResult(0,s,data)
   }
   
+  if (!printKey) return run()
+  
+  val key = "split " + r + " @ " + s  
   log(key, run())
 }
 
 def infix_matches(s: String, r: Regexp): Any = {
-  val key = "match " + r + " @ " + s
   
   // without /g, same as r.exec(s): return array with first match of each group
   // with /g, return all matches of whole expr
@@ -166,13 +172,15 @@ def infix_matches(s: String, r: Regexp): Any = {
     new MatchResult(0,s,data.toArray)
   }
 
+  if (!printKey) return run()
+
+  val key = "match " + r + " @ " + s
   log(key, run())
 }
 
 def infix_replace(s: String, r: Regexp, s2: String): Any = {
-  val key = "replace " + r + " @ " + s + " -- " + s2
 
-  def run(): Any = {
+  def run(): Any = { //return "TODO"
     
     val m = r.pat.right.get.matcher(s);
     
@@ -180,6 +188,9 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
     if (res.nonEmpty && res.last == '\n') res.init else res
   }
 
+  if (!printKey) return run()
+
+  val key = "replace " + r + " @ " + s + " -- " + s2
   log(key, run())
 }
 
@@ -187,16 +198,85 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
 
 
 
-// some stuff in block11 is commented out -- enabling it causes an
-// IncompatibleClassChangeError in sbt
+class TestRhino extends FileDiffSuite {
+
+  def run(re: String, in: String) = {
+    println(re + " @ " + in)
+    val start = System.currentTimeMillis
+    val rno = RhinoParser.compileREStub(re, "", false)
+
+    val res1 = RhinoMatcher.matchNaive(rno, in, 0)
+    val str1 = if (res1 == null) "null" else res1 + "/" + (res1.groups(in).mkString(","))
+    println(str1)
+
+    val res2 = RhinoMatcher.matchStaged(rno, in, 0)
+    val str2 = if (res2 == null) "null" else res2 + "/" + (res2.groups(in).mkString(","))
+    println(str2)
+    
+    expect(str1)(str2)
+
+    println("done")
+  }
+
+  def test1 = withOutFileChecked("test-out/rhino1") {
+    run("""aab|aac""", "aaac")
+  }
+
+  def test2 = withOutFileChecked("test-out/rhino2") {
+    run("""\w*b""", "aaabc")
+  }
+
+  def test3 = withOutFileChecked("test-out/rhino3") {
+    run("""(\w{4})b""", "aaaaaaabc")
+  }
+
+  def test4 = withOutFileChecked("test-out/rhino4") {
+    run("""/(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?/""",
+    "uggc://jjj.snprobbx.pbz/ybtva.cuc")
+  }
+
+  def test5 = withOutFileChecked("test-out/rhino5") {
+    run("""(?:ZFVR.(\d+\.\d+))|(?:(?:Sversbk|TenaCnenqvfb|Vprjrnfry).(\d+\.\d+))|(?:Bcren.(\d+\.\d+))|(?:NccyrJroXvg.(\d+(?:\.\d+)?))""",
+    "Zbmvyyn/5.0 (Jvaqbjf; H; Jvaqbjf AG 5.1; ra-HF) NccyrJroXvg/528.9 (XUGZY, yvxr Trpxb) Puebzr/2.0.157.0 Fnsnev/528.9")
+  }
+
+  def test6 = withOutFileChecked("test-out/rhino6") {
+    run("""qqqq|qqq|qq|q|ZZZZ|ZZZ|ZZ|Z|llll|ll|l|uu|u|UU|U|zz|z|ff|f|gg|g|sss|ss|s|mmm|mm|m""",
+    "qqqq, ZZZ q, llll")
+  }
+
+  // worse:
+  // (\\\"|\x00-|\x1f|\x7f-|\x9f|\u00ad|\u0600-|\u0604|\u070f|\u17b4|\u17b5|\u200c-|\u200f|\u2028-|\u202f|\u2060-|\u206f|\ufeff|\ufff0-|\uffff)
+
+  // ----
+  
+}
+
+
+object TestV8Bench extends TestV8 {
+
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.count = 0
+    Util.printKey = false
+    Util.printRes = false
+    Util.printElapsed = true
+    for (i <- 0 until 32)
+      run()
+  }  
+  
+}
+
 
 class TestV8 extends FileDiffSuite {
+  
   
   def testV80 = withOutFileChecked("test-out/v8regexp0") {
     // output doesn't match check file 100% -- non printing chars?
     Util.count = 0
     Util.printKey = true
     Util.printRes = false
+    Util.printElapsed = false
     runSuite()
   }
 
@@ -204,7 +284,15 @@ class TestV8 extends FileDiffSuite {
     Util.count = 0
     Util.printKey = true
     Util.printRes = true
+    Util.printElapsed = false
     runSuite()
+  }
+
+  def run() = {
+    val start = System.currentTimeMillis
+    runSuite
+    val elapsed = System.currentTimeMillis - start
+    if (Util.printElapsed) System.out.println("elapsed: " + elapsed)
   }
 
 
@@ -302,6 +390,7 @@ class TestV8 extends FileDiffSuite {
       var variants = new Array[String](n)
       variants(0) = str
       for (i <- 1 until n) {
+        //variants(i) = str
         var pos = (MathD.random() * str.length).toInt;
         var chr = ((str.charAt(pos) + (MathD.random() * 128).toInt) % 128).toChar;
         if (chr < 32.toChar || chr > 126.toChar)

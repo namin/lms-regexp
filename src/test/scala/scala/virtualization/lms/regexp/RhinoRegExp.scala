@@ -321,6 +321,8 @@ trait REGrammar {
 
   type RENode
 
+  def nullNode: RENode
+
   def empty: RENode
   
   def bol: RENode
@@ -374,6 +376,8 @@ object RhinoNodes extends REGrammar {
   
   type RENode = scala.virtualization.lms.regexp.RENode
   
+  def nullNode: RENode = null
+  
   def empty: RENode = new RENode(REOP_EMPTY)
   
   def bol: RENode = new RENode(REOP_BOL)
@@ -425,12 +429,28 @@ object RhinoNodes extends REGrammar {
   def seq(kids: List[RENode]): RENode = {
     if (kids.isEmpty) return empty
     
+    // FIXME: should support nesting -- need to follow all head's children first
+    
     val first = kids.head
     var head = kids.head
     var tail = kids.tail
     while (tail.nonEmpty) {
-      head.next = tail.head
-      head = tail.head
+      Predef.assert(head.next == null)
+      val next = tail.head
+      
+      val consume = if (head.op == REOP_FLAT && next.op == REOP_FLAT) {
+        val t2 = head.asInstanceOf[RESeqNode]
+        if (t2.flatIndex != -1
+          && ((t2.flatIndex + t2.length) == next.asInstanceOf[RESeqNode].flatIndex)) {
+              t2.length += next.asInstanceOf[RESeqNode].length;
+              true 
+        } else false
+      } else false
+      
+      if (!consume) {
+        head.next = next
+        head = next
+      }
       tail = tail.tail
     }
     first
@@ -478,6 +498,57 @@ object RhinoNodes extends REGrammar {
   }
   
   
+  
+  def mirror(t: RENode, handler: REGrammar): handler.RENode = {
+    mirrorSeq(t,handler) match {
+      case Nil => handler.nullNode
+      case x::Nil => x
+      case xs => handler.seq(xs)
+    }
+  }
+
+  def mirrorSeq(t: RENode, handler: REGrammar): List[handler.RENode] = if (t == null) Nil else {
+    mirrorOne(t, handler)::mirrorSeq(t.next,handler)
+  }
+
+
+  def mirrorOne(t: RENode, handler: REGrammar): handler.RENode = if (t == null) handler.nullNode else t.op match {
+
+    case REOP_EMPTY =>    handler.empty
+    case REOP_BOL =>      handler.bol
+    case REOP_EOL =>      handler.eol
+    case REOP_WBDRY =>    handler.wordBoundary
+    case REOP_WNONBDRY => handler.nonWordBoundary
+    case REOP_DOT =>      handler.dot
+    case REOP_DIGIT =>    handler.digit
+    case REOP_NONDIGIT => handler.nonDigit
+    case REOP_ALNUM =>    handler.alnum
+    case REOP_NONALNUM => handler.nonAlnum
+    case REOP_SPACE =>    handler.space
+    case REOP_NONSPACE => handler.nonSpace
+    case REOP_CLASS =>    
+        val t2 = t.asInstanceOf[REClassNode]
+        handler.clazz(t2.startIndex, t2.index, t2.kidlen)
+    case REOP_FLAT =>
+        val t2 = t.asInstanceOf[RESeqNode]
+        handler.flat(t2.chr, t2.length, t2.flatIndex)
+    case REOP_BACKREF =>
+        handler.backref(t.parenIndex)
+    case REOP_ALT =>
+        handler.alt(mirror(t.kid,handler), mirror(t.kid2,handler))
+    case REOP_LPAREN =>
+        handler.paren(t.parenIndex,mirror(t.kid,handler))
+    case REOP_ASSERT =>
+        handler.assert(mirror(t.kid,handler))
+    case REOP_ASSERT_NOT =>
+        handler.assertNot(mirror(t.kid,handler))
+    case REOP_QUANT => // repetition
+        val t2 = t.asInstanceOf[RERangeNode]
+        handler.repeat(mirror(t2.kid,handler), t2.min, t2.max, t2.greedy, t2.parenIndex, t2.parenCount)
+    //case _ => 
+  }
+  
+  
 }
 
 
@@ -488,8 +559,7 @@ object RhinoParser {
     val RhinoNodes: REGrammar = scala.virtualization.lms.regexp.RhinoNodes
     type RENode = RhinoNodes.RENode
   
-    def infix_externalize(x: RENode) = x.asInstanceOf[scala.virtualization.lms.regexp.RENode]
-    def nullNode = null.asInstanceOf[RENode]
+    def infix_externalize(x: RENode) = x.asInstanceOf[scala.virtualization.lms.regexp.RENode]    
   
     // TODO: val RhinoNodes: REGrammar = 
   
@@ -505,6 +575,8 @@ object RhinoParser {
         var classCount: Int = 0;   /* number of [] encountered */
         var progLength: Int = 0;   /* estimated bytecode length */
         var result: RENode = _;
+        
+        var classList: Array[RECharSet] = _
     }
 
 
@@ -542,6 +614,21 @@ object RhinoParser {
         return state
     }
 
+    def compileREStub(str: String, global: String, flat: Boolean): RECompiled = {
+      
+      val pstate = parseRE(str, global, flat)
+      
+      val regexp = new RECompiled(pstate.source)
+      regexp.flags = pstate.flags
+      regexp.startNode = pstate.result.externalize
+      regexp.parenCount = pstate.parenCount
+      regexp.classCount = pstate.classCount
+      regexp.classList = pstate.classList
+
+      regexp
+    }
+
+
 
     def compileRE(str: String, global: String, flat: Boolean): RECompiled =
     {
@@ -554,16 +641,17 @@ object RhinoParser {
         state.classCount = pstate.classCount
         state.progLength = pstate.progLength
         state.result = pstate.result.externalize
+        state.flags = pstate.flags
         
         val regexp = new RECompiled(pstate.source)
-        regexp.flags = pstate.flags
+        regexp.flags = state.flags
         regexp.startNode = state.result
         
         import RhinoBytecodeEmitter._
 
         regexp.program = new Array[Byte](state.progLength + 1);
-        if (state.classCount != 0) { // TR FIXME: need to do for non-compiled case, too
-            regexp.classList = new Array[RECharSet](state.classCount);
+        if (state.classCount != 0) {
+            regexp.classList = new Array[RECharSet](state.classCount); // TR: could take it from pstate
             regexp.classCount = state.classCount;
         }
         var endPC = emitREBytecode(state, regexp, 0, state.result);
@@ -945,7 +1033,7 @@ object RhinoParser {
         var nDigits = 2;
         var parenBaseCount = state.parenCount;
         var num, tmp: Int = 0;
-        var term: RENode = nullNode;
+        var term: RENode = RhinoNodes.nullNode;
         var termStart: Int = 0;
         
         /*def emit(n: RENode) = {
@@ -1129,7 +1217,7 @@ object RhinoParser {
         case '(' => {
             var op = REOP_EMPTY
             var parenIndex = -1
-            var result: RENode = nullNode;
+            var result: RENode = RhinoNodes.nullNode;
             termStart = state.cp;
             if (state.cp + 1 < state.cpend && src(state.cp) == '?'
                 && (({ c = src(state.cp + 1); c}) == '=' || c == '!' || c == ':'))
@@ -1207,10 +1295,18 @@ object RhinoParser {
              * to be reported during the parse phase, not at execution.
              */
             // TR FIXME should get rid of this and handle char classes properly
-            if (!calculateBitmapSize(state, result.asInstanceOf[REClassNode], src, termStart, state.cp)) {
+            val t2 = result.asInstanceOf[REClassNode]
+            if (!calculateBitmapSize(state, t2, src, termStart, state.cp)) {
                 state.cp += 1 //TR necessary?
                 return false;
             }
+            
+            val oldClassList = state.classList
+            state.classList = new Array[RECharSet](state.classCount);
+            if (index > 0) System.arraycopy(oldClassList, 0, state.classList, 0, index)
+            state.classList(index) = new RECharSet(t2.bmsize, startIndex,
+                                                kidlen, t2.sense);
+            
             state.cp += 1
             state.progLength += 3; /* CLASS, <index> */
 
@@ -1333,21 +1429,296 @@ object RhinoMatcher {
 
   def matchNaive(re: RECompiled, input: String, inp: Int = 0): REGlobalData = {
     
-    debug = false //new String(re.source).contains("\\|") && input.startsWith("m:94")
-    if (debug) println("debug on: " + new String(re.source) + " @ " + inp + " @ " + input)
-    
-    val t = re.startNode
-    
-    for (i <- inp to input.length) { // need to include last index: may match empty string
-      val (gData, res) = matchNaive(re, t, input, i)
-      if (res)
-        return gData
+    var gData = new REGlobalData
+
+    if (re.parenCount != 0) {
+        gData.parens = new Array[Long](re.parenCount);
+    } else {
+        gData.parens = null;
     }
-    return null
+
+    gData.backTrackStackTop = null;
+    gData.stateStackTop = null;
+
+    gData.multiline = (re.flags & JSREG_MULTILINE) != 0;
+    gData.regexp = re;
+
+    var j = 0
+    while (j < re.parenCount) {
+        gData.parens(j) = -1l;
+        j += 1
+    }
+
+    matcher.input = input
+    matcher.gData = gData
+    matcher.re = re
+
+    if (re.matcher == null) {
+      val t = re.startNode
+      val m = RhinoNodes.mirror(t, matcher)
+      re.matcher = () => m(x=>x)
+    }
+
+    var i = inp
+    
+    
+    // shortcut if we're searching a flat string
+    // doesn't work for case insensitive though
+    /*if (re.startNode.op == REOP_FLAT) {
+      val t = re.startNode.asInstanceOf[RESeqNode]
+      if (t.flatIndex != -1) {
+        val s = new String(re.source, t.flatIndex, t.length)
+        i = input.indexOf(s)
+        if (i < 0)
+          return null
+      }
+    }*/
+    
+    val end = input.length
+    while (i <= end) {
+      gData.skipped = i
+      gData.cp = i
+
+      val res = re.matcher()
+      if (res) return gData
+      i += 1
+    }
+
+
+    null
   }
+  
+  
+    
+  object matcher extends REGrammar {
+      
+      var re: RECompiled = null
+      var gData: REGlobalData = null
+      var input: String = null
+      def end = input.length
+      
+      type RENode = (Boolean => Boolean) => Boolean
+      
+      def state(f: (Boolean => Boolean) => Boolean): RENode = f
+      def simple(x: => Boolean): RENode = state(k => k(x))
+      
+      def matchNode(t: RENode)(k: Boolean => Boolean) = t(k)
+      
+      def nullNode = simple(true)
+
+      def empty = simple(true)
+
+      def bol = simple((gData.cp == 0) || (gData.multiline && isLineTerm(input.charAt(gData.cp - 1))))
+      def eol = simple((gData.cp == end)  || (gData.multiline && isLineTerm(input.charAt(gData.cp))))
+
+      def wordBoundary = simple(((gData.cp == 0 || !isWord(input.charAt(gData.cp - 1)))
+              ^ !((gData.cp < end) && isWord(input.charAt(gData.cp)))))
+      def nonWordBoundary = simple(((gData.cp == 0 || !isWord(input.charAt(gData.cp - 1)))
+              ^ ((gData.cp < end) && isWord(input.charAt(gData.cp)))))
+
+      def digit = simple((gData.cp != end && isDigit(input.charAt(gData.cp))) && {
+          gData.cp+=1; true
+      })
+      def nonDigit = simple((gData.cp != end && !isDigit(input.charAt(gData.cp))) && {
+          gData.cp+=1; true
+      })
+
+      def space = simple((gData.cp != end && isREWhiteSpace(input.charAt(gData.cp))) && {
+          gData.cp+=1; true
+      })
+      def nonSpace = simple((gData.cp != end && !isREWhiteSpace(input.charAt(gData.cp))) && {
+          gData.cp+=1; true
+      })
+
+      def alnum = simple((gData.cp != end && isWord(input.charAt(gData.cp))) && {
+          gData.cp+=1; true
+      })
+      def nonAlnum = simple((gData.cp != end && !isWord(input.charAt(gData.cp))) && {
+          gData.cp+=1; true
+      })
+
+      def dot = simple((gData.cp != end && !isLineTerm(input.charAt(gData.cp))) && {
+          gData.cp+=1; true
+      })
+
+      def clazz(startIndex: Int, index: Int, kidlen: Int) = simple {
+        Predef.assert(index < re.classCount, index + " >= " + re.classCount)
+
+        (gData.cp != end) && (classMatcher(gData, re.classList(index),
+                input.charAt(gData.cp))) && {
+                  gData.cp += 1; true
+                }
+      }
+
+      def backref(parenIndex: Int) = simple {
+        backrefMatcher(gData, parenIndex, input, end);
+      }
+
+      def flat(chr: Char) = flat(chr, 1, -1)
+
+      def flat(chr: Char, length: Int, flatIndex: Int) = simple {
+        /*
+         * Consecutize FLAT's if possible.
+         */
+        /*if (t2.flatIndex != -1) {
+            while ((t.next != null) && (t.next.op == REOP_FLAT)
+                    && ((t2.flatIndex + t2.length)
+                                    == t.next.asInstanceOf[RESeqNode].flatIndex)) {
+                t2.length += t.next.asInstanceOf[RESeqNode].length;
+                t.next = t.next.next;
+            }
+        }*/ //TR TODO: re-enable
+        
+        if ((flatIndex != -1) && (length > 1)) {
+            if ((re.flags & JSREG_FOLD) != 0) //REOP_FLATi
+                flatNIMatcher(gData, flatIndex, length, input, end);
+            else // REOP_FLAT
+                flatNMatcher(gData, flatIndex, length, input, end);
+        }
+        else {
+            val matchCh = chr
+            def xform(c: Char) = if ((re.flags & JSREG_FOLD) != 0) upcase(c) else c
+            (gData.cp != end) && {
+                val c = input.charAt(gData.cp);
+                (matchCh == c || xform(matchCh) == xform(c)) && {
+                    gData.cp+=1;
+                    true
+                }
+            }
+        }
+      }
+
+      def alt(kid1: RENode, kid2: RENode) = state { k =>
+        val prefix = /*if (t.op != REOP_ALT) {
+          val t2 = t.asInstanceOf[RESeqNode]
+
+          val ignoreCase = t.op == REOP_ALTPREREQi;
+
+          val matchCh1 = if (ignoreCase) upcase(t2.chr) else t2.chr
+          val matchCh2 = if (ignoreCase) upcase(t2.index.toChar) else t2.index.toChar
+
+          (gData.cp != end) && {
+            var c = input.charAt(gData.cp);
+            if (t.op == REOP_ALTPREREQ2) {
+                ! ((c != matchCh1 &&
+                    !classMatcher(gData, gData.regexp.classList(matchCh2), c)))
+            } else {
+                if (t.op == REOP_ALTPREREQi)
+                    c = upcase(c);
+                ! (c != matchCh1 && c != matchCh2)
+            }
+          }
+        } else*/ true
+        
+        prefix && {
+          val saveCp = gData.cp
+          val saveParens = if (gData.parens == null) null else gData.parens.toList
+          matchNode(kid1)(r => k(r) || {
+            gData.cp = saveCp
+            gData.parens = if (saveParens == null) null else saveParens.toArray
+            matchNode(kid2)(k) })}
+      }
+
+      def paren(parenIndex: Int, kid: RENode) = state { k =>
+        gData.setParens(parenIndex, gData.cp, 0);
+        matchNode(kid)(r => k(r && {
+          val cap_index = gData.parensIndex(parenIndex);
+          gData.setParens(parenIndex, cap_index,
+                  gData.cp - cap_index);
+          true
+        }))
+      }
+
+      def assert(kid: RENode) = state { k =>
+        val saveCp = gData.cp
+        println("not properly handling assert")
+        matchNode(kid)(r => k(r && {
+          // backtrack state
+          gData.cp = saveCp
+          true
+        }))
+      }
+
+      def assertNot(kid: RENode) = state { k =>
+        val saveCp = gData.cp
+        println("not properly handling assert")
+        matchNode(kid)(r => k(!r && {
+          // backtrack state
+          gData.cp = saveCp
+          true
+        }))
+      }
+      
+      def seq(kids: List[RENode]) = state { k =>
+        kids match {
+          case x::tail => matchNode(x)(r => if (r) seq(tail)(k) else k(false))
+          case _ => empty(k)
+        }
+      }
+
+      def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int) = state { k =>
+        if (greedy) {
+          // (kid.match && this.match) || next.match 
+          
+          def loop(i: Int)(k: Boolean => Boolean): Boolean = {
+            
+            if (debug)
+              println("try loop " + i + " {" + min + ".." + max +  "} of "+ kid + " at " + input.substring(gData.cp))
+            
+            if (max < 0 || i < max) {
+              
+              // save and reset parens
+              val saveParens = if (gData.parens == null) null else gData.parens.toList
+              val saveCp = gData.cp
+
+              for (k <- parenIndex until re.parenCount) {
+                  gData.setParens(k, -1, 0);
+              }
+
+              matchNode(kid) { res => 
+                if (debug)
+                  println(res)
+                  
+                (res && loop(i+1)(k)) || {
+                  gData.parens = if (saveParens == null) null else saveParens.toArray
+                  gData.cp = saveCp
+                  k(i >= min)
+                }
+              }
+            } else
+              k(i >= min)
+          }
+          loop(0)(k)
+        
+        } else { // not greedy
+          if (debug) println("not greedy: " + kid + " / " + input.substring(gData.cp))
+          Predef.assert(max < 0 && min == 0) // TODO: generalize
+          // next.match || (kid.match && this.match)
+
+          val saveParens = if (gData.parens == null) null else gData.parens.toList
+          val saveCp = gData.cp
+          
+          val res = k(true);
+          {
+            if (debug) println("next: " + res)
+            if (res) true else {              
+              gData.parens = if (saveParens == null) null else saveParens.toArray
+              gData.cp = saveCp
+          
+              matchNode(kid)(r => r && matchNode(repeat(kid,0,-1,false,parenIndex,parenCount))(k))
+            }
+          }
+        }
+      }
+
+  } // matcher
 
 
-  def matchNaive(re: RECompiled, t: RENode, input: String, inp: Int): (REGlobalData, Boolean) = {
+
+
+
+
+  def matchStaged(re: RECompiled, input: String, inp: Int = 0): REGlobalData = {
     
     var gData = new REGlobalData
 
@@ -1363,246 +1734,355 @@ object RhinoMatcher {
     gData.multiline = (re.flags & JSREG_MULTILINE) != 0;
     gData.regexp = re;
 
-    gData.skipped = inp
-    gData.cp = inp
-
-    for (j <- 0 until re.parenCount) {
+    var j = 0
+    while (j < re.parenCount) {
         gData.parens(j) = -1l;
+        j += 1
     }
 
-    var end = input.length
-    
-  def matchNode(t: RENode)(k: Boolean => Boolean): Boolean = {
-    if (t == null) return k(true)
-    
-    if (debug)
-      println("match " + t + " at " + input.substring(gData.cp))
-    
-    val k1 = (x: Boolean) => if (x) matchNode(t.next)(k) else k(false)
-    
-    val matching = t.op match {
-        case REOP_EMPTY =>
-            true
-        case REOP_BOL =>
-            (gData.cp == 0) || (gData.multiline && isLineTerm(input.charAt(gData.cp - 1)))
-        case REOP_EOL =>
-            (gData.cp == end)  || (gData.multiline && isLineTerm(input.charAt(gData.cp)))
 
-        case REOP_WBDRY =>
-            ((gData.cp == 0 || !isWord(input.charAt(gData.cp - 1)))
-                    ^ !((gData.cp < end) && isWord(input.charAt(gData.cp))));
-        case REOP_WNONBDRY =>
-            ((gData.cp == 0 || !isWord(input.charAt(gData.cp - 1)))
-                    ^ ((gData.cp < end) && isWord(input.charAt(gData.cp))));
-        case REOP_DOT =>
-            (gData.cp != end && !isLineTerm(input.charAt(gData.cp))) && {
-                gData.cp+=1; true
-            }
-        case REOP_DIGIT =>
-            (gData.cp != end && isDigit(input.charAt(gData.cp))) && {
-                gData.cp+=1; true
-            }
-        case REOP_NONDIGIT =>
-            (gData.cp != end && !isDigit(input.charAt(gData.cp))) && {
-                gData.cp+=1; true
-            }
-        case REOP_ALNUM =>
-            (gData.cp != end && isWord(input.charAt(gData.cp))) && {
-                gData.cp+=1; true
-            }
-        case REOP_NONALNUM =>
-            (gData.cp != end && !isWord(input.charAt(gData.cp))) && {
-                gData.cp+=1; true
-            }
-        case REOP_SPACE =>
-            (gData.cp != end && isREWhiteSpace(input.charAt(gData.cp))) && {
-                gData.cp+=1; true
-            }
-        case REOP_NONSPACE =>
-            (gData.cp != end && !isREWhiteSpace(input.charAt(gData.cp))) && {
-                gData.cp+=1; true
-            }
-        case REOP_CLASS =>
-            val t2 = t.asInstanceOf[REClassNode]
-            //if (!t2.sense)
-            //    program(pc - 1) = REOP_NCLASS;
-            assert(t2.index < re.classCount, t2.index + " >= " + re.classCount)
-            re.classList(t2.index) = new RECharSet(t2.bmsize, t2.startIndex,
-                                                  t2.kidlen, t2.sense);
+    stmatcher.re = re
 
-            val index = t2.index
-            (gData.cp != end) && (classMatcher(gData, re.classList(index),
-                    input.charAt(gData.cp))) && {
-                      gData.cp += 1; true
-                    }
+    if (re.stmatcher == null) {
+      val t = re.startNode
+      val m = RhinoNodes.mirror(t, stmatcher)
 
-        case REOP_FLAT =>
-            /*
-             * Consecutize FLAT's if possible.
-             */
-            val t2 = t.asInstanceOf[RESeqNode]
-            /*if (t2.flatIndex != -1) {
-                while ((t.next != null) && (t.next.op == REOP_FLAT)
-                        && ((t2.flatIndex + t2.length)
-                                        == t.next.asInstanceOf[RESeqNode].flatIndex)) {
-                    t2.length += t.next.asInstanceOf[RESeqNode].length;
-                    t.next = t.next.next;
-                }
-            }*/ //TR TODO: re-enable
-            
-            if ((t2.flatIndex != -1) && (t2.length > 1)) {
-                if ((re.flags & JSREG_FOLD) != 0) //REOP_FLATi
-                    flatNIMatcher(gData, t2.flatIndex, t2.length, input, end);
-                else // REOP_FLAT
-                    flatNMatcher(gData, t2.flatIndex, t2.length, input, end);
-            }
-            else {
-                val matchCh = t2.chr
-                def xform(c: Char) = if ((re.flags & JSREG_FOLD) != 0) upcase(c) else c
-                (gData.cp != end) && {
-                    val c = input.charAt(gData.cp);
-                    (matchCh == c || xform(matchCh) == xform(c)) && {
-                        gData.cp+=1;
-                        true
-                    }
-                }
-            }
+      val f = (c:stmatcher.INTF.Rep[Unit]) => m(x=>x)
+
+      stmatcher.IR.dump = true
+      println("----" + new String(re.source))
+      val start = System.currentTimeMillis
+      val fc = stmatcher.IR.compile(f)
+      println("---- took " + (System.currentTimeMillis - start) + "ms")
+      re.stmatcher = fc
+    }
+    
+    matcher.input = input
+    matcher.gData = gData
+    matcher.re = re
+
+    val end = input.length
+    var i = inp
+    while (i <= end) {
+      gData.skipped = i
+      gData.cp = i
+
+      val res = re.stmatcher()
+      if (res) return gData
+      i += 1
+    }
+
+    null
+  }
+
+
+
+  object stmatcher extends REGrammar {
+
+      import scala.virtualization.lms.common._
+      import scala.virtualization.lms.internal.ScalaCompile
+
+      class Foo extends ScalaOpsPkgExp with LiftScala with StaticDataExp with FunctionsExternalDef with ScalaCompile { self =>
         
-        case REOP_BACKREF =>
-            backrefMatcher(gData, t.parenIndex, input, end);
+        val codegen = new ScalaCodeGenPkg with ScalaGenStaticData with ScalaGenFunctionsExternal { val IR: self.type = self
+          type Rep[+T] = IR.Exp[T]
+          override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+            case Unchecked(xs) => emitValDef(sym, xs map ((x:Any)=> x match { case x: Exp[_] => quote(x) case x => x.toString }) mkString "")
+            case _ => super.emitNode(sym,rhs)
+          }
+          override def emitFileHeader(): Unit = {
+            stream.println("import scala.virtualization.lms.regexp._")
+            stream.println("import RhinoMatcher.matcher")
+          }
+          override def quote(x: Exp[Any]) = x match {  //escapes!
+            //case Const(s: String) => "\""+s+"\"" 
+            case Const('\\') => "'\\\\'"
+            //case Const(s: Char) => "'"+s+"'"
+            case _ => super.quote(x)
+          }
+        }
         
-            
-        case REOP_ALTPREREQ
-         | REOP_ALTPREREQi
-         | REOP_ALTPREREQ2
-         | REOP_ALT =>
-            val prefix = if (t.op != REOP_ALT) {
-              val t2 = t.asInstanceOf[RESeqNode]
+        case class Unchecked[T](s: List[Any]) extends Def[T]
+        def unchecked[T](s: Any*): Rep[T] = reflectEffect(Unchecked(s.toList))
+        override def unit[T:Manifest](x:T) = super.unit(x)
+      }
 
-              val ignoreCase = t.op == REOP_ALTPREREQi;
+      val IR = new Foo
+      val codegen = IR.codegen
+      val INTF: ScalaOpsPkg with LiftScala with Functions { type Rep[+T] = IR.Rep[T] } = IR
+      import INTF._
 
-              val matchCh1 = if (ignoreCase) upcase(t2.chr) else t2.chr
-              val matchCh2 = if (ignoreCase) upcase(t2.index.toChar) else t2.index.toChar
+      // Unit/StaticData
+      def unchecked[T](s: Any*): Rep[T] = IR.unchecked(s:_*)
+      def staticData[T:Manifest](x:T): Rep[T] = IR.staticData(x)
 
-              (gData.cp != end) && {
-                var c = input.charAt(gData.cp);
-                if (t.op == REOP_ALTPREREQ2) {
-                    ! ((c != matchCh1 &&
-                        !classMatcher(gData, gData.regexp.classList(matchCh2), c)))
-                } else {
-                    if (t.op == REOP_ALTPREREQi)
-                        c = upcase(c);
-                    ! (c != matchCh1 && c != matchCh2)
+      implicit def unit(x:Boolean): Rep[Boolean] = IR.unit(x)
+      implicit def unit(x:Int): Rep[Int] = IR.unit(x)
+      implicit def unit(x:String): Rep[String] = IR.unit(x)
+      implicit def unit(x:Null): Rep[Null] = IR.unit(x)
+
+      // String
+      def infix_length(x: Rep[String]) = unchecked[Int](x,".length")
+      def infix_charAt(x: Rep[String], i: Rep[Int]) = unchecked[Char](x,".charAt(",i,")")
+      def infix_substring(x: Rep[String], i: Rep[Int]) = unchecked[Char](x,".substring(",i,")")
+
+      // List/Array
+      //def infix_toList[A](x: Rep[Array[A]]) = unchecked[List[A]](x,".toList")
+      
+      // Boolean
+      def infix_^(x: Rep[Boolean], y: Rep[Boolean]) = unchecked[Boolean](x," ^ ",y)
+
+      def infix_&&(lhs: Boolean, rhs: =>Boolean): Boolean = if (lhs) rhs else false
+      def infix_&&(lhs: Boolean, rhs: =>Rep[Boolean]): Rep[Boolean] = if (lhs) rhs else false
+      def infix_&&(lhs: Rep[Boolean], rhs: =>Rep[Boolean]): Rep[Boolean] = if (lhs) rhs else false
+      def infix_||(lhs: Boolean, rhs: =>Boolean): Boolean = if (lhs) true else rhs
+      def infix_||(lhs: Boolean, rhs: =>Rep[Boolean]): Rep[Boolean] = if (lhs) true else rhs
+      def infix_||(lhs: Rep[Boolean], rhs: =>Rep[Boolean]): Rep[Boolean] = if (lhs) true else rhs
+
+
+      // Equal
+      def infix_!=[A:Manifest,B:Manifest](a: A, b: B) : Boolean = !(a.equals(b))
+      def infix_!=[A,B](a: Rep[A], b: B)(implicit o: Overloaded4, mA: Manifest[A], mB: Manifest[B]) : Rep[Boolean] = { import IR._; IR.infix_!=(a,b) }
+      def infix_!=[A,B](a: A, b: Rep[B])(implicit o: Overloaded5, mA: Manifest[A], mB: Manifest[B]) : Rep[Boolean] = { import IR._; IR.infix_!=(a,b) }
+      def infix_!=[A,B](a: Rep[A], b: Rep[B])(implicit o: Overloaded1, mA: Manifest[A], mB: Manifest[B]) : Rep[Boolean] = { import IR._; IR.infix_!=(a,b) }
+
+
+      // State -- should use static data?
+      var re: RECompiled = null
+      def gData: Rep[REGlobalData] = unchecked("matcher.gData")
+      def input: Rep[String] = unchecked("matcher.input")
+      def end = input.length
+
+      // gData
+      def infix_cp(x: Rep[REGlobalData]) = unchecked[Int](x,".cp")
+      def infix_cpSet(x: Rep[REGlobalData], y: Rep[Int]) = unchecked[Int](x,".cp = ",y)
+      def infix_cpInc(x: Rep[REGlobalData]) = unchecked[Int](x,".cp += 1")
+      def infix_multiline(x: Rep[REGlobalData]) = unchecked[Boolean](x,".multiline")
+
+      def infix_parens(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked(x,".parens")
+      def infix_parensGet(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked("if (",x,".parens == null) null else ",x,".parens.toList.toArray //copy")
+      def infix_parensSet(x: Rep[REGlobalData],y: Rep[Array[Int]]): Rep[Unit] = unchecked(x,".parens = ",y)
+      def infix_parensIndex(x: Rep[REGlobalData], i: Int): Rep[Int] = unchecked(x,".parensIndex(",i,")")
+      def infix_setParens(x: Rep[REGlobalData], i: Int, index: Rep[Int], length: Rep[Int]): Rep[Unit] = 
+        unchecked(x,".setParens(",i,",",index,",",length,")")
+
+
+      // Char/Matcher
+      def isREWhiteSpace(x: Rep[Char]) = unchecked[Boolean]("Rhino.isREWhiteSpace(",x,")")
+      def isLineTerm(x: Rep[Char]) = unchecked[Boolean]("Rhino.isLineTerm(",x,")")
+      def isWord(x: Rep[Char]) = unchecked[Boolean]("Rhino.isWord(",x,")")
+      def isDigit(x: Rep[Char]) = unchecked[Boolean]("Rhino.isDigit(",x,")")
+
+      def upcaseR(c: Rep[Char]) = unchecked[Char]("Rhino.upcase(",c,")")
+
+      def xform(c: Char) = if ((re.flags & JSREG_FOLD) != 0) upcase(c) else c      
+      def xform(c: Rep[Char]) = if ((re.flags & JSREG_FOLD) != 0) upcaseR(c) else c
+
+      def classMatcher(x: Rep[REGlobalData], y: RECharSet, z: Rep[Char]) = 
+        unchecked[Boolean]("RhinoMatchUtil.classMatcher(",x,",",staticData(y),",",z,")")
+
+      def flatNMatcher(g: Rep[REGlobalData], x: Int, y: Int, z: Rep[String], e: Rep[Int]) = 
+        unchecked[Boolean]("RhinoMatchUtil.flatNMatcher(",g,",",x,",",y,",",z,",",e,") // " + new String(re.source,x,y))
+      def flatNIMatcher(g: Rep[REGlobalData], x: Int, y: Int, z: Rep[String], e: Rep[Int]) = 
+        unchecked[Boolean]("RhinoMatchUtil.flatNIMatcher(",g,",",x,",",y,",",z,",",e,") // " + new String(re.source,x,y))
+
+      def backrefMatcher(x: Rep[REGlobalData], y: Int, z: Rep[String], e: Rep[Int]) = 
+        unchecked[Boolean]("RhinoMatchUtil.backrefMatcher(",x,",",y,",",z,",",e,")")
+
+
+
+      // Matcher code
+
+      type RENode = (Rep[Boolean] => Rep[Boolean]) => Rep[Boolean]
+
+      def state(f: (Rep[Boolean] => Rep[Boolean]) => Rep[Boolean]): RENode = f
+      def simple(x: => Rep[Boolean]): RENode = state(k => k(x))
+
+      def matchNode(t: RENode)(k: Rep[Boolean] => Rep[Boolean]) = t(k)
+
+      def nullNode = simple(true)
+
+      def empty = simple(true)
+
+      def bol = simple((gData.cp == 0) || (gData.multiline && isLineTerm(input.charAt(gData.cp - 1))))
+      def eol = simple((gData.cp == end)  || (gData.multiline && isLineTerm(input.charAt(gData.cp))))
+
+      def wordBoundary = simple(((gData.cp == 0 || !isWord(input.charAt(gData.cp - 1)))
+              ^ !((gData.cp < end) && isWord(input.charAt(gData.cp)))))
+      def nonWordBoundary = simple(((gData.cp == 0 || !isWord(input.charAt(gData.cp - 1)))
+              ^ ((gData.cp < end) && isWord(input.charAt(gData.cp)))))
+
+      def digit = simple((gData.cp != end && isDigit(input.charAt(gData.cp))) && {
+          gData.cpInc; true
+      })
+      def nonDigit = simple((gData.cp != end && !isDigit(input.charAt(gData.cp))) && {
+          gData.cpInc; true
+      })
+
+      def space = simple((gData.cp != end && isREWhiteSpace(input.charAt(gData.cp))) && {
+          gData.cpInc; true
+      })
+      def nonSpace = simple((gData.cp != end && !isREWhiteSpace(input.charAt(gData.cp))) && {
+          gData.cpInc; true
+      })
+
+      def alnum = simple((gData.cp != end && isWord(input.charAt(gData.cp))) && {
+          gData.cpInc; true
+      })
+      def nonAlnum = simple((gData.cp != end && !isWord(input.charAt(gData.cp))) && {
+          gData.cpInc; true
+      })
+
+      def dot = simple((gData.cp != end && !isLineTerm(input.charAt(gData.cp))) && {
+          gData.cpInc; true
+      })
+
+      def clazz(startIndex: Int, index: Int, kidlen: Int) = simple {
+        Predef.assert(index < re.classCount, index + " >= " + re.classCount)
+
+        (gData.cp != end) && (classMatcher(gData, re.classList(index), input.charAt(gData.cp))) && {
+          gData.cpInc; true
+        }
+      }
+
+      def backref(parenIndex: Int) = simple {
+        backrefMatcher(gData, parenIndex, input, end);
+      }
+
+      def flat(chr: Char) = flat(chr, 1, -1)
+
+      def flat(chr: Char, length: Int, flatIndex: Int) = simple {
+        if ((flatIndex != -1) && (length > 1)) {
+            if ((re.flags & JSREG_FOLD) != 0) //REOP_FLATi
+                flatNIMatcher(gData, flatIndex, length, input, end);
+            else // REOP_FLAT
+                flatNMatcher(gData, flatIndex, length, input, end);
+        }
+        else {
+            val matchCh = chr
+            (gData.cp != end) && {
+                val c = input.charAt(gData.cp);
+                (matchCh == c || xform(matchCh) == xform(c)) && {
+                    gData.cpInc
+                    true
                 }
-              }
-            } else true
-            
-            return prefix && {
-              val saveCp = gData.cp
-              val saveParens = if (gData.parens == null) null else gData.parens.toList
-              matchNode(t.kid)(r => k1(r) || {
-                gData.cp = saveCp
-                gData.parens = if (saveParens == null) null else saveParens.toArray
-                matchNode(t.kid2)(k1) })}
-            
-
-        case REOP_LPAREN =>
-            gData.setParens(t.parenIndex, gData.cp, 0);
-            return matchNode(t.kid)(r => k1(r && {
-              val cap_index = gData.parensIndex(t.parenIndex);
-              gData.setParens(t.parenIndex, cap_index,
-                      gData.cp - cap_index);
-              true
-            }))
-        case REOP_ASSERT =>
-            val saveCp = gData.cp
-            println("not properly handling assert")
-            return matchNode(t.kid)(r => k1(r && {
-              // backtrack state
-              gData.cp = saveCp
-              true
-            }))
-        case REOP_ASSERT_NOT =>
-            val saveCp = gData.cp
-            println("not properly handling assert")
-            return matchNode(t.kid)(r => k1(!r && {
-              // backtrack state
-              gData.cp = saveCp
-              true
-            }))
-            
-        case REOP_QUANT => // repetition
-            val t2 = t.asInstanceOf[RERangeNode]
-            
-            if (t2.greedy) {
-              // (kid.match && this.match) || next.match 
-              
-              val parenIndex = t2.parenIndex
-            
-              def loop(i: Int)(k: Boolean => Boolean): Boolean = {
-                
-                if (debug)
-                  println("try loop " + i + " {" + t2.min + ".." + t2.max +  "} of "+ t.kid + " at " + input.substring(gData.cp))
-                
-                if (t2.max < 0 || i < t2.max) {
-                  
-                  // save and reset parens
-                  val saveParens = if (gData.parens == null) null else gData.parens.toList
-                  val saveCp = gData.cp
-
-                  for (k <- parenIndex until re.parenCount) {
-                      gData.setParens(k, -1, 0);
-                  }
-
-                  matchNode(t.kid) { res => 
-                    if (debug)
-                      println(res)
-                      
-                    (res && loop(i+1)(k)) || {
-                      gData.parens = if (saveParens == null) null else saveParens.toArray
-                      gData.cp = saveCp
-                      k(i >= t2.min)
-                    }
-                  }
-                } else
-                  k(i >= t2.min)
-              }
-              return loop(0)(k1)
-            
-            } else { // not greedy
-              if (debug) println("not greedy: " + t + " / " + t.kid + " / " + input.substring(gData.cp))
-              assert(t2.max < 0 && t2.min == 0) // TODO: generalize
-              // next.match || (kid.match && this.match)
-
-              val saveParens = if (gData.parens == null) null else gData.parens.toList
-              val saveCp = gData.cp
-              
-              // FIXME: this doesn't work, maybe we're inside parens -- we need to run the *full* continuation!
-              val res = k1(true);
-              return {
-                if (debug) println("next: " + res)
-                if (res) true else {              
-                  gData.parens = if (saveParens == null) null else saveParens.toArray
-                  gData.cp = saveCp
-              
-                  matchNode(t.kid)(r => r && matchNode(t)(k))
-                }
-              }
             }
+        }
+      }
 
-        case _ =>
-          println("don't know how to match " + t)
+      def alt(kid1: RENode, kid2: RENode) = state { k =>
+        val saveCp = gData.cp
+        val saveParens = gData.parensGet
+        val k1 = doLambda(k)
+        matchNode(kid1)(r => k1(r) || {
+          gData.cpSet(saveCp)
+          gData.parensSet(saveParens)
+          matchNode(kid2)(r=>k1(r)) })
+      }
+
+      def paren(parenIndex: Int, kid: RENode) = state { k =>
+        gData.setParens(parenIndex, gData.cp, 0);
+        matchNode(kid)(r => k(r && {
+          val cap_index = gData.parensIndex(parenIndex);
+          gData.setParens(parenIndex, cap_index,
+                  gData.cp - cap_index);
           true
-    }
-   
-    k1(matching)
-  }
-  
-  
-  
-    val res = matchNode(t)(x=>x)
-    (gData, res)
-  }
+        }))
+      }
+
+      def assert(kid: RENode) = state { k =>
+        val saveCp = gData.cp
+        //println("not properly handling assert")
+        matchNode(kid)(r => k(r && {
+          // backtrack state
+          gData.cpSet(saveCp)
+          true
+        }))
+      }
+
+      def assertNot(kid: RENode) = state { k =>
+        val saveCp = gData.cp
+        //println("not properly handling assert")
+        matchNode(kid)(r => k(!r && {
+          // backtrack state
+          gData.cpSet(saveCp)
+          true
+        }))
+      }
+
+      def seq(kids: List[RENode]) = state { k =>
+        if (kids.isEmpty) k(true) else {
+          val k1 = doLambda(k)
+          def loop(xs: List[RENode]): Rep[Boolean] = xs match {
+            case x::tail => matchNode(x)(r => if (tail.isEmpty) k1(r) else if (r) loop(tail) else k1(false))
+            case _ => k1(true)
+          }
+          loop(kids)
+        }
+      }
+
+      def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int) = state { k =>
+        if (!greedy) println("not greedy!")
+        if (true || greedy) {
+          // (kid.match && this.match) || next.match 
+
+          // prevent code blow-up (somewhat)
+          def k1: Rep[Boolean => Boolean] = doLambda { r: Rep[Boolean] => k(r) }
+
+          def loop: Rep[Int => Boolean] = doLambda { i: Rep[Int] =>
+
+            //if (debug)
+            //  println("try loop " + i + " {" + min + ".." + max +  "} of "+ kid + " at " + input.substring(gData.cp))
+
+            if (((max < 0): Boolean) || ((i < unit(max)):Rep[Boolean])) {
+
+              // save and reset parens
+              val saveParens = gData.parensGet
+              val saveCp = gData.cp
+
+              for (k <- (parenIndex until re.parenCount):Range) {
+                  gData.setParens(k, unit(-1), unit(0));
+              }
+
+              matchNode(kid) { res => 
+                if (debug)
+                  println(res)
+
+                (res && loop(i+1)) || {
+                  gData.parensSet(saveParens)
+                  gData.cpSet(saveCp)
+                  k1(i >= min)
+                }
+              }
+            } else
+              k1(i >= min)
+          }
+          loop(0)
+
+        } else { // not greedy
+          Predef.assert(false, "not greedy!")
+          //if (debug) println("not greedy: " + kid + " / " + input.substring(gData.cp))
+          //Predef.assert(max < 0 && min == 0) // TODO: generalize
+          // next.match || (kid.match && this.match)
+
+          val saveParens = gData.parensGet
+          val saveCp = gData.cp
+
+          val res = k(true);
+          {
+            //if (debug) println("next: " + res)
+            if (res) true else {              
+              gData.parensSet(saveParens)
+              gData.cpSet(saveCp)
+
+              matchNode(kid)(r => r && matchNode(repeat(kid,0,-1,false,parenIndex,parenCount))(k))
+            }
+          }
+        }
+      }
+
+    } // staged matcher
+
 
 }
 
@@ -2842,6 +3322,8 @@ object RhinoBytecodeMatcher {
 class RECompiled(str: Array[Char]) //extends Serializable
 {
     var startNode: RENode = _
+    var matcher: () => Boolean = _
+    var stmatcher: Unit => Boolean = _
   
     val source: Array[Char] = str;    /* locked source string, sans // */
     var parenCount: Int = _;         /* number of parenthesized submatches */
@@ -3041,6 +3523,8 @@ class REGlobalData {
  */
 final class RECharSet(val length: Int, val startIndex: Int, val strlength: Int, val sense: Boolean) //extends Serializable
 {
+    override def toString = "RECharSet("+length+","+startIndex+")"
+
 
     @volatile @transient var converted: Boolean = _;
     @volatile @transient var bits: Array[Byte] = _;

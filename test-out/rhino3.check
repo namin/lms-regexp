@@ -1,0 +1,177 @@
+(\w{4})b @ aaaaaaabc
+REGlobalData(3,8 / (4,3))/aaaab,aaaa
+----(\w{4})b
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+import scala.virtualization.lms.regexp._
+import RhinoMatcher.matcher
+class staged$2 extends ((Unit)=>(Boolean)) {
+def apply(x102:Unit): Boolean = {
+var x107 = null.asInstanceOf[scala.Function1[Int, Boolean]]
+x107 = {x108: (Int) => 
+val x109 = x108 < 4
+val x201 = if (x109) {
+val x110 = matcher.gData
+val x111 = if (x110.parens == null) null else x110.parens.toList.toArray //copy
+val x112 = matcher.gData
+val x113 = x112.cp
+val x114 = matcher.gData
+val x115 = x114.cp
+val x116 = matcher.input
+val x117 = x116.length
+val x118 = x115 != x117
+val x125 = if (x118) {
+val x119 = matcher.input
+val x120 = matcher.gData
+val x121 = x120.cp
+val x122 = x119.charAt(x121)
+val x123 = Rhino.isWord(x122)
+x123
+} else {
+false
+}
+val x129 = if (x125) {
+val x126 = matcher.gData
+val x127 = x126.cp += 1
+true
+} else {
+false
+}
+val x133 = if (x129) {
+val x130 = x108 + 1
+val x131 = x107(x130)
+x131
+} else {
+false
+}
+val x169 = if (x133) {
+true
+} else {
+val x134 = matcher.gData
+val x135 = x134.parens = x111
+val x136 = matcher.gData
+val x137 = x136.cp = x113
+val x138 = x108 >= 4
+val x147 = if (x138) {
+val x139 = matcher.gData
+val x140 = x139.parensIndex(0)
+val x141 = matcher.gData
+val x142 = matcher.gData
+val x143 = x142.cp
+val x144 = x143 - x140
+val x145 = x141.setParens(0,x140,x144)
+true
+} else {
+false
+}
+val x167 = if (x147) {
+val x148 = matcher.gData
+val x149 = x148.cp
+val x150 = matcher.input
+val x151 = x150.length
+val x152 = x149 != x151
+val x164 = if (x152) {
+val x153 = matcher.input
+val x154 = matcher.gData
+val x155 = x154.cp
+val x156 = x153.charAt(x155)
+val x157 = 'b' == x156
+val x158 = if (x157) {
+true
+} else {
+x157
+}
+val x162 = if (x158) {
+val x159 = matcher.gData
+val x160 = x159.cp += 1
+true
+} else {
+false
+}
+x162
+} else {
+false
+}
+val x165 = if (x164) {
+true
+} else {
+false
+}
+x165
+} else {
+false
+}
+x167
+}
+x169
+} else {
+val x138 = x108 >= 4
+val x179 = if (x138) {
+val x171 = matcher.gData
+val x172 = x171.parensIndex(0)
+val x173 = matcher.gData
+val x174 = matcher.gData
+val x175 = x174.cp
+val x176 = x175 - x172
+val x177 = x173.setParens(0,x172,x176)
+true
+} else {
+false
+}
+val x199 = if (x179) {
+val x180 = matcher.gData
+val x181 = x180.cp
+val x182 = matcher.input
+val x183 = x182.length
+val x184 = x181 != x183
+val x196 = if (x184) {
+val x185 = matcher.input
+val x186 = matcher.gData
+val x187 = x186.cp
+val x188 = x185.charAt(x187)
+val x189 = 'b' == x188
+val x190 = if (x189) {
+true
+} else {
+x189
+}
+val x194 = if (x190) {
+val x191 = matcher.gData
+val x192 = x191.cp += 1
+true
+} else {
+false
+}
+x194
+} else {
+false
+}
+val x197 = if (x196) {
+true
+} else {
+false
+}
+x197
+} else {
+false
+}
+x199
+}
+x201
+}
+val x103 = matcher.gData
+val x104 = matcher.gData
+val x105 = x104.cp
+val x106 = x103.setParens(0,x105,0)
+val x203 = x107(0)
+x203
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+
+compilation: ok
+REGlobalData(3,8 / (4,3))/aaaab,aaaa
+done

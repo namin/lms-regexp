@@ -1,0 +1,845 @@
+qqqq|qqq|qq|q|ZZZZ|ZZZ|ZZ|Z|llll|ll|l|uu|u|UU|U|zz|z|ff|f|gg|g|sss|ss|s|mmm|mm|m @ qqqq, ZZZ q, llll
+REGlobalData(0,4 / null)/qqqq
+----qqqq|qqq|qq|q|ZZZZ|ZZZ|ZZ|Z|llll|ll|l|uu|u|UU|U|zz|z|ff|f|gg|g|sss|ss|s|mmm|mm|m
+nVars=2000
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+import scala.virtualization.lms.regexp._
+import RhinoMatcher.matcher
+class staged$5 extends ((Unit)=>(Boolean)) {
+def apply(x1793:Unit): Boolean = {
+val x1794 = matcher.gData
+val x1795 = x1794.cp
+val x1796 = matcher.gData
+val x1797 = if (x1796.parens == null) null else x1796.parens.toList.toArray //copy
+val x1798 = matcher.gData
+val x1799 = matcher.input
+val x1800 = matcher.input
+val x1801 = x1800.length
+val x1802 = RhinoMatchUtil.flatNMatcher(x1798,0,4,x1799,x1801) // qqqq
+val x5 = {x6: (Boolean) => 
+x6
+}
+val x1803 = x5(x1802)
+val x2435 = if (x1803) {
+true
+} else {
+val x1804 = matcher.gData
+val x1805 = x1804.cp = x1795
+val x1806 = matcher.gData
+val x1807 = x1806.parens = x1797
+val x1808 = matcher.gData
+val x1809 = x1808.cp
+val x1810 = matcher.gData
+val x1811 = if (x1810.parens == null) null else x1810.parens.toList.toArray //copy
+val x1816 = matcher.gData
+val x1817 = matcher.input
+val x1818 = matcher.input
+val x1819 = x1818.length
+val x1820 = RhinoMatchUtil.flatNMatcher(x1816,5,3,x1817,x1819) // qqq
+val x1812 = {x1813: (Boolean) => 
+val x1814 = x5(x1813)
+x1814
+}
+val x1821 = x1812(x1820)
+val x2433 = if (x1821) {
+true
+} else {
+val x1822 = matcher.gData
+val x1823 = x1822.cp = x1809
+val x1824 = matcher.gData
+val x1825 = x1824.parens = x1811
+val x1826 = matcher.gData
+val x1827 = x1826.cp
+val x1828 = matcher.gData
+val x1829 = if (x1828.parens == null) null else x1828.parens.toList.toArray //copy
+val x1834 = matcher.gData
+val x1835 = matcher.input
+val x1836 = matcher.input
+val x1837 = x1836.length
+val x1838 = RhinoMatchUtil.flatNMatcher(x1834,9,2,x1835,x1837) // qq
+val x1830 = {x1831: (Boolean) => 
+val x1832 = x1812(x1831)
+x1832
+}
+val x1839 = x1830(x1838)
+val x2431 = if (x1839) {
+true
+} else {
+val x1840 = matcher.gData
+val x1841 = x1840.cp = x1827
+val x1842 = matcher.gData
+val x1843 = x1842.parens = x1829
+val x1844 = matcher.gData
+val x1845 = x1844.cp
+val x1846 = matcher.gData
+val x1847 = if (x1846.parens == null) null else x1846.parens.toList.toArray //copy
+val x1852 = matcher.gData
+val x1853 = x1852.cp
+val x1854 = matcher.input
+val x1855 = x1854.length
+val x1856 = x1853 != x1855
+val x1868 = if (x1856) {
+val x1857 = matcher.input
+val x1858 = matcher.gData
+val x1859 = x1858.cp
+val x1860 = x1857.charAt(x1859)
+val x1861 = 'q' == x1860
+val x1862 = if (x1861) {
+true
+} else {
+x1861
+}
+val x1866 = if (x1862) {
+val x1863 = matcher.gData
+val x1864 = x1863.cp += 1
+true
+} else {
+false
+}
+x1866
+} else {
+false
+}
+val x1848 = {x1849: (Boolean) => 
+val x1850 = x1830(x1849)
+x1850
+}
+val x1869 = x1848(x1868)
+val x2429 = if (x1869) {
+true
+} else {
+val x1870 = matcher.gData
+val x1871 = x1870.cp = x1845
+val x1872 = matcher.gData
+val x1873 = x1872.parens = x1847
+val x1874 = matcher.gData
+val x1875 = x1874.cp
+val x1876 = matcher.gData
+val x1877 = if (x1876.parens == null) null else x1876.parens.toList.toArray //copy
+val x1882 = matcher.gData
+val x1883 = matcher.input
+val x1884 = matcher.input
+val x1885 = x1884.length
+val x1886 = RhinoMatchUtil.flatNMatcher(x1882,14,4,x1883,x1885) // ZZZZ
+val x1878 = {x1879: (Boolean) => 
+val x1880 = x1848(x1879)
+x1880
+}
+val x1887 = x1878(x1886)
+val x2427 = if (x1887) {
+true
+} else {
+val x1888 = matcher.gData
+val x1889 = x1888.cp = x1875
+val x1890 = matcher.gData
+val x1891 = x1890.parens = x1877
+val x1892 = matcher.gData
+val x1893 = x1892.cp
+val x1894 = matcher.gData
+val x1895 = if (x1894.parens == null) null else x1894.parens.toList.toArray //copy
+val x1900 = matcher.gData
+val x1901 = matcher.input
+val x1902 = matcher.input
+val x1903 = x1902.length
+val x1904 = RhinoMatchUtil.flatNMatcher(x1900,19,3,x1901,x1903) // ZZZ
+val x1896 = {x1897: (Boolean) => 
+val x1898 = x1878(x1897)
+x1898
+}
+val x1905 = x1896(x1904)
+val x2425 = if (x1905) {
+true
+} else {
+val x1906 = matcher.gData
+val x1907 = x1906.cp = x1893
+val x1908 = matcher.gData
+val x1909 = x1908.parens = x1895
+val x1910 = matcher.gData
+val x1911 = x1910.cp
+val x1912 = matcher.gData
+val x1913 = if (x1912.parens == null) null else x1912.parens.toList.toArray //copy
+val x1918 = matcher.gData
+val x1919 = matcher.input
+val x1920 = matcher.input
+val x1921 = x1920.length
+val x1922 = RhinoMatchUtil.flatNMatcher(x1918,23,2,x1919,x1921) // ZZ
+val x1914 = {x1915: (Boolean) => 
+val x1916 = x1896(x1915)
+x1916
+}
+val x1923 = x1914(x1922)
+val x2423 = if (x1923) {
+true
+} else {
+val x1924 = matcher.gData
+val x1925 = x1924.cp = x1911
+val x1926 = matcher.gData
+val x1927 = x1926.parens = x1913
+val x1928 = matcher.gData
+val x1929 = x1928.cp
+val x1930 = matcher.gData
+val x1931 = if (x1930.parens == null) null else x1930.parens.toList.toArray //copy
+val x1936 = matcher.gData
+val x1937 = x1936.cp
+val x1938 = matcher.input
+val x1939 = x1938.length
+val x1940 = x1937 != x1939
+val x1952 = if (x1940) {
+val x1941 = matcher.input
+val x1942 = matcher.gData
+val x1943 = x1942.cp
+val x1944 = x1941.charAt(x1943)
+val x1945 = 'Z' == x1944
+val x1946 = if (x1945) {
+true
+} else {
+x1945
+}
+val x1950 = if (x1946) {
+val x1947 = matcher.gData
+val x1948 = x1947.cp += 1
+true
+} else {
+false
+}
+x1950
+} else {
+false
+}
+val x1932 = {x1933: (Boolean) => 
+val x1934 = x1914(x1933)
+x1934
+}
+val x1953 = x1932(x1952)
+val x2421 = if (x1953) {
+true
+} else {
+val x1954 = matcher.gData
+val x1955 = x1954.cp = x1929
+val x1956 = matcher.gData
+val x1957 = x1956.parens = x1931
+val x1958 = matcher.gData
+val x1959 = x1958.cp
+val x1960 = matcher.gData
+val x1961 = if (x1960.parens == null) null else x1960.parens.toList.toArray //copy
+val x1966 = matcher.gData
+val x1967 = matcher.input
+val x1968 = matcher.input
+val x1969 = x1968.length
+val x1970 = RhinoMatchUtil.flatNMatcher(x1966,28,4,x1967,x1969) // llll
+val x1962 = {x1963: (Boolean) => 
+val x1964 = x1932(x1963)
+x1964
+}
+val x1971 = x1962(x1970)
+val x2419 = if (x1971) {
+true
+} else {
+val x1972 = matcher.gData
+val x1973 = x1972.cp = x1959
+val x1974 = matcher.gData
+val x1975 = x1974.parens = x1961
+val x1976 = matcher.gData
+val x1977 = x1976.cp
+val x1978 = matcher.gData
+val x1979 = if (x1978.parens == null) null else x1978.parens.toList.toArray //copy
+val x1984 = matcher.gData
+val x1985 = matcher.input
+val x1986 = matcher.input
+val x1987 = x1986.length
+val x1988 = RhinoMatchUtil.flatNMatcher(x1984,33,2,x1985,x1987) // ll
+val x1980 = {x1981: (Boolean) => 
+val x1982 = x1962(x1981)
+x1982
+}
+val x1989 = x1980(x1988)
+val x2417 = if (x1989) {
+true
+} else {
+val x1990 = matcher.gData
+val x1991 = x1990.cp = x1977
+val x1992 = matcher.gData
+val x1993 = x1992.parens = x1979
+val x1994 = matcher.gData
+val x1995 = x1994.cp
+val x1996 = matcher.gData
+val x1997 = if (x1996.parens == null) null else x1996.parens.toList.toArray //copy
+val x2002 = matcher.gData
+val x2003 = x2002.cp
+val x2004 = matcher.input
+val x2005 = x2004.length
+val x2006 = x2003 != x2005
+val x2018 = if (x2006) {
+val x2007 = matcher.input
+val x2008 = matcher.gData
+val x2009 = x2008.cp
+val x2010 = x2007.charAt(x2009)
+val x2011 = 'l' == x2010
+val x2012 = if (x2011) {
+true
+} else {
+x2011
+}
+val x2016 = if (x2012) {
+val x2013 = matcher.gData
+val x2014 = x2013.cp += 1
+true
+} else {
+false
+}
+x2016
+} else {
+false
+}
+val x1998 = {x1999: (Boolean) => 
+val x2000 = x1980(x1999)
+x2000
+}
+val x2019 = x1998(x2018)
+val x2415 = if (x2019) {
+true
+} else {
+val x2020 = matcher.gData
+val x2021 = x2020.cp = x1995
+val x2022 = matcher.gData
+val x2023 = x2022.parens = x1997
+val x2024 = matcher.gData
+val x2025 = x2024.cp
+val x2026 = matcher.gData
+val x2027 = if (x2026.parens == null) null else x2026.parens.toList.toArray //copy
+val x2032 = matcher.gData
+val x2033 = matcher.input
+val x2034 = matcher.input
+val x2035 = x2034.length
+val x2036 = RhinoMatchUtil.flatNMatcher(x2032,38,2,x2033,x2035) // uu
+val x2028 = {x2029: (Boolean) => 
+val x2030 = x1998(x2029)
+x2030
+}
+val x2037 = x2028(x2036)
+val x2413 = if (x2037) {
+true
+} else {
+val x2038 = matcher.gData
+val x2039 = x2038.cp = x2025
+val x2040 = matcher.gData
+val x2041 = x2040.parens = x2027
+val x2042 = matcher.gData
+val x2043 = x2042.cp
+val x2044 = matcher.gData
+val x2045 = if (x2044.parens == null) null else x2044.parens.toList.toArray //copy
+val x2050 = matcher.gData
+val x2051 = x2050.cp
+val x2052 = matcher.input
+val x2053 = x2052.length
+val x2054 = x2051 != x2053
+val x2066 = if (x2054) {
+val x2055 = matcher.input
+val x2056 = matcher.gData
+val x2057 = x2056.cp
+val x2058 = x2055.charAt(x2057)
+val x2059 = 'u' == x2058
+val x2060 = if (x2059) {
+true
+} else {
+x2059
+}
+val x2064 = if (x2060) {
+val x2061 = matcher.gData
+val x2062 = x2061.cp += 1
+true
+} else {
+false
+}
+x2064
+} else {
+false
+}
+val x2046 = {x2047: (Boolean) => 
+val x2048 = x2028(x2047)
+x2048
+}
+val x2067 = x2046(x2066)
+val x2411 = if (x2067) {
+true
+} else {
+val x2068 = matcher.gData
+val x2069 = x2068.cp = x2043
+val x2070 = matcher.gData
+val x2071 = x2070.parens = x2045
+val x2072 = matcher.gData
+val x2073 = x2072.cp
+val x2074 = matcher.gData
+val x2075 = if (x2074.parens == null) null else x2074.parens.toList.toArray //copy
+val x2080 = matcher.gData
+val x2081 = matcher.input
+val x2082 = matcher.input
+val x2083 = x2082.length
+val x2084 = RhinoMatchUtil.flatNMatcher(x2080,43,2,x2081,x2083) // UU
+val x2076 = {x2077: (Boolean) => 
+val x2078 = x2046(x2077)
+x2078
+}
+val x2085 = x2076(x2084)
+val x2409 = if (x2085) {
+true
+} else {
+val x2086 = matcher.gData
+val x2087 = x2086.cp = x2073
+val x2088 = matcher.gData
+val x2089 = x2088.parens = x2075
+val x2090 = matcher.gData
+val x2091 = x2090.cp
+val x2092 = matcher.gData
+val x2093 = if (x2092.parens == null) null else x2092.parens.toList.toArray //copy
+val x2098 = matcher.gData
+val x2099 = x2098.cp
+val x2100 = matcher.input
+val x2101 = x2100.length
+val x2102 = x2099 != x2101
+val x2114 = if (x2102) {
+val x2103 = matcher.input
+val x2104 = matcher.gData
+val x2105 = x2104.cp
+val x2106 = x2103.charAt(x2105)
+val x2107 = 'U' == x2106
+val x2108 = if (x2107) {
+true
+} else {
+x2107
+}
+val x2112 = if (x2108) {
+val x2109 = matcher.gData
+val x2110 = x2109.cp += 1
+true
+} else {
+false
+}
+x2112
+} else {
+false
+}
+val x2094 = {x2095: (Boolean) => 
+val x2096 = x2076(x2095)
+x2096
+}
+val x2115 = x2094(x2114)
+val x2407 = if (x2115) {
+true
+} else {
+val x2116 = matcher.gData
+val x2117 = x2116.cp = x2091
+val x2118 = matcher.gData
+val x2119 = x2118.parens = x2093
+val x2120 = matcher.gData
+val x2121 = x2120.cp
+val x2122 = matcher.gData
+val x2123 = if (x2122.parens == null) null else x2122.parens.toList.toArray //copy
+val x2128 = matcher.gData
+val x2129 = matcher.input
+val x2130 = matcher.input
+val x2131 = x2130.length
+val x2132 = RhinoMatchUtil.flatNMatcher(x2128,48,2,x2129,x2131) // zz
+val x2124 = {x2125: (Boolean) => 
+val x2126 = x2094(x2125)
+x2126
+}
+val x2133 = x2124(x2132)
+val x2405 = if (x2133) {
+true
+} else {
+val x2134 = matcher.gData
+val x2135 = x2134.cp = x2121
+val x2136 = matcher.gData
+val x2137 = x2136.parens = x2123
+val x2138 = matcher.gData
+val x2139 = x2138.cp
+val x2140 = matcher.gData
+val x2141 = if (x2140.parens == null) null else x2140.parens.toList.toArray //copy
+val x2146 = matcher.gData
+val x2147 = x2146.cp
+val x2148 = matcher.input
+val x2149 = x2148.length
+val x2150 = x2147 != x2149
+val x2162 = if (x2150) {
+val x2151 = matcher.input
+val x2152 = matcher.gData
+val x2153 = x2152.cp
+val x2154 = x2151.charAt(x2153)
+val x2155 = 'z' == x2154
+val x2156 = if (x2155) {
+true
+} else {
+x2155
+}
+val x2160 = if (x2156) {
+val x2157 = matcher.gData
+val x2158 = x2157.cp += 1
+true
+} else {
+false
+}
+x2160
+} else {
+false
+}
+val x2142 = {x2143: (Boolean) => 
+val x2144 = x2124(x2143)
+x2144
+}
+val x2163 = x2142(x2162)
+val x2403 = if (x2163) {
+true
+} else {
+val x2164 = matcher.gData
+val x2165 = x2164.cp = x2139
+val x2166 = matcher.gData
+val x2167 = x2166.parens = x2141
+val x2168 = matcher.gData
+val x2169 = x2168.cp
+val x2170 = matcher.gData
+val x2171 = if (x2170.parens == null) null else x2170.parens.toList.toArray //copy
+val x2176 = matcher.gData
+val x2177 = matcher.input
+val x2178 = matcher.input
+val x2179 = x2178.length
+val x2180 = RhinoMatchUtil.flatNMatcher(x2176,53,2,x2177,x2179) // ff
+val x2172 = {x2173: (Boolean) => 
+val x2174 = x2142(x2173)
+x2174
+}
+val x2181 = x2172(x2180)
+val x2401 = if (x2181) {
+true
+} else {
+val x2182 = matcher.gData
+val x2183 = x2182.cp = x2169
+val x2184 = matcher.gData
+val x2185 = x2184.parens = x2171
+val x2186 = matcher.gData
+val x2187 = x2186.cp
+val x2188 = matcher.gData
+val x2189 = if (x2188.parens == null) null else x2188.parens.toList.toArray //copy
+val x2194 = matcher.gData
+val x2195 = x2194.cp
+val x2196 = matcher.input
+val x2197 = x2196.length
+val x2198 = x2195 != x2197
+val x2210 = if (x2198) {
+val x2199 = matcher.input
+val x2200 = matcher.gData
+val x2201 = x2200.cp
+val x2202 = x2199.charAt(x2201)
+val x2203 = 'f' == x2202
+val x2204 = if (x2203) {
+true
+} else {
+x2203
+}
+val x2208 = if (x2204) {
+val x2205 = matcher.gData
+val x2206 = x2205.cp += 1
+true
+} else {
+false
+}
+x2208
+} else {
+false
+}
+val x2190 = {x2191: (Boolean) => 
+val x2192 = x2172(x2191)
+x2192
+}
+val x2211 = x2190(x2210)
+val x2399 = if (x2211) {
+true
+} else {
+val x2212 = matcher.gData
+val x2213 = x2212.cp = x2187
+val x2214 = matcher.gData
+val x2215 = x2214.parens = x2189
+val x2216 = matcher.gData
+val x2217 = x2216.cp
+val x2218 = matcher.gData
+val x2219 = if (x2218.parens == null) null else x2218.parens.toList.toArray //copy
+val x2224 = matcher.gData
+val x2225 = matcher.input
+val x2226 = matcher.input
+val x2227 = x2226.length
+val x2228 = RhinoMatchUtil.flatNMatcher(x2224,58,2,x2225,x2227) // gg
+val x2220 = {x2221: (Boolean) => 
+val x2222 = x2190(x2221)
+x2222
+}
+val x2229 = x2220(x2228)
+val x2397 = if (x2229) {
+true
+} else {
+val x2230 = matcher.gData
+val x2231 = x2230.cp = x2217
+val x2232 = matcher.gData
+val x2233 = x2232.parens = x2219
+val x2234 = matcher.gData
+val x2235 = x2234.cp
+val x2236 = matcher.gData
+val x2237 = if (x2236.parens == null) null else x2236.parens.toList.toArray //copy
+val x2242 = matcher.gData
+val x2243 = x2242.cp
+val x2244 = matcher.input
+val x2245 = x2244.length
+val x2246 = x2243 != x2245
+val x2258 = if (x2246) {
+val x2247 = matcher.input
+val x2248 = matcher.gData
+val x2249 = x2248.cp
+val x2250 = x2247.charAt(x2249)
+val x2251 = 'g' == x2250
+val x2252 = if (x2251) {
+true
+} else {
+x2251
+}
+val x2256 = if (x2252) {
+val x2253 = matcher.gData
+val x2254 = x2253.cp += 1
+true
+} else {
+false
+}
+x2256
+} else {
+false
+}
+val x2238 = {x2239: (Boolean) => 
+val x2240 = x2220(x2239)
+x2240
+}
+val x2259 = x2238(x2258)
+val x2395 = if (x2259) {
+true
+} else {
+val x2260 = matcher.gData
+val x2261 = x2260.cp = x2235
+val x2262 = matcher.gData
+val x2263 = x2262.parens = x2237
+val x2264 = matcher.gData
+val x2265 = x2264.cp
+val x2266 = matcher.gData
+val x2267 = if (x2266.parens == null) null else x2266.parens.toList.toArray //copy
+val x2272 = matcher.gData
+val x2273 = matcher.input
+val x2274 = matcher.input
+val x2275 = x2274.length
+val x2276 = RhinoMatchUtil.flatNMatcher(x2272,63,3,x2273,x2275) // sss
+val x2268 = {x2269: (Boolean) => 
+val x2270 = x2238(x2269)
+x2270
+}
+val x2277 = x2268(x2276)
+val x2393 = if (x2277) {
+true
+} else {
+val x2278 = matcher.gData
+val x2279 = x2278.cp = x2265
+val x2280 = matcher.gData
+val x2281 = x2280.parens = x2267
+val x2282 = matcher.gData
+val x2283 = x2282.cp
+val x2284 = matcher.gData
+val x2285 = if (x2284.parens == null) null else x2284.parens.toList.toArray //copy
+val x2290 = matcher.gData
+val x2291 = matcher.input
+val x2292 = matcher.input
+val x2293 = x2292.length
+val x2294 = RhinoMatchUtil.flatNMatcher(x2290,67,2,x2291,x2293) // ss
+val x2286 = {x2287: (Boolean) => 
+val x2288 = x2268(x2287)
+x2288
+}
+val x2295 = x2286(x2294)
+val x2391 = if (x2295) {
+true
+} else {
+val x2296 = matcher.gData
+val x2297 = x2296.cp = x2283
+val x2298 = matcher.gData
+val x2299 = x2298.parens = x2285
+val x2300 = matcher.gData
+val x2301 = x2300.cp
+val x2302 = matcher.gData
+val x2303 = if (x2302.parens == null) null else x2302.parens.toList.toArray //copy
+val x2308 = matcher.gData
+val x2309 = x2308.cp
+val x2310 = matcher.input
+val x2311 = x2310.length
+val x2312 = x2309 != x2311
+val x2324 = if (x2312) {
+val x2313 = matcher.input
+val x2314 = matcher.gData
+val x2315 = x2314.cp
+val x2316 = x2313.charAt(x2315)
+val x2317 = 's' == x2316
+val x2318 = if (x2317) {
+true
+} else {
+x2317
+}
+val x2322 = if (x2318) {
+val x2319 = matcher.gData
+val x2320 = x2319.cp += 1
+true
+} else {
+false
+}
+x2322
+} else {
+false
+}
+val x2304 = {x2305: (Boolean) => 
+val x2306 = x2286(x2305)
+x2306
+}
+val x2325 = x2304(x2324)
+val x2389 = if (x2325) {
+true
+} else {
+val x2326 = matcher.gData
+val x2327 = x2326.cp = x2301
+val x2328 = matcher.gData
+val x2329 = x2328.parens = x2303
+val x2330 = matcher.gData
+val x2331 = x2330.cp
+val x2332 = matcher.gData
+val x2333 = if (x2332.parens == null) null else x2332.parens.toList.toArray //copy
+val x2338 = matcher.gData
+val x2339 = matcher.input
+val x2340 = matcher.input
+val x2341 = x2340.length
+val x2342 = RhinoMatchUtil.flatNMatcher(x2338,72,3,x2339,x2341) // mmm
+val x2334 = {x2335: (Boolean) => 
+val x2336 = x2304(x2335)
+x2336
+}
+val x2343 = x2334(x2342)
+val x2387 = if (x2343) {
+true
+} else {
+val x2344 = matcher.gData
+val x2345 = x2344.cp = x2331
+val x2346 = matcher.gData
+val x2347 = x2346.parens = x2333
+val x2348 = matcher.gData
+val x2349 = x2348.cp
+val x2350 = matcher.gData
+val x2351 = if (x2350.parens == null) null else x2350.parens.toList.toArray //copy
+val x2356 = matcher.gData
+val x2357 = matcher.input
+val x2358 = matcher.input
+val x2359 = x2358.length
+val x2360 = RhinoMatchUtil.flatNMatcher(x2356,76,2,x2357,x2359) // mm
+val x2352 = {x2353: (Boolean) => 
+val x2354 = x2334(x2353)
+x2354
+}
+val x2361 = x2352(x2360)
+val x2385 = if (x2361) {
+true
+} else {
+val x2362 = matcher.gData
+val x2363 = x2362.cp = x2349
+val x2364 = matcher.gData
+val x2365 = x2364.parens = x2351
+val x2366 = matcher.gData
+val x2367 = x2366.cp
+val x2368 = matcher.input
+val x2369 = x2368.length
+val x2370 = x2367 != x2369
+val x2382 = if (x2370) {
+val x2371 = matcher.input
+val x2372 = matcher.gData
+val x2373 = x2372.cp
+val x2374 = x2371.charAt(x2373)
+val x2375 = 'm' == x2374
+val x2376 = if (x2375) {
+true
+} else {
+x2375
+}
+val x2380 = if (x2376) {
+val x2377 = matcher.gData
+val x2378 = x2377.cp += 1
+true
+} else {
+false
+}
+x2380
+} else {
+false
+}
+val x2383 = x2352(x2382)
+x2383
+}
+x2385
+}
+x2387
+}
+x2389
+}
+x2391
+}
+x2393
+}
+x2395
+}
+x2397
+}
+x2399
+}
+x2401
+}
+x2403
+}
+x2405
+}
+x2407
+}
+x2409
+}
+x2411
+}
+x2413
+}
+x2415
+}
+x2417
+}
+x2419
+}
+x2421
+}
+x2423
+}
+x2425
+}
+x2427
+}
+x2429
+}
+x2431
+}
+x2433
+}
+x2435
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+
+compilation: ok
+---- took 184864ms
+REGlobalData(0,4 / null)/qqqq
+done

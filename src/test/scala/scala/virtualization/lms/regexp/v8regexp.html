@@ -37,12 +37,17 @@
       //BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
       //                           NotifyError: PrintError,
       //                           NotifyScore: PrintScore });
+      var start = new Date()
       RegExpSetup()
+      var elapsed = new Date() - start
+      print("elapsed: " + elapsed)
     }
 
     function load() {
       
       print("loading...")
+      
+      var attach = false
       
       var count = 0
       var seen = {}
@@ -52,48 +57,52 @@
       
       var profile = false
       
-      function log(key, res) {
-        if (count < 50000 && !(key in seen)) {
-          //seen[key] = true
-          count++
-          if (printKey) print(key)
-          if (printRes) print("res "+res)
+      if (attach) {
+        function log(key, res) {
+          if (count < 50000 && !(key in seen)) {
+            //seen[key] = true
+            count++
+            if (printKey) print(key)
+            if (printRes) print("res "+res)
+          }
+          return res
         }
-        return res
-      }
       
-      RegExp.prototype.oldExec = RegExp.prototype.exec
-      RegExp.prototype.exec = function (s) {
-        var key = "exec " + this + " @ " + s
+        RegExp.prototype.oldExec = RegExp.prototype.exec
+        RegExp.prototype.exec = function (s) {
+          var key = "exec " + this + " @ " + s
         
-        var skey = ""+this
-        if (profile) console.time(skey)
-        var res = this.oldExec(s)
-        if (profile) console.timeEnd(skey)
+          var skey = ""+this
+          if (profile) console.time(skey)
+          var res = this.oldExec(s)
+          if (profile) console.timeEnd(skey)
         
-        return log(key, res)
-      }
+          return log(key, res)
+        }
 
-      String.prototype.oldSplit = String.prototype.split
-      String.prototype.split = function (r) {
-        var key = "split " + r + " @ " + this
-        return log(key, this.oldSplit(r))
-      }
+        String.prototype.oldSplit = String.prototype.split
+        String.prototype.split = function (r) {
+          var key = "split " + r + " @ " + this
+          return log(key, this.oldSplit(r))
+        }
 
-      String.prototype.oldMatch = String.prototype.match
-      String.prototype.match = function (r) {
-        var key = "match " + r + " @ " + this
-        return log(key, this.oldMatch(r))
-      }
+        String.prototype.oldMatch = String.prototype.match
+        String.prototype.match = function (r) {
+          var key = "match " + r + " @ " + this
+          return log(key, this.oldMatch(r))
+        }
 
-      String.prototype.oldReplace = String.prototype.replace
-      String.prototype.replace = function (r,s) {
-        var key = "replace " + r + " @ " + this + " -- " + s
-        return log(key, this.oldReplace(r,s))
+        String.prototype.oldReplace = String.prototype.replace
+        String.prototype.replace = function (r,s) {
+          var key = "replace " + r + " @ " + this + " -- " + s
+          return log(key, this.oldReplace(r,s))
+        }
       }
-      
       setTimeout(function() {
         print("running ...")
+        Run()
+        Run()
+        Run()
         Run()
         print("done: " + count)
       }, 100)
