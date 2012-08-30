@@ -40,6 +40,16 @@ trait FunctionsExternalDef extends FunctionsExp with BlockExp with ClosureCompar
         funSym
     }
   }
+  
+  /*def defineFun[A:Manifest,B:Manifest](funSym: Sym[A=>B], argSym: Sym[A], y: Exp[B]) = {
+    createDefinition(funSym, DefineFun[A,B](y)(argSym))
+  }*/
+  
+  
+  override def reset = {
+    funTable = Nil
+    super.reset
+  }
 }
 
 trait ScalaGenFunctionsExternal extends ScalaGenFunctions {

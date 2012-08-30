@@ -10,33 +10,23 @@ class staged$0 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
 val x1 = matcher.gData
 val x2 = x1.cp
-val x3 = matcher.gData
-val x4 = if (x3.parens == null) null else x3.parens.toList.toArray //copy
-val x7 = matcher.gData
-val x8 = matcher.input
-val x9 = matcher.input
-val x10 = x9.length
-val x11 = RhinoMatchUtil.flatNMatcher(x7,0,3,x8,x10) // aab
-val x5 = {x6: (Boolean) => 
-x6
+val x3 = if (x1.parens == null) null else x1.parens.clone //copy
+val x12 = matcher.input
+val x13 = x12.length
+val x16 = RhinoMatchUtil.flatNMatcher(x1,0,3,x12,x13) // aab
+def x8(): Boolean = {
+val x10 = x1.cp = x2
+val x11 = x1.parens = x3
+val x14 = RhinoMatchUtil.flatNMatcher(x1,4,3,x12,x13) // aac
+x14
 }
-val x12 = x5(x11)
-val x24 = if (x12) {
+val x19 = if (x16) {
 true
 } else {
-val x13 = matcher.gData
-val x14 = x13.cp = x2
-val x15 = matcher.gData
-val x16 = x15.parens = x4
-val x17 = matcher.gData
-val x18 = matcher.input
-val x19 = matcher.input
-val x20 = x19.length
-val x21 = RhinoMatchUtil.flatNMatcher(x17,4,3,x18,x20) // aac
-val x22 = x5(x21)
-x22
+val x17 = x8()
+x17
 }
-x24
+x19
 }
 }
 /*****************************************
@@ -44,6 +34,6 @@ x24
 *******************************************/
 
 compilation: ok
----- took 823ms
+---- took 513ms
 REGlobalData(1,4 / null)/aac
 done

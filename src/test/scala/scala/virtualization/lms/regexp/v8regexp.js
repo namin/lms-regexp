@@ -334,8 +334,8 @@ var RegExp_ = new BenchmarkSuite('RegExp', 910985, [
 
 var regExpBenchmark = null;
 
-function RegExpSetup() {
-  regExpBenchmark = new RegExpBenchmark();
+function RegExpSetup(benchIter) {
+  regExpBenchmark = new RegExpBenchmark(benchIter);
   RegExpRun(); // run once to get system initialized
 }
 
@@ -363,7 +363,7 @@ function computeInputVariants(str, n) {
   return variants;
 }
 
-function RegExpBenchmark() {
+function RegExpBenchmark(benchIter) {
   var re0 = /^ba/;
   var re1 = /(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?/;
   var re2 = /^\s*|\s*$/g;
@@ -2038,7 +2038,7 @@ function RegExpBenchmark() {
   }
 
   function run() {
-    for (var i = 0; i < 1/*TR was 5*/; i++) {
+    for (var i = 0; i < benchIter/*TR was 5*/; i++) {
       runBlock0();
       runBlock1();
       runBlock2();

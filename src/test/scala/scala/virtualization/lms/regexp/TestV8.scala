@@ -2,7 +2,7 @@ package scala.virtualization.lms.regexp
 
 import org.scalatest._
 
-object Util {
+object Util extends REIntf {
 
 var seen = new scala.collection.mutable.HashSet[String]
 var count = 0
@@ -10,6 +10,20 @@ var count = 0
 var printKey = true
 var printRes = false
 var printElapsed = false
+var dumpCode = false
+var runNaive = false
+var optUnsafe = false
+
+def reset() = {
+  printKey = false
+  printRes = false
+  printElapsed = false
+  dumpCode = false
+  runNaive = false
+  optUnsafe = false
+  count = 0
+  cache.clear
+}
 
 def log[T](key: String, res: T): T = {
   if (count < 50000 && !(seen contains key)) {
@@ -113,8 +127,8 @@ def infix_exec(r: Regexp, s: String): Any = {
       return null
     }
 
-//    val gData = RhinoMatcher.matchNaive(r.rno, s, r.lastIndex)
-    val gData = RhinoMatcher.matchStaged(r.rno, s, r.lastIndex)
+    val gData = if (runNaive) RhinoMatcher.matchNaive(r.rno, s, r.lastIndex)
+                else RhinoMatcher.matchStaged(r.rno, s, r.lastIndex)
     if (gData == null) {
       r.lastIndex = 0
       return null
@@ -123,7 +137,7 @@ def infix_exec(r: Regexp, s: String): Any = {
     if (r.global)
       r.lastIndex = gData.cp
     
-    val groups = gData.groups(s)
+    val groups = if (optUnsafe) null else gData.groups(s)
     
     //println(gData)
     
@@ -188,10 +202,43 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
     if (res.nonEmpty && res.last == '\n') res.init else res
   }
 
-  if (!printKey) return run()
+  def run2(): Any = {
+    
+    if (!optUnsafe) return run()
+    
+    var i = 0
+    val end = s.length
+    var cnt = 0
+    while (i < end) {
+      if (s.charAt(i) == '/') cnt += 1
+      i += 1
+    }
+    return cnt
+    
+    //OPT not actually replacing anything, just doing the matches
+    
+    var idx = 0
+    
+    while (true) {
+      val gData = if (runNaive) RhinoMatcher.matchNaive(r.rno, s, idx) else RhinoMatcher.matchStaged(r.rno, s, idx)
+      if (gData == null) {
+        return null
+      }
+    
+      if (!r.global || gData.cp >= s.length)
+        return new MatchResult(gData.skipped, s, null)
+      
+      if (gData.cp == idx)
+        return ()//println("XX no progress: " + r + " @ " + s + " at " + idx)
+      
+      idx = gData.cp
+    }
+  }
 
+  if (!printKey) return run2()
+  
   val key = "replace " + r + " @ " + s + " -- " + s2
-  log(key, run())
+  log(key, run2())
 }
 
 }
@@ -201,6 +248,9 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
 class TestRhino extends FileDiffSuite {
 
   def run(re: String, in: String) = {
+    Util.reset()
+    Util.dumpCode = true
+    
     println(re + " @ " + in)
     val start = System.currentTimeMillis
     val rno = RhinoParser.compileREStub(re, "", false)
@@ -231,11 +281,15 @@ class TestRhino extends FileDiffSuite {
   }
 
   def test4 = withOutFileChecked("test-out/rhino4") {
-    run("""/(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?/""",
+    // 3000 - 4000 ms
+    // (why?)
+    run("""(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?""",
     "uggc://jjj.snprobbx.pbz/ybtva.cuc")
   }
 
   def test5 = withOutFileChecked("test-out/rhino5") {
+    // 800 ms
+    // need to locate Nccyr
     run("""(?:ZFVR.(\d+\.\d+))|(?:(?:Sversbk|TenaCnenqvfb|Vprjrnfry).(\d+\.\d+))|(?:Bcren.(\d+\.\d+))|(?:NccyrJroXvg.(\d+(?:\.\d+)?))""",
     "Zbmvyyn/5.0 (Jvaqbjf; H; Jvaqbjf AG 5.1; ra-HF) NccyrJroXvg/528.9 (XUGZY, yvxr Trpxb) Puebzr/2.0.157.0 Fnsnev/528.9")
   }
@@ -245,59 +299,141 @@ class TestRhino extends FileDiffSuite {
     "qqqq, ZZZ q, llll")
   }
 
-  // worse:
-  // (\\\"|\x00-|\x1f|\x7f-|\x9f|\u00ad|\u0600-|\u0604|\u070f|\u17b4|\u17b5|\u200c-|\u200f|\u2028-|\u202f|\u2060-|\u206f|\ufeff|\ufff0-|\uffff)
-
-  // ----
+  def test7 = withOutFileChecked("test-out/rhino7") {
+    run("""(\\\"|\x00-|\x1f|\x7f-|\x9f|\u00ad|\u0600-|\u0604|\u070f|\u17b4|\u17b5|\u200c-|\u200f|\u2028-|\u202f|\u2060-|\u206f|\ufeff|\ufff0-|\uffff)""",
+    "GnoThvq")
+  }
   
 }
 
 
-object TestV8Bench extends TestV8 {
+object TestV8BenchRE1 extends V8Bench {
+
+  override val REImpl = Util
 
   def main(args: Array[String]): Unit = {
     System.out.println("HELLO")
-    Util.count = 0
-    Util.printKey = false
-    Util.printRes = false
+    Util.reset()
     Util.printElapsed = true
-    for (i <- 0 until 32)
-      run()
+    Util.dumpCode = true
+    Util.optUnsafe = true
+    
+    Rhino.debug = false
+    
+    val re = """(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?"""
+    val in = "uggc://jjj.snprobbx.pbz/ybtva.cuc"
+    
+    val rno = RhinoParser.compileREStub(re, "", false)
+
+    def run() = {
+      
+      //val res1 = RhinoMatcher.matchNaive(rno, in, 0)
+      //val str2 = if (res2 == null) "null" else res2 //+ "/" + (res2.groups(in).mkString(","))
+      //println(str2)
+      //println("done naive: " + res1)
+      
+      val res2 = RhinoMatcher.matchStaged(rno, in, 0)
+      //val str2 = if (res2 == null) "null" else res2 //+ "/" + (res2.groups(in).mkString(","))
+      //println(str2)
+      //println("done staged: " + res2)
+    }
+    
+    for (i <- 0 until 64) {
+      val start = System.currentTimeMillis
+      var i = 0
+      while (i < 2298) {
+        run()
+        i += 1
+      }
+      println("elapsed: " + (System.currentTimeMillis - start))
+    }
   }  
   
 }
 
 
-class TestV8 extends FileDiffSuite {
+object TestV8BenchAll extends V8Bench {
+
+  val REImpl = Util
   
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.dumpCode = true
+    Util.optUnsafe = true
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
+
+
+class TestV8 extends V8Bench with FileDiffSuite {
+  
+  override val REImpl = Util
   
   def testV80 = withOutFileChecked("test-out/v8regexp0") {
     // output doesn't match check file 100% -- non printing chars?
-    Util.count = 0
+    Util.reset()
     Util.printKey = true
     Util.printRes = false
-    Util.printElapsed = false
-    runSuite()
+    Util.runNaive = true
+    runSuite(1)
+    println("done: " + Util.count)
   }
 
   def testV81 = withOutFileChecked("test-out/v8regexp1") {
-    Util.count = 0
+    Util.reset()
     Util.printKey = true
     Util.printRes = true
-    Util.printElapsed = false
-    runSuite()
+    Util.runNaive = true
+    runSuite(1)
+    println("done: " + Util.count)
   }
 
-  def run() = {
+  def testV82 = withOutFileChecked("test-out/v8regexp2") {
+    Util.reset()
+    Util.printKey = true
+    Util.printRes = true
+    Util.runNaive = false
+    runSuite(1)
+    println("done: " + Util.count)
+  }
+
+}
+
+
+abstract class REIntf {
+  
+  type Regexp
+  
+  def infix_R(s: String): Regexp
+
+  def infix_exec(r: Regexp, s: String): Any
+
+  def infix_split(s: String, r: Regexp): Any 
+  def infix_matches(s: String, r: Regexp): Any
+  def infix_replace(s: String, r: Regexp, s2: String): Any
+
+}
+
+
+
+abstract class V8Bench {
+
+  val REImpl: REIntf
+  import REImpl._
+
+  def run(benchIter: Int) = {
     val start = System.currentTimeMillis
-    runSuite
+    runSuite(benchIter)
     val elapsed = System.currentTimeMillis - start
     if (Util.printElapsed) System.out.println("elapsed: " + elapsed)
   }
 
+  
 
-
-  def runSuite() = {
+  def runSuite(benchIter: Int) = {
 
     //---base.js---
     // Copyright 2008 the V8 project authors. All rights reserved.
@@ -400,8 +536,6 @@ class TestV8 extends FileDiffSuite {
       }
       variants;
     }
-
-    import Util._
 
     def RegExpBenchmark() {
       var re0 = """/^ba/""".R;
@@ -2097,7 +2231,7 @@ class TestV8 extends FileDiffSuite {
       
       
       def run() {
-        for (i <- 0 until 1 /*TR was 5*/) {
+        for (i <- 0 until benchIter /*TR was 5*/) {
           //println("block0-"+i)
           runBlock0();
           //println("block1-"+i)
@@ -2129,7 +2263,5 @@ class TestV8 extends FileDiffSuite {
     }
     
     RegExpBenchmark()
-    
-    println("done: " + count)
   }
 }    

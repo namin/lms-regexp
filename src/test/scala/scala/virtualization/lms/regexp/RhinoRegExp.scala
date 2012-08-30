@@ -1455,6 +1455,7 @@ object RhinoMatcher {
 
     if (re.matcher == null) {
       val t = re.startNode
+      if (debug) println(RhinoNodes.mirror(t, printer))
       val m = RhinoNodes.mirror(t, matcher)
       re.matcher = () => m(x=>x)
     }
@@ -1489,6 +1490,55 @@ object RhinoMatcher {
   }
   
   
+  object printer extends REGrammar {
+    type RENode = String
+    
+    def nullNode: RENode = "null"
+
+    def empty: RENode = "empty"
+
+    def bol: RENode = "bol"
+    def eol: RENode = "eol"
+
+    def wordBoundary: RENode = "wordBoundary"
+    def nonWordBoundary: RENode  = "nonWordBoundary"
+
+    def digit: RENode = "digit"
+    def nonDigit: RENode = "nonDigit"
+
+    def space: RENode = "space"
+    def nonSpace: RENode = "nonSpace"
+
+    def alnum: RENode = "alnum"
+    def nonAlnum: RENode = "nonAlnum"
+
+    def dot: RENode = "dot"
+
+
+    def clazz(startIndex: Int, index: Int, kidlen: Int): RENode = "clazz("+startIndex+")"
+
+
+    def paren(parenIndex: Int, kid: RENode): RENode = "paren(" + kid + ")"
+
+    def assert(kid: RENode): RENode = "assert(" + kid + ")"
+
+    def assertNot(kid: RENode): RENode = "assertNot(" + kid + ")"
+
+
+    def seq(kids: List[RENode]): RENode = "seq(" + kids.mkString(",") + ")"
+
+    def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int): RENode = 
+      "repeat["+min+".."+max+"]("+kid+")"
+
+
+    def backref(parenIndex: Int): RENode = "backref"+parenIndex
+
+    def flat(chr: Char): RENode = ""+chr
+
+    def flat(chr: Char, length: Int, flatIndex: Int): RENode = "flat("+chr+","+length+","+flatIndex+")"
+
+    def alt(kid1: RENode, kid2: RENode): RENode  = "alt("+kid1+","+kid2+")"
+  }
     
   object matcher extends REGrammar {
       
@@ -1650,14 +1700,23 @@ object RhinoMatcher {
       }
       
       def seq(kids: List[RENode]) = state { k =>
-        kids match {
-          case x::tail => matchNode(x)(r => if (r) seq(tail)(k) else k(false))
-          case _ => empty(k)
+        val saveParens = if (gData.parens == null) null else gData.parens.toList
+        val saveCp = gData.cp
+        def loop(xs: List[RENode]): Boolean = xs match {
+          case x::tail => 
+          matchNode(x)(r => if (r) loop(tail) else {
+            gData.parens = if (saveParens == null) null else saveParens.toArray
+            gData.cp = saveCp
+            k(false)
+          })
+          case _ => k(true)
         }
+        loop(kids)
       }
 
       def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int) = state { k =>
         if (greedy) {
+          
           // (kid.match && this.match) || next.match 
           
           def loop(i: Int)(k: Boolean => Boolean): Boolean = {
@@ -1689,6 +1748,24 @@ object RhinoMatcher {
               k(i >= min)
           }
           loop(0)(k)
+
+/*
+          alternative:
+          
+          while (i < min) {
+            if (!kid.match) return false
+            i += 1
+          }
+          // have min matches
+
+          while (i < max) {
+            if (!kid.match) break
+          }
+          // i == max || not match
+*/
+
+
+
         
         } else { // not greedy
           if (debug) println("not greedy: " + kid + " / " + input.substring(gData.cp))
@@ -1749,11 +1826,14 @@ object RhinoMatcher {
 
       val f = (c:stmatcher.INTF.Rep[Unit]) => m(x=>x)
 
-      stmatcher.IR.dump = true
-      println("----" + new String(re.source))
+      stmatcher.IR.dump = Util.dumpCode
+      if (Util.dumpCode) println("----" + new String(re.source))
+      stmatcher.IR.reset
       val start = System.currentTimeMillis
-      val fc = stmatcher.IR.compile(f)
-      println("---- took " + (System.currentTimeMillis - start) + "ms")
+      val fc = stmatcher.IR.compile(f) //{ (x:stmatcher.INTF.Rep[Unit]) => val g = stmatcher.IR.doLambda(f); stmatcher.IR.doApply(g,x) } // insert lambda to prevent blowup from codemotion pushing stuff into if branches
+      stmatcher.IR.reset
+      Predef.assert(stmatcher.IR.nVars == 0)
+      if (Util.dumpCode) println("---- took " + (System.currentTimeMillis - start) + "ms")
       re.stmatcher = fc
     }
     
@@ -1761,7 +1841,7 @@ object RhinoMatcher {
     matcher.gData = gData
     matcher.re = re
 
-    val end = input.length
+    val end = if (re.startNode.op == REOP_BOL) 0 else input.length
     var i = inp
     while (i <= end) {
       gData.skipped = i
@@ -1781,15 +1861,58 @@ object RhinoMatcher {
 
       import scala.virtualization.lms.common._
       import scala.virtualization.lms.internal.ScalaCompile
+      import scala.reflect.SourceContext
 
-      class Foo extends ScalaOpsPkgExp with LiftScala with StaticDataExp with FunctionsExternalDef with ScalaCompile { self =>
+      class Foo extends ScalaOpsPkgExp with IfThenElseExpOpt with LiftScala with StaticDataExp with FunctionsExternalDef with ScalaCompile { self =>
+
+        // work around lifting of `==`
+        def infix_===(a:Any,b:Any): Boolean = a.equals(b)
+        
+        // perform eta reduction -- could also use staged functions as continuations
+        override def doLambda[A:Manifest,B:Manifest](f: Exp[A]=>Exp[B])(implicit pos: SourceContext): Exp[A=>B] = {
+          super.doLambda(f) match {
+            case x@Def(e@DefineFun(Block(Def(Apply(f,Const(())))))) if manifest[A] === manifest[Unit] => f
+            case x@Def(e@DefineFun(Block(Def(Apply(f,a))))) if a === e.arg => f
+            case x@Def(e@DefineFun(Block(Def(Reify(Def(Reflect(Apply(f,Const(())),_,Nil)), _,_))))) if manifest[A] === manifest[Unit] => f //FIXME: may have more bound stms via effects
+            case x@Def(e@DefineFun(Block(Def(Reify(Def(Reflect(Apply(f,a),_,Nil)), _,_))))) if a === e.arg => f //FIXME: may have more bound stms via effects
+            case x => x
+          }
+        }
+        
+        // remove calls to constant functions
+        override def doApply[A:Manifest,B:Manifest](f: Exp[A=>B], x: Exp[A])(implicit pos: SourceContext): Exp[B] = f match {
+          case Def(DefineFun(Block(x@Const(_)))) => x.asInstanceOf[Const[B]]
+          case _ => super.doApply(f,x)
+        }
+
+        // some if then else optimizations
+        override def ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: Block[T], elsep: Block[T])(implicit pos: SourceContext) = (cond, thenp, elsep) match {
+          case (c, Block(Const(true)), Block(Const(false))) => c.asInstanceOf[Exp[T]]
+          case _ => super.ifThenElse(cond,thenp,elsep)
+        }
+         
+        // always hoist functions -- otherwise we get code explosion for deeply nested ifs (see failing code motion tests in lms)
+        override def symsFreq(e: Any): List[(Sym[Any], Double)] = 
+          super.symsFreq(e) map { case (a@Def(DefineFun(_)), x) => (a,100.0) case z => z }
         
         val codegen = new ScalaCodeGenPkg with ScalaGenStaticData with ScalaGenFunctionsExternal { val IR: self.type = self
           type Rep[+T] = IR.Exp[T]
           override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-            case Unchecked(xs) => emitValDef(sym, xs map ((x:Any)=> x match { case x: Exp[_] => quote(x) case x => x.toString }) mkString "")
+            case Unchecked(xs) => 
+              emitValDef(sym, xs map ((x:Any)=> x match { case x: Exp[_] => quote(x) case x => x.toString }) mkString "")
+            // def foo(x: Unit) --> def foo()
+            case e@DefineFun(y) =>
+              val paramlist = if (e.arg.tp === manifest[Unit]) "" else quote(e.arg) + ": (" + remap(e.arg.tp) + ")"
+              stream.println("def " + quote(sym) + "(" + paramlist + "): " + remap(y.res.tp) + " = {"/*}*/)
+              emitBlock(y)
+              stream.println(quote(getBlockResult(y)))
+              stream.println(/*{*/"}")
+              //emitValDef(sym, "m" + quote(sym))
+            case e@Apply(f,Const(())) =>
+              emitValDef(sym, quote(f) + "()")
             case _ => super.emitNode(sym,rhs)
           }
+          override def emitForwardDef(sym: Sym[Any]): Unit = {}
           override def emitFileHeader(): Unit = {
             stream.println("import scala.virtualization.lms.regexp._")
             stream.println("import RhinoMatcher.matcher")
@@ -1804,6 +1927,7 @@ object RhinoMatcher {
         
         case class Unchecked[T](s: List[Any]) extends Def[T]
         def unchecked[T](s: Any*): Rep[T] = reflectEffect(Unchecked(s.toList))
+        def uncheckedPure[T](s: Any*): Rep[T] = toAtom(Unchecked(s.toList))
         override def unit[T:Manifest](x:T) = super.unit(x)
       }
 
@@ -1812,8 +1936,9 @@ object RhinoMatcher {
       val INTF: ScalaOpsPkg with LiftScala with Functions { type Rep[+T] = IR.Rep[T] } = IR
       import INTF._
 
-      // Unit/StaticData
+      // Unit/StaticData/Unchecked
       def unchecked[T](s: Any*): Rep[T] = IR.unchecked(s:_*)
+      def uncheckedPure[T](s: Any*): Rep[T] = IR.uncheckedPure(s:_*)
       def staticData[T:Manifest](x:T): Rep[T] = IR.staticData(x)
 
       implicit def unit(x:Boolean): Rep[Boolean] = IR.unit(x)
@@ -1822,9 +1947,9 @@ object RhinoMatcher {
       implicit def unit(x:Null): Rep[Null] = IR.unit(x)
 
       // String
-      def infix_length(x: Rep[String]) = unchecked[Int](x,".length")
-      def infix_charAt(x: Rep[String], i: Rep[Int]) = unchecked[Char](x,".charAt(",i,")")
-      def infix_substring(x: Rep[String], i: Rep[Int]) = unchecked[Char](x,".substring(",i,")")
+      def infix_length(x: Rep[String]) = uncheckedPure[Int](x,".length")
+      def infix_charAt(x: Rep[String], i: Rep[Int]) = uncheckedPure[Char](x,".charAt(",i,")")
+      def infix_substring(x: Rep[String], i: Rep[Int]) = uncheckedPure[Char](x,".substring(",i,")")
 
       // List/Array
       //def infix_toList[A](x: Rep[Array[A]]) = unchecked[List[A]](x,".toList")
@@ -1849,31 +1974,31 @@ object RhinoMatcher {
 
       // State -- should use static data?
       var re: RECompiled = null
-      def gData: Rep[REGlobalData] = unchecked("matcher.gData")
-      def input: Rep[String] = unchecked("matcher.input")
+      def gData: Rep[REGlobalData] = uncheckedPure("matcher.gData")
+      def input: Rep[String] = uncheckedPure("matcher.input")
       def end = input.length
 
       // gData
       def infix_cp(x: Rep[REGlobalData]) = unchecked[Int](x,".cp")
       def infix_cpSet(x: Rep[REGlobalData], y: Rep[Int]) = unchecked[Int](x,".cp = ",y)
       def infix_cpInc(x: Rep[REGlobalData]) = unchecked[Int](x,".cp += 1")
-      def infix_multiline(x: Rep[REGlobalData]) = unchecked[Boolean](x,".multiline")
+      def infix_multiline(x: Rep[REGlobalData]): Rep[Boolean] = if (Util.optUnsafe) false else uncheckedPure[Boolean](x,".multiline")
 
       def infix_parens(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked(x,".parens")
-      def infix_parensGet(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked("if (",x,".parens == null) null else ",x,".parens.toList.toArray //copy")
+      def infix_parensGet(x: Rep[REGlobalData]): Rep[Array[Int]] = if (Util.optUnsafe) unchecked(x,".parens") else unchecked("if (",x,".parens == null) null else ",x,".parens.clone //copy")
       def infix_parensSet(x: Rep[REGlobalData],y: Rep[Array[Int]]): Rep[Unit] = unchecked(x,".parens = ",y)
       def infix_parensIndex(x: Rep[REGlobalData], i: Int): Rep[Int] = unchecked(x,".parensIndex(",i,")")
       def infix_setParens(x: Rep[REGlobalData], i: Int, index: Rep[Int], length: Rep[Int]): Rep[Unit] = 
-        unchecked(x,".setParens(",i,",",index,",",length,")")
+        if (Util.optUnsafe) { } else unchecked(x,".setParens(",i,",",index,",",length,")")
 
 
       // Char/Matcher
-      def isREWhiteSpace(x: Rep[Char]) = unchecked[Boolean]("Rhino.isREWhiteSpace(",x,")")
-      def isLineTerm(x: Rep[Char]) = unchecked[Boolean]("Rhino.isLineTerm(",x,")")
-      def isWord(x: Rep[Char]) = unchecked[Boolean]("Rhino.isWord(",x,")")
-      def isDigit(x: Rep[Char]) = unchecked[Boolean]("Rhino.isDigit(",x,")")
+      def isREWhiteSpace(x: Rep[Char]) = uncheckedPure[Boolean]("Rhino.isREWhiteSpace(",x,")")
+      def isLineTerm(x: Rep[Char]) = uncheckedPure[Boolean]("Rhino.isLineTerm(",x,")")
+      def isWord(x: Rep[Char]) = uncheckedPure[Boolean]("Rhino.isWord(",x,")")
+      def isDigit(x: Rep[Char]) = uncheckedPure[Boolean]("Rhino.isDigit(",x,")")
 
-      def upcaseR(c: Rep[Char]) = unchecked[Char]("Rhino.upcase(",c,")")
+      def upcaseR(c: Rep[Char]) = uncheckedPure[Char]("Rhino.upcase(",c,")")
 
       def xform(c: Char) = if ((re.flags & JSREG_FOLD) != 0) upcase(c) else c      
       def xform(c: Rep[Char]) = if ((re.flags & JSREG_FOLD) != 0) upcaseR(c) else c
@@ -1973,11 +2098,26 @@ object RhinoMatcher {
       def alt(kid1: RENode, kid2: RENode) = state { k =>
         val saveCp = gData.cp
         val saveParens = gData.parensGet
-        val k1 = doLambda(k)
-        matchNode(kid1)(r => k1(r) || {
+        //val k1 = doLambda(k)
+        val fk1 = doLambda { r: Rep[Unit] => k(true) }
+        val fk2 = doLambda { r: Rep[Unit] => k(false) }
+        def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) fk1() else fk2()
+        //println("try alt " + System.identityHashCode(kid1) + " /"+saveCp)
+        
+        val altk = doLambda { r: Rep[Unit] => 
           gData.cpSet(saveCp)
           gData.parensSet(saveParens)
-          matchNode(kid2)(r=>k1(r)) })
+          matchNode(kid2)(r=>k1(r))
+        }
+        
+        /*matchNode(kid1)(r => k1(r) || {
+          //println("backtrack to alt " + System.identityHashCode(kid2) + " /"+saveCp)
+          gData.cpSet(saveCp)
+          gData.parensSet(saveParens)
+          matchNode(kid2)(r=>k1(r)) })*/
+          matchNode(kid1)(r => if (r) { 
+            if (fk1()) true else altk()
+          } else altk())
       }
 
       def paren(parenIndex: Int, kid: RENode) = state { k =>
@@ -2012,9 +2152,17 @@ object RhinoMatcher {
 
       def seq(kids: List[RENode]) = state { k =>
         if (kids.isEmpty) k(true) else {
-          val k1 = doLambda(k)
+          val saveParens = gData.parensGet
+          val saveCp = gData.cp
+          //val k1 = doLambda(k)
+          def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) { val f = doLambda { r: Rep[Unit] => k(true) }; f() } else { val f = doLambda { r: Rep[Unit] => k(false) }; f() }
           def loop(xs: List[RENode]): Rep[Boolean] = xs match {
-            case x::tail => matchNode(x)(r => if (tail.isEmpty) k1(r) else if (r) loop(tail) else k1(false))
+            case x::tail => 
+            matchNode(x)(r => if (r) loop(tail) else {
+              gData.parensSet(saveParens)
+              gData.cpSet(saveCp)
+              k1(false)
+            })
             case _ => k1(true)
           }
           loop(kids)
@@ -2027,12 +2175,14 @@ object RhinoMatcher {
           // (kid.match && this.match) || next.match 
 
           // prevent code blow-up (somewhat)
-          def k1: Rep[Boolean => Boolean] = doLambda { r: Rep[Boolean] => k(r) }
-
+          //def k1: Rep[Boolean => Boolean] = doLambda { r: Rep[Boolean] => k(r) }
+          def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) { val f = doLambda { r: Rep[Unit] => k(true) }; f() } else { val f = doLambda { r: Rep[Unit] => k(false) }; f() }
+          
           def loop: Rep[Int => Boolean] = doLambda { i: Rep[Int] =>
 
             //if (debug)
             //  println("try loop " + i + " {" + min + ".." + max +  "} of "+ kid + " at " + input.substring(gData.cp))
+            if (debug) println("loop " + System.identityHashCode(kid) + " iter " + i + " /"+gData.cp)
 
             if (((max < 0): Boolean) || ((i < unit(max)):Rep[Boolean])) {
 
@@ -2045,10 +2195,10 @@ object RhinoMatcher {
               }
 
               matchNode(kid) { res => 
-                if (debug)
-                  println(res)
+                if (debug) println(res)
 
                 (res && loop(i+1)) || {
+                  if (debug) println("backtrack to loop " + System.identityHashCode(kid) + " iter " + i + " /"+saveCp)
                   gData.parensSet(saveParens)
                   gData.cpSet(saveCp)
                   k1(i >= min)
@@ -2669,9 +2819,11 @@ object RhinoMatchUtil {
         }
 
         val byteIndex = ch >> 3;
-        return (charSet.length == 0 ||
+        val res = (charSet.length == 0 ||
                 ch >= charSet.length ||
                 (charSet.bits(byteIndex) & (1 << (ch & 0x7))) == 0) ^ charSet.sense;
+        //println("match " + charSet + " " + ch + ": " + res)
+        res
     }
 
 }
@@ -3471,7 +3623,7 @@ class REGlobalData {
     var cp: Int = _;                         /* char buffer index */
     var parens: Array[Long] = _;                  /* parens captures */
 
-    var  stateStackTop: REProgState = _;       /* stack of state of current ancestors */
+    var stateStackTop: REProgState = _;       /* stack of state of current ancestors */
 
     var backTrackStackTop : REBackTrackData  = _;  /* last matched-so-far position */
 

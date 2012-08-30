@@ -33,12 +33,12 @@
       }
     }
 
-    function Run() {
+    function Run(benchIter) {
       //BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
       //                           NotifyError: PrintError,
       //                           NotifyScore: PrintScore });
       var start = new Date()
-      RegExpSetup()
+      RegExpSetup(benchIterInner)
       var elapsed = new Date() - start
       print("elapsed: " + elapsed)
     }
@@ -48,6 +48,8 @@
       print("loading...")
       
       var attach = false
+      var benchIterInner = 64
+      var benchIterOuter = 10
       
       var count = 0
       var seen = {}
@@ -100,10 +102,9 @@
       }
       setTimeout(function() {
         print("running ...")
-        Run()
-        Run()
-        Run()
-        Run()
+        for (var i = 0; i < benchIterOuter; i++) {
+          Run(benchIterInner)
+        }
         print("done: " + count)
       }, 100)
     }

@@ -18,3 +18,13 @@ else
     rm test-out/v8regexp1.diff
   fi
 fi
+
+if [ -f test-out/v8regexp2 ]
+then
+  diff test-out/v8regexp2 test-out/v8regexp2.check > test-out/v8regexp2.diff
+else
+  if [ -f test-out/v8regexp2.diff ]
+  then
+    rm test-out/v8regexp2.diff
+  fi
+fi

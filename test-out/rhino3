@@ -7,121 +7,113 @@ REGlobalData(3,8 / (4,3))/aaaab,aaaa
 import scala.virtualization.lms.regexp._
 import RhinoMatcher.matcher
 class staged$2 extends ((Unit)=>(Boolean)) {
-def apply(x93:Unit): Boolean = {
-var x98 = null.asInstanceOf[scala.Function1[Int, Boolean]]
-val x5 = {x6: (Boolean) => 
-x6
+def apply(x0:Unit): Boolean = {
+val x1 = matcher.gData
+val x12 = matcher.input
+val x13 = x12.length
+val x2 = if (x1.parens == null) null else x1.parens.clone //copy
+val x3 = x1.cp
+def x31(): Boolean = {
+val x33 = x1.parensIndex(0)
+val x34 = x1.cp
+val x35 = x34 - x33
+val x36 = x1.setParens(0,x33,x35)
+val x37 = x1.cp
+val x39 = x37 == x13
+val x48 = if (x39) {
+false
+} else {
+val x40 = x1.cp
+val x41 = x12.charAt(x40)
+val x42 = 'b' == x41
+val x43 = if (x42) {
+true
+} else {
+x42
 }
-val x129 = {x130: (Boolean) => 
-val x139 = if (x130) {
-val x131 = matcher.gData
-val x132 = x131.parensIndex(0)
-val x133 = matcher.gData
-val x134 = matcher.gData
-val x135 = x134.cp
-val x136 = x135 - x132
-val x137 = x133.setParens(0,x132,x136)
+val x46 = if (x43) {
+val x44 = x1.cp += 1
 true
 } else {
 false
 }
-val x161 = if (x139) {
-val x140 = matcher.gData
-val x141 = x140.cp
-val x142 = matcher.input
-val x143 = x142.length
-val x144 = x141 != x143
-val x156 = if (x144) {
-val x145 = matcher.input
-val x146 = matcher.gData
-val x147 = x146.cp
-val x148 = x145.charAt(x147)
-val x149 = 'b' == x148
-val x150 = if (x149) {
+x46
+}
+val x56 = if (x48) {
 true
 } else {
-x149
-}
-val x154 = if (x150) {
-val x151 = matcher.gData
-val x152 = x151.cp += 1
-true
-} else {
+val x51 = x1.parens = x2
+val x52 = x1.cp = x3
 false
 }
-x154
-} else {
+x56
+}
+def x60(): Boolean = {
+val x62 = x1.parens = x2
+val x63 = x1.cp = x3
 false
 }
-val x157 = x5(x156)
-x157
-} else {
-val x159 = x5(false)
-x159
-}
-x161
-}
-x98 = {x99: (Int) => 
-val x100 = x99 < 4
-val x170 = if (x100) {
-val x101 = matcher.gData
-val x102 = if (x101.parens == null) null else x101.parens.toList.toArray //copy
-val x103 = matcher.gData
-val x104 = x103.cp
-val x105 = matcher.gData
-val x106 = x105.cp
-val x107 = matcher.input
-val x108 = x107.length
-val x109 = x106 != x108
-val x116 = if (x109) {
-val x110 = matcher.input
-val x111 = matcher.gData
-val x112 = x111.cp
-val x113 = x110.charAt(x112)
-val x114 = Rhino.isWord(x113)
-x114
-} else {
+def x6(x7: (Int)): Boolean = {
+val x8 = x7 < 4
+val x77 = if (x8) {
+val x9 = if (x1.parens == null) null else x1.parens.clone //copy
+val x10 = x1.cp
+val x11 = x1.cp
+val x15 = x11 == x13
+val x20 = if (x15) {
 false
+} else {
+val x16 = x1.cp
+val x17 = x12.charAt(x16)
+val x18 = Rhino.isWord(x17)
+x18
 }
-val x120 = if (x116) {
-val x117 = matcher.gData
-val x118 = x117.cp += 1
+val x23 = if (x20) {
+val x21 = x1.cp += 1
 true
 } else {
 false
 }
-val x124 = if (x120) {
-val x121 = x99 + 1
-val x122 = x98(x121)
-x122
+val x27 = if (x23) {
+val x24 = x7 + 1
+val x25 = x6(x24)
+x25
 } else {
 false
 }
-val x166 = if (x124) {
+val x69 = if (x27) {
 true
 } else {
-val x125 = matcher.gData
-val x126 = x125.parens = x102
-val x127 = matcher.gData
-val x128 = x127.cp = x104
-val x163 = x99 >= 4
-val x164 = x129(x163)
-x164
-}
-x166
+val x28 = x1.parens = x9
+val x29 = x1.cp = x10
+val x30 = x7 >= 4
+val x67 = if (x30) {
+val x58 = x31()
+x58
 } else {
-val x163 = x99 >= 4
-val x168 = x129(x163)
-x168
+val x65 = x60()
+x65
 }
-x170
+x67
 }
-val x94 = matcher.gData
-val x95 = matcher.gData
-val x96 = x95.cp
-val x97 = x94.setParens(0,x96,0)
-val x172 = x98(0)
-x172
+x69
+} else {
+val x30 = x7 >= 4
+val x75 = if (x30) {
+val x71 = x31()
+x71
+} else {
+val x73 = x60()
+x73
+}
+x75
+}
+x77
+}
+val x4 = x1.cp
+val x5 = x1.setParens(0,x4,0)
+val x79 = x6(0)
+x79
 }
 }
 /*****************************************
@@ -129,6 +121,6 @@ x172
 *******************************************/
 
 compilation: ok
----- took 357ms
+---- took 432ms
 REGlobalData(3,8 / (4,3))/aaaab,aaaa
 done
