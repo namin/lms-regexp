@@ -8,25 +8,19 @@ import scala.virtualization.lms.regexp._
 import RhinoMatcher.matcher
 class staged$0 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
-val x1 = matcher.gData
-val x2 = x1.cp
-val x3 = if (x1.parens == null) null else x1.parens.clone //copy
-val x12 = matcher.input
-val x13 = x12.length
-val x16 = RhinoMatchUtil.flatNMatcher(x1,0,3,x12,x13) // aab
-def x8(): Boolean = {
-val x10 = x1.cp = x2
-val x11 = x1.parens = x3
-val x14 = RhinoMatchUtil.flatNMatcher(x1,4,3,x12,x13) // aac
-x14
-}
-val x19 = if (x16) {
+val x3 = matcher.gData
+val x4 = x3.cp
+val x5 = matcher.input
+val x6 = x5.length
+val x7 = RhinoMatchUtil.flatNMatcher(x3,0,3,x5,x6) // aab
+val x11 = if (x7) {
 true
 } else {
-val x17 = x8()
-x17
+val x8 = x3.cp
+val x9 = RhinoMatchUtil.flatNMatcher(x3,4,3,x5,x6) // aac
+x9
 }
-x19
+x11
 }
 }
 /*****************************************
@@ -34,6 +28,6 @@ x19
 *******************************************/
 
 compilation: ok
----- took 655ms
+---- took 659ms
 REGlobalData(1,4 / null)/aac
 done

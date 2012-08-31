@@ -9,109 +9,112 @@ import RhinoMatcher.matcher
 class staged$2 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
 val x1 = matcher.gData
-val x11 = matcher.input
-val x12 = x11.length
-val x2 = if (x1.parens == null) null else x1.parens.clone //copy
+val x9 = matcher.input
+val x10 = x9.length
+val x2 = x1.cp
 val x3 = x1.cp
-val x4 = x1.cp
-def x30(): Boolean = {
-val x32 = x1.cp
-val x33 = x32 - x4
-val x34 = x1.setParens(0,x4,x33)
-val x35 = x1.cp
-val x37 = x35 == x12
-val x46 = if (x37) {
+def x29(): Boolean = {
+val x31 = x1.parensIndex(0)
+val x32 = x1.parensLength(0)
+val x33 = x1.cp
+val x34 = x33 - x3
+val x35 = x1.setParens(0,x3,x34)
+val x36 = x1.cp
+val x37 = x1.cp
+val x39 = x37 == x10
+val x48 = if (x39) {
 false
 } else {
-val x38 = x1.cp
-val x39 = x11.charAt(x38)
-val x40 = 'b' == x39
-val x41 = if (x40) {
+val x40 = x1.cp
+val x41 = x9.charAt(x40)
+val x42 = 'b' == x41
+val x43 = if (x42) {
 true
 } else {
-x40
+x42
 }
-val x44 = if (x41) {
-val x42 = x1.cp += 1
-true
-} else {
-false
-}
-x44
-}
-val x54 = if (x46) {
-true
-} else {
-val x49 = x1.parens = x2
-val x50 = x1.cp = x3
-false
-}
-x54
-}
-def x58(): Boolean = {
-val x60 = x1.parens = x2
-val x61 = x1.cp = x3
-false
-}
-def x5(x6: (Int)): Boolean = {
-val x7 = x6 < 4
-val x75 = if (x7) {
-val x8 = if (x1.parens == null) null else x1.parens.clone //copy
-val x9 = x1.cp
-val x10 = x1.cp
-val x14 = x10 == x12
-val x19 = if (x14) {
-false
-} else {
-val x15 = x1.cp
-val x16 = x11.charAt(x15)
-val x17 = Rhino.isWord(x16)
-x17
-}
-val x22 = if (x19) {
-val x20 = x1.cp += 1
+val x46 = if (x43) {
+val x44 = x1.cp += 1
 true
 } else {
 false
 }
-val x26 = if (x22) {
-val x23 = x6 + 1
-val x24 = x5(x23)
-x24
+x46
+}
+val x51 = if (x48) {
+true
+} else {
+val x49 = x1.setParens(0,x31,x32)
+false
+}
+x51
+}
+def x4(x5: (Int)): Boolean = {
+val x6 = x5 < 4
+val x63 = if (x6) {
+val x7 = x1.cp
+val x8 = x1.cp
+val x12 = x8 == x10
+val x17 = if (x12) {
+false
+} else {
+val x13 = x1.cp
+val x14 = x9.charAt(x13)
+val x15 = Rhino.isWord(x14)
+x15
+}
+val x20 = if (x17) {
+val x18 = x1.cp += 1
+true
 } else {
 false
 }
-val x67 = if (x26) {
+val x27 = if (x20) {
+val x21 = x5 + 1
+val x22 = x4(x21)
+val x25 = if (x22) {
 true
 } else {
-val x27 = x1.parens = x8
-val x28 = x1.cp = x9
-val x29 = x6 >= 4
-val x65 = if (x29) {
-val x56 = x30()
-x56
+val x23 = x1.cp = x7
+false
+}
+x25
 } else {
-val x63 = x58()
+false
+}
+val x57 = if (x27) {
+true
+} else {
+val x28 = x5 >= 4
+val x55 = if (x28) {
+val x53 = x29()
+x53
+} else {
+false
+}
+x55
+}
+x57
+} else {
+val x28 = x5 >= 4
+val x61 = if (x28) {
+val x59 = x29()
+x59
+} else {
+false
+}
+x61
+}
 x63
 }
-x65
-}
-x67
+val x65 = x4(0)
+val x68 = if (x65) {
+true
 } else {
-val x29 = x6 >= 4
-val x73 = if (x29) {
-val x69 = x30()
-x69
-} else {
-val x71 = x58()
-x71
+val x66 = x1.cp = x2
+false
 }
-x73
-}
-x75
-}
-val x77 = x5(0)
-x77
+x68
 }
 }
 /*****************************************
@@ -119,6 +122,6 @@ x77
 *******************************************/
 
 compilation: ok
----- took 332ms
+---- took 278ms
 REGlobalData(3,8 / (4,3))/aaaab,aaaa
 done

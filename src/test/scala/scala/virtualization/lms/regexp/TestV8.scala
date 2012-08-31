@@ -204,7 +204,7 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
 
   def run2(): Any = {
     
-    if (!optUnsafe) return run()
+    if (optUnsafe) {
     
     var i = 0
     val end = s.length
@@ -214,24 +214,38 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
       i += 1
     }
     return cnt
+    }
     
     //OPT not actually replacing anything, just doing the matches
     
     var idx = 0
+    var cnt = 0
+    val acc = new java.lang.StringBuilder    
+    
+    def fix(res: String) = if (res.nonEmpty && res.last == '\n') res.init else res
     
     while (true) {
       val gData = if (runNaive) RhinoMatcher.matchNaive(r.rno, s, idx) else RhinoMatcher.matchStaged(r.rno, s, idx)
+
       if (gData == null) {
-        return null
+        acc append s.substring(idx, s.length)
+        return fix(acc.toString)
       }
     
-      if (!r.global || gData.cp >= s.length)
-        return new MatchResult(gData.skipped, s, null)
+      acc append s.substring(idx, gData.skipped)
+      acc append s2
       
-      if (gData.cp == idx)
-        return ()//println("XX no progress: " + r + " @ " + s + " at " + idx)
+      if (!r.global || gData.cp >= s.length) {
+        acc append s.substring(gData.cp, s.length)
+        return fix(acc.toString)
+      }
       
-      idx = gData.cp
+      if (gData.cp == idx) {   // need to make progress (don't check same pos again...)
+        acc append s.substring(gData.cp, gData.cp + 1)
+        idx = gData.cp + 1
+      } else
+        idx = gData.cp
+      cnt += 1
     }
   }
 

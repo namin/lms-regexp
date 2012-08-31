@@ -8,575 +8,394 @@ import scala.virtualization.lms.regexp._
 import RhinoMatcher.matcher
 class staged$5 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
-val x1 = matcher.gData
-val x2 = x1.cp
-val x3 = if (x1.parens == null) null else x1.parens.clone //copy
-val x263 = matcher.input
-val x264 = x263.length
-val x501 = RhinoMatchUtil.flatNMatcher(x1,0,4,x263,x264) // qqqq
-def x8(): Boolean = {
-val x10 = x1.cp = x2
-val x11 = x1.parens = x3
-val x12 = x1.cp
-val x13 = if (x1.parens == null) null else x1.parens.clone //copy
-val x496 = RhinoMatchUtil.flatNMatcher(x1,5,3,x263,x264) // qqq
-def x18(): Boolean = {
-val x20 = x1.cp = x12
-val x21 = x1.parens = x13
-val x22 = x1.cp
-val x23 = if (x1.parens == null) null else x1.parens.clone //copy
-val x491 = RhinoMatchUtil.flatNMatcher(x1,9,2,x263,x264) // qq
-def x28(): Boolean = {
-val x30 = x1.cp = x22
-val x31 = x1.parens = x23
-val x32 = x1.cp
-val x33 = if (x1.parens == null) null else x1.parens.clone //copy
-val x475 = x1.cp
-val x477 = x475 == x264
-val x486 = if (x477) {
-false
-} else {
-val x478 = x1.cp
-val x479 = x263.charAt(x478)
-val x480 = 'q' == x479
-val x481 = if (x480) {
+val x3 = matcher.gData
+val x4 = x3.cp
+val x5 = matcher.input
+val x6 = x5.length
+val x7 = RhinoMatchUtil.flatNMatcher(x3,0,4,x5,x6) // qqqq
+val x271 = if (x7) {
 true
 } else {
-x480
+val x10 = x3.cp
+val x11 = RhinoMatchUtil.flatNMatcher(x3,5,3,x5,x6) // qqq
+val x269 = if (x11) {
+true
+} else {
+val x14 = x3.cp
+val x15 = RhinoMatchUtil.flatNMatcher(x3,9,2,x5,x6) // qq
+val x267 = if (x15) {
+true
+} else {
+val x18 = x3.cp
+val x19 = x3.cp
+val x21 = x19 == x6
+val x30 = if (x21) {
+false
+} else {
+val x22 = x3.cp
+val x23 = x5.charAt(x22)
+val x24 = 'q' == x23
+val x25 = if (x24) {
+true
+} else {
+x24
 }
-val x484 = if (x481) {
-val x482 = x1.cp += 1
+val x28 = if (x25) {
+val x26 = x3.cp += 1
 true
 } else {
 false
 }
-x484
+x28
 }
-def x38(): Boolean = {
-val x40 = x1.cp = x32
-val x41 = x1.parens = x33
-val x42 = x1.cp
-val x43 = if (x1.parens == null) null else x1.parens.clone //copy
-val x470 = RhinoMatchUtil.flatNMatcher(x1,14,4,x263,x264) // ZZZZ
-def x48(): Boolean = {
-val x50 = x1.cp = x42
-val x51 = x1.parens = x43
-val x52 = x1.cp
-val x53 = if (x1.parens == null) null else x1.parens.clone //copy
-val x465 = RhinoMatchUtil.flatNMatcher(x1,19,3,x263,x264) // ZZZ
-def x58(): Boolean = {
-val x60 = x1.cp = x52
-val x61 = x1.parens = x53
-val x62 = x1.cp
-val x63 = if (x1.parens == null) null else x1.parens.clone //copy
-val x460 = RhinoMatchUtil.flatNMatcher(x1,23,2,x263,x264) // ZZ
-def x68(): Boolean = {
-val x70 = x1.cp = x62
-val x71 = x1.parens = x63
-val x72 = x1.cp
-val x73 = if (x1.parens == null) null else x1.parens.clone //copy
-val x444 = x1.cp
-val x446 = x444 == x264
-val x455 = if (x446) {
-false
-} else {
-val x447 = x1.cp
-val x448 = x263.charAt(x447)
-val x449 = 'Z' == x448
-val x450 = if (x449) {
+val x265 = if (x30) {
 true
 } else {
-x449
+val x33 = x3.cp
+val x34 = RhinoMatchUtil.flatNMatcher(x3,14,4,x5,x6) // ZZZZ
+val x263 = if (x34) {
+true
+} else {
+val x37 = x3.cp
+val x38 = RhinoMatchUtil.flatNMatcher(x3,19,3,x5,x6) // ZZZ
+val x261 = if (x38) {
+true
+} else {
+val x41 = x3.cp
+val x42 = RhinoMatchUtil.flatNMatcher(x3,23,2,x5,x6) // ZZ
+val x259 = if (x42) {
+true
+} else {
+val x45 = x3.cp
+val x46 = x3.cp
+val x48 = x46 == x6
+val x57 = if (x48) {
+false
+} else {
+val x49 = x3.cp
+val x50 = x5.charAt(x49)
+val x51 = 'Z' == x50
+val x52 = if (x51) {
+true
+} else {
+x51
 }
-val x453 = if (x450) {
-val x451 = x1.cp += 1
+val x55 = if (x52) {
+val x53 = x3.cp += 1
 true
 } else {
 false
 }
-x453
+x55
 }
-def x78(): Boolean = {
-val x80 = x1.cp = x72
-val x81 = x1.parens = x73
-val x82 = x1.cp
-val x83 = if (x1.parens == null) null else x1.parens.clone //copy
-val x439 = RhinoMatchUtil.flatNMatcher(x1,28,4,x263,x264) // llll
-def x88(): Boolean = {
-val x90 = x1.cp = x82
-val x91 = x1.parens = x83
-val x92 = x1.cp
-val x93 = if (x1.parens == null) null else x1.parens.clone //copy
-val x434 = RhinoMatchUtil.flatNMatcher(x1,33,2,x263,x264) // ll
-def x98(): Boolean = {
-val x100 = x1.cp = x92
-val x101 = x1.parens = x93
-val x102 = x1.cp
-val x103 = if (x1.parens == null) null else x1.parens.clone //copy
-val x418 = x1.cp
-val x420 = x418 == x264
-val x429 = if (x420) {
-false
-} else {
-val x421 = x1.cp
-val x422 = x263.charAt(x421)
-val x423 = 'l' == x422
-val x424 = if (x423) {
+val x257 = if (x57) {
 true
 } else {
-x423
+val x60 = x3.cp
+val x61 = RhinoMatchUtil.flatNMatcher(x3,28,4,x5,x6) // llll
+val x255 = if (x61) {
+true
+} else {
+val x64 = x3.cp
+val x65 = RhinoMatchUtil.flatNMatcher(x3,33,2,x5,x6) // ll
+val x253 = if (x65) {
+true
+} else {
+val x68 = x3.cp
+val x69 = x3.cp
+val x71 = x69 == x6
+val x80 = if (x71) {
+false
+} else {
+val x72 = x3.cp
+val x73 = x5.charAt(x72)
+val x74 = 'l' == x73
+val x75 = if (x74) {
+true
+} else {
+x74
 }
-val x427 = if (x424) {
-val x425 = x1.cp += 1
+val x78 = if (x75) {
+val x76 = x3.cp += 1
 true
 } else {
 false
 }
-x427
+x78
 }
-def x108(): Boolean = {
-val x110 = x1.cp = x102
-val x111 = x1.parens = x103
-val x112 = x1.cp
-val x113 = if (x1.parens == null) null else x1.parens.clone //copy
-val x413 = RhinoMatchUtil.flatNMatcher(x1,38,2,x263,x264) // uu
-def x118(): Boolean = {
-val x120 = x1.cp = x112
-val x121 = x1.parens = x113
-val x122 = x1.cp
-val x123 = if (x1.parens == null) null else x1.parens.clone //copy
-val x397 = x1.cp
-val x399 = x397 == x264
-val x408 = if (x399) {
-false
-} else {
-val x400 = x1.cp
-val x401 = x263.charAt(x400)
-val x402 = 'u' == x401
-val x403 = if (x402) {
+val x251 = if (x80) {
 true
 } else {
-x402
-}
-val x406 = if (x403) {
-val x404 = x1.cp += 1
+val x83 = x3.cp
+val x84 = RhinoMatchUtil.flatNMatcher(x3,38,2,x5,x6) // uu
+val x249 = if (x84) {
 true
 } else {
-false
-}
-x406
-}
-def x128(): Boolean = {
-val x130 = x1.cp = x122
-val x131 = x1.parens = x123
-val x132 = x1.cp
-val x133 = if (x1.parens == null) null else x1.parens.clone //copy
-val x392 = RhinoMatchUtil.flatNMatcher(x1,43,2,x263,x264) // UU
-def x138(): Boolean = {
-val x140 = x1.cp = x132
-val x141 = x1.parens = x133
-val x142 = x1.cp
-val x143 = if (x1.parens == null) null else x1.parens.clone //copy
-val x376 = x1.cp
-val x378 = x376 == x264
-val x387 = if (x378) {
+val x87 = x3.cp
+val x88 = x3.cp
+val x90 = x88 == x6
+val x99 = if (x90) {
 false
 } else {
-val x379 = x1.cp
-val x380 = x263.charAt(x379)
-val x381 = 'U' == x380
-val x382 = if (x381) {
+val x91 = x3.cp
+val x92 = x5.charAt(x91)
+val x93 = 'u' == x92
+val x94 = if (x93) {
 true
 } else {
-x381
+x93
 }
-val x385 = if (x382) {
-val x383 = x1.cp += 1
+val x97 = if (x94) {
+val x95 = x3.cp += 1
 true
 } else {
 false
 }
-x385
+x97
 }
-def x148(): Boolean = {
-val x150 = x1.cp = x142
-val x151 = x1.parens = x143
-val x152 = x1.cp
-val x153 = if (x1.parens == null) null else x1.parens.clone //copy
-val x371 = RhinoMatchUtil.flatNMatcher(x1,48,2,x263,x264) // zz
-def x158(): Boolean = {
-val x160 = x1.cp = x152
-val x161 = x1.parens = x153
-val x162 = x1.cp
-val x163 = if (x1.parens == null) null else x1.parens.clone //copy
-val x355 = x1.cp
-val x357 = x355 == x264
-val x366 = if (x357) {
-false
-} else {
-val x358 = x1.cp
-val x359 = x263.charAt(x358)
-val x360 = 'z' == x359
-val x361 = if (x360) {
+val x247 = if (x99) {
 true
 } else {
-x360
-}
-val x364 = if (x361) {
-val x362 = x1.cp += 1
+val x102 = x3.cp
+val x103 = RhinoMatchUtil.flatNMatcher(x3,43,2,x5,x6) // UU
+val x245 = if (x103) {
 true
 } else {
-false
-}
-x364
-}
-def x168(): Boolean = {
-val x170 = x1.cp = x162
-val x171 = x1.parens = x163
-val x172 = x1.cp
-val x173 = if (x1.parens == null) null else x1.parens.clone //copy
-val x350 = RhinoMatchUtil.flatNMatcher(x1,53,2,x263,x264) // ff
-def x178(): Boolean = {
-val x180 = x1.cp = x172
-val x181 = x1.parens = x173
-val x182 = x1.cp
-val x183 = if (x1.parens == null) null else x1.parens.clone //copy
-val x334 = x1.cp
-val x336 = x334 == x264
-val x345 = if (x336) {
+val x106 = x3.cp
+val x107 = x3.cp
+val x109 = x107 == x6
+val x118 = if (x109) {
 false
 } else {
-val x337 = x1.cp
-val x338 = x263.charAt(x337)
-val x339 = 'f' == x338
-val x340 = if (x339) {
+val x110 = x3.cp
+val x111 = x5.charAt(x110)
+val x112 = 'U' == x111
+val x113 = if (x112) {
 true
 } else {
-x339
+x112
 }
-val x343 = if (x340) {
-val x341 = x1.cp += 1
+val x116 = if (x113) {
+val x114 = x3.cp += 1
 true
 } else {
 false
 }
-x343
+x116
 }
-def x188(): Boolean = {
-val x190 = x1.cp = x182
-val x191 = x1.parens = x183
-val x192 = x1.cp
-val x193 = if (x1.parens == null) null else x1.parens.clone //copy
-val x329 = RhinoMatchUtil.flatNMatcher(x1,58,2,x263,x264) // gg
-def x198(): Boolean = {
-val x200 = x1.cp = x192
-val x201 = x1.parens = x193
-val x202 = x1.cp
-val x203 = if (x1.parens == null) null else x1.parens.clone //copy
-val x313 = x1.cp
-val x315 = x313 == x264
-val x324 = if (x315) {
-false
-} else {
-val x316 = x1.cp
-val x317 = x263.charAt(x316)
-val x318 = 'g' == x317
-val x319 = if (x318) {
+val x243 = if (x118) {
 true
 } else {
-x318
-}
-val x322 = if (x319) {
-val x320 = x1.cp += 1
+val x121 = x3.cp
+val x122 = RhinoMatchUtil.flatNMatcher(x3,48,2,x5,x6) // zz
+val x241 = if (x122) {
 true
 } else {
-false
-}
-x322
-}
-def x208(): Boolean = {
-val x210 = x1.cp = x202
-val x211 = x1.parens = x203
-val x212 = x1.cp
-val x213 = if (x1.parens == null) null else x1.parens.clone //copy
-val x308 = RhinoMatchUtil.flatNMatcher(x1,63,3,x263,x264) // sss
-def x218(): Boolean = {
-val x220 = x1.cp = x212
-val x221 = x1.parens = x213
-val x222 = x1.cp
-val x223 = if (x1.parens == null) null else x1.parens.clone //copy
-val x303 = RhinoMatchUtil.flatNMatcher(x1,67,2,x263,x264) // ss
-def x228(): Boolean = {
-val x230 = x1.cp = x222
-val x231 = x1.parens = x223
-val x232 = x1.cp
-val x233 = if (x1.parens == null) null else x1.parens.clone //copy
-val x287 = x1.cp
-val x289 = x287 == x264
-val x298 = if (x289) {
+val x125 = x3.cp
+val x126 = x3.cp
+val x128 = x126 == x6
+val x137 = if (x128) {
 false
 } else {
-val x290 = x1.cp
-val x291 = x263.charAt(x290)
-val x292 = 's' == x291
-val x293 = if (x292) {
+val x129 = x3.cp
+val x130 = x5.charAt(x129)
+val x131 = 'z' == x130
+val x132 = if (x131) {
 true
 } else {
-x292
+x131
 }
-val x296 = if (x293) {
-val x294 = x1.cp += 1
+val x135 = if (x132) {
+val x133 = x3.cp += 1
 true
 } else {
 false
 }
-x296
+x135
 }
-def x238(): Boolean = {
-val x240 = x1.cp = x232
-val x241 = x1.parens = x233
-val x242 = x1.cp
-val x243 = if (x1.parens == null) null else x1.parens.clone //copy
-val x282 = RhinoMatchUtil.flatNMatcher(x1,72,3,x263,x264) // mmm
-def x248(): Boolean = {
-val x250 = x1.cp = x242
-val x251 = x1.parens = x243
-val x252 = x1.cp
-val x253 = if (x1.parens == null) null else x1.parens.clone //copy
-val x277 = RhinoMatchUtil.flatNMatcher(x1,76,2,x263,x264) // mm
-def x258(): Boolean = {
-val x260 = x1.cp = x252
-val x261 = x1.parens = x253
-val x262 = x1.cp
-val x266 = x262 == x264
-val x275 = if (x266) {
-false
-} else {
-val x267 = x1.cp
-val x268 = x263.charAt(x267)
-val x269 = 'm' == x268
-val x270 = if (x269) {
+val x239 = if (x137) {
 true
 } else {
+val x140 = x3.cp
+val x141 = RhinoMatchUtil.flatNMatcher(x3,53,2,x5,x6) // ff
+val x237 = if (x141) {
+true
+} else {
+val x144 = x3.cp
+val x145 = x3.cp
+val x147 = x145 == x6
+val x156 = if (x147) {
+false
+} else {
+val x148 = x3.cp
+val x149 = x5.charAt(x148)
+val x150 = 'f' == x149
+val x151 = if (x150) {
+true
+} else {
+x150
+}
+val x154 = if (x151) {
+val x152 = x3.cp += 1
+true
+} else {
+false
+}
+x154
+}
+val x235 = if (x156) {
+true
+} else {
+val x159 = x3.cp
+val x160 = RhinoMatchUtil.flatNMatcher(x3,58,2,x5,x6) // gg
+val x233 = if (x160) {
+true
+} else {
+val x163 = x3.cp
+val x164 = x3.cp
+val x166 = x164 == x6
+val x175 = if (x166) {
+false
+} else {
+val x167 = x3.cp
+val x168 = x5.charAt(x167)
+val x169 = 'g' == x168
+val x170 = if (x169) {
+true
+} else {
+x169
+}
+val x173 = if (x170) {
+val x171 = x3.cp += 1
+true
+} else {
+false
+}
+x173
+}
+val x231 = if (x175) {
+true
+} else {
+val x178 = x3.cp
+val x179 = RhinoMatchUtil.flatNMatcher(x3,63,3,x5,x6) // sss
+val x229 = if (x179) {
+true
+} else {
+val x182 = x3.cp
+val x183 = RhinoMatchUtil.flatNMatcher(x3,67,2,x5,x6) // ss
+val x227 = if (x183) {
+true
+} else {
+val x186 = x3.cp
+val x187 = x3.cp
+val x189 = x187 == x6
+val x198 = if (x189) {
+false
+} else {
+val x190 = x3.cp
+val x191 = x5.charAt(x190)
+val x192 = 's' == x191
+val x193 = if (x192) {
+true
+} else {
+x192
+}
+val x196 = if (x193) {
+val x194 = x3.cp += 1
+true
+} else {
+false
+}
+x196
+}
+val x225 = if (x198) {
+true
+} else {
+val x201 = x3.cp
+val x202 = RhinoMatchUtil.flatNMatcher(x3,72,3,x5,x6) // mmm
+val x223 = if (x202) {
+true
+} else {
+val x205 = x3.cp
+val x206 = RhinoMatchUtil.flatNMatcher(x3,76,2,x5,x6) // mm
+val x221 = if (x206) {
+true
+} else {
+val x207 = x3.cp
+val x208 = x3.cp
+val x210 = x208 == x6
+val x219 = if (x210) {
+false
+} else {
+val x211 = x3.cp
+val x212 = x5.charAt(x211)
+val x213 = 'm' == x212
+val x214 = if (x213) {
+true
+} else {
+x213
+}
+val x217 = if (x214) {
+val x215 = x3.cp += 1
+true
+} else {
+false
+}
+x217
+}
+x219
+}
+x221
+}
+x223
+}
+x225
+}
+x227
+}
+x229
+}
+x231
+}
+x233
+}
+x235
+}
+x237
+}
+x239
+}
+x241
+}
+x243
+}
+x245
+}
+x247
+}
+x249
+}
+x251
+}
+x253
+}
+x255
+}
+x257
+}
+x259
+}
+x261
+}
+x263
+}
+x265
+}
+x267
+}
 x269
 }
-val x273 = if (x270) {
-val x271 = x1.cp += 1
-true
-} else {
-false
-}
-x273
-}
-x275
-}
-val x280 = if (x277) {
-true
-} else {
-val x278 = x258()
-x278
-}
-x280
-}
-val x285 = if (x282) {
-true
-} else {
-val x283 = x248()
-x283
-}
-x285
-}
-val x301 = if (x298) {
-true
-} else {
-val x299 = x238()
-x299
-}
-x301
-}
-val x306 = if (x303) {
-true
-} else {
-val x304 = x228()
-x304
-}
-x306
-}
-val x311 = if (x308) {
-true
-} else {
-val x309 = x218()
-x309
-}
-x311
-}
-val x327 = if (x324) {
-true
-} else {
-val x325 = x208()
-x325
-}
-x327
-}
-val x332 = if (x329) {
-true
-} else {
-val x330 = x198()
-x330
-}
-x332
-}
-val x348 = if (x345) {
-true
-} else {
-val x346 = x188()
-x346
-}
-x348
-}
-val x353 = if (x350) {
-true
-} else {
-val x351 = x178()
-x351
-}
-x353
-}
-val x369 = if (x366) {
-true
-} else {
-val x367 = x168()
-x367
-}
-x369
-}
-val x374 = if (x371) {
-true
-} else {
-val x372 = x158()
-x372
-}
-x374
-}
-val x390 = if (x387) {
-true
-} else {
-val x388 = x148()
-x388
-}
-x390
-}
-val x395 = if (x392) {
-true
-} else {
-val x393 = x138()
-x393
-}
-x395
-}
-val x411 = if (x408) {
-true
-} else {
-val x409 = x128()
-x409
-}
-x411
-}
-val x416 = if (x413) {
-true
-} else {
-val x414 = x118()
-x414
-}
-x416
-}
-val x432 = if (x429) {
-true
-} else {
-val x430 = x108()
-x430
-}
-x432
-}
-val x437 = if (x434) {
-true
-} else {
-val x435 = x98()
-x435
-}
-x437
-}
-val x442 = if (x439) {
-true
-} else {
-val x440 = x88()
-x440
-}
-x442
-}
-val x458 = if (x455) {
-true
-} else {
-val x456 = x78()
-x456
-}
-x458
-}
-val x463 = if (x460) {
-true
-} else {
-val x461 = x68()
-x461
-}
-x463
-}
-val x468 = if (x465) {
-true
-} else {
-val x466 = x58()
-x466
-}
-x468
-}
-val x473 = if (x470) {
-true
-} else {
-val x471 = x48()
-x471
-}
-x473
-}
-val x489 = if (x486) {
-true
-} else {
-val x487 = x38()
-x487
-}
-x489
-}
-val x494 = if (x491) {
-true
-} else {
-val x492 = x28()
-x492
-}
-x494
-}
-val x499 = if (x496) {
-true
-} else {
-val x497 = x18()
-x497
-}
-x499
-}
-val x504 = if (x501) {
-true
-} else {
-val x502 = x8()
-x502
-}
-x504
+x271
 }
 }
 /*****************************************
@@ -584,6 +403,6 @@ x504
 *******************************************/
 
 compilation: ok
----- took 1197ms
+---- took 1127ms
 REGlobalData(0,4 / null)/qqqq
 done

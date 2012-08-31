@@ -1824,7 +1824,7 @@ object RhinoMatcher {
       val t = re.startNode
       val m = RhinoNodes.mirror(t, stmatcher)
 
-      val f = (c:stmatcher.INTF.Rep[Unit]) => m(x=>x)
+      val f = (c:stmatcher.INTF.Rep[Unit]) => m(()=>true)
 
       stmatcher.IR.dump = Util.dumpCode
       if (Util.dumpCode) println("----" + new String(re.source))
@@ -1990,11 +1990,12 @@ object RhinoMatcher {
       def infix_multiline(x: Rep[REGlobalData]): Rep[Boolean] = if (Util.optUnsafe) false else uncheckedPure[Boolean](x,".multiline")
 
       def infix_parens(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked(x,".parens")
-      def infix_parensGet(x: Rep[REGlobalData]): Rep[Array[Int]] = if (Util.optUnsafe) unchecked(x,".parens") else unchecked("if (",x,".parens == null) null else ",x,".parens.clone //copy")
-      def infix_parensSet(x: Rep[REGlobalData],y: Rep[Array[Int]]): Rep[Unit] = unchecked(x,".parens = ",y)
+      //def infix_parensGet(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked(x,".parens") else unchecked("if (",x,".parens == null) null else ",x,".parens.clone //copy")
+      //def infix_parensSet(x: Rep[REGlobalData],y: Rep[Array[Int]]): Rep[Unit] = unchecked(x,".parens = ",y)
       def infix_parensIndex(x: Rep[REGlobalData], i: Int): Rep[Int] = unchecked(x,".parensIndex(",i,")")
+      def infix_parensLength(x: Rep[REGlobalData], i: Int): Rep[Int] = unchecked(x,".parensLength(",i,")")
       def infix_setParens(x: Rep[REGlobalData], i: Int, index: Rep[Int], length: Rep[Int]): Rep[Unit] = 
-        if (Util.optUnsafe) { } else unchecked(x,".setParens(",i,",",index,",",length,")")
+        unchecked(x,".setParens(",i,",",index,",",length,")")
 
 
       // Char/Matcher
@@ -2023,12 +2024,12 @@ object RhinoMatcher {
 
       // Matcher code
 
-      type RENode = (Rep[Boolean] => Rep[Boolean]) => Rep[Boolean]
+      type RENode = (() => Rep[Boolean]) => Rep[Boolean]
 
-      def state(f: (Rep[Boolean] => Rep[Boolean]) => Rep[Boolean]): RENode = f
-      def simple(x: => Rep[Boolean]): RENode = state(k => k(x))
+      def state(f: (() => Rep[Boolean]) => Rep[Boolean]): RENode = f
+      def simple(x: => Rep[Boolean]): RENode = state { k => val saveCp = gData.cp; if (x) { if (k()) true else { gData.cpSet(saveCp); false } } else false }
 
-      def matchNode(t: RENode)(k: Rep[Boolean] => Rep[Boolean]) = t(k)
+      def matchNode(t: RENode)(k: => Rep[Boolean]) = t(() => k)
 
       def nullNode = simple(true)
 
@@ -2101,187 +2102,97 @@ object RhinoMatcher {
       }
 
       def alt(kid1: RENode, kid2: RENode) = state { k =>
-        val saveCp = gData.cp
-        val saveParens = gData.parensGet
-        //val k1 = doLambda(k)
-        val fk1 = doLambda { r: Rep[Unit] => k(true) }
-        val fk2 = doLambda { r: Rep[Unit] => k(false) }
-        def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) fk1() else fk2()
-        //println("try alt " + System.identityHashCode(kid1) + " /"+saveCp)
-        
-        val altk = doLambda { r: Rep[Unit] => 
-          gData.cpSet(saveCp)
-          gData.parensSet(saveParens)
-          matchNode(kid2)(r=>k1(r))
-        }
-        
-        /*matchNode(kid1)(r => k1(r) || {
-          //println("backtrack to alt " + System.identityHashCode(kid2) + " /"+saveCp)
-          gData.cpSet(saveCp)
-          gData.parensSet(saveParens)
-          matchNode(kid2)(r=>k1(r)) })*/
-          matchNode(kid1)(r => if (r) { 
-            if (fk1()) true else altk()
-          } else altk())
+
+        val fk1 = doLambda { r: Rep[Unit] => k() }
+
+        matchNode(kid1)(fk1()) || matchNode(kid2)(fk1())
       }
 
       def paren(parenIndex: Int, kid: RENode) = state { k =>
         //gData.setParens(parenIndex, gData.cp, 0);
         val cap_index = gData.cp
-        matchNode(kid)(r => k(r && {
-          //val cap_index = gData.parensIndex(parenIndex);
-          gData.setParens(parenIndex, cap_index,
-                  gData.cp - cap_index);
-          true
-        }))
+        matchNode(kid) { 
+            val oldIndex = gData.parensIndex(parenIndex);
+            val oldLength = gData.parensLength(parenIndex);
+            //val cap_index = gData.parensIndex(parenIndex);
+            gData.setParens(parenIndex, cap_index,
+                    gData.cp - cap_index);
+            if (k()) true else {
+              gData.setParens(parenIndex, oldIndex, oldLength)
+              false
+            }
+        }
       }
 
       def assert(kid: RENode) = state { k =>
         val saveCp = gData.cp
         //println("not properly handling assert")
-        matchNode(kid)(r => k(r && {
-          // backtrack state
-          gData.cpSet(saveCp)
-          true
-        }))
+        matchNode(kid) { gData.cpSet(saveCp); k() }
       }
 
       def assertNot(kid: RENode) = state { k =>
         val saveCp = gData.cp
         //println("not properly handling assert")
-        matchNode(kid)(r => k(!r && {
-          // backtrack state
-          gData.cpSet(saveCp)
-          true
-        }))
+        matchNode(kid)(true) && { gData.cpSet(saveCp); k() }
       }
 
       def seq(kids: List[RENode]) = state { k =>
-        if (kids.isEmpty) k(true) else {
-          val saveParens = gData.parensGet
+        if (kids.isEmpty) k() else {
           val saveCp = gData.cp
-          //val k1 = doLambda(k)
-          def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) { val f = doLambda { r: Rep[Unit] => k(true) }; f() } else { val f = doLambda { r: Rep[Unit] => k(false) }; f() }
           def loop(xs: List[RENode]): Rep[Boolean] = xs match {
-            case x::tail => 
-            matchNode(x)(r => if (r) loop(tail) else {
-              gData.parensSet(saveParens)
-              gData.cpSet(saveCp)
-              k1(false)
-            })
-            case _ => k1(true)
+            case x::tail => matchNode(x)(loop(tail))
+            case _ => k()
           }
-          loop(kids)
+          if (loop(kids)) true
+          else { gData.cpSet(saveCp); false }
         }
       }
 
       def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int) = state { k =>
         def bool(x: Boolean) = x
+        val fk1 = doLambda { r: Rep[Unit] => k() }
         
         if (greedy) {
           // (kid.match && this.match) || next.match 
 
           if (bool(min == 0) && bool(max == 1)) { // optional ?
             
-            val fk1 = doLambda { r: Rep[Unit] => k(true) }
-            val fk2 = doLambda { r: Rep[Unit] => k(false) }
-
-            val saveParens = gData.parensGet
-            val saveCp = gData.cp
-            /*for (k <- (parenIndex until re.parenCount):Range) {
-                gData.setParens(k, unit(-1), unit(0));
-            }*/
-
-            matchNode(kid) { r => if (!r) {gData.cpSet(saveCp); gData.parensSet(saveParens)}; fk1() }
+            matchNode(kid)(fk1()) || fk1()
             
           } else if ((bool(min == 0) || bool(min == 1)) && bool(max == -1)) { // unbounded */+
             
-            val fk1 = doLambda { r: Rep[Unit] => k(true) }
-            val fk2 = doLambda { r: Rep[Unit] => k(false) }
-            
             def loop: Rep[Unit => Boolean] = doLambda { r: Rep[Unit] =>
-              val saveParens = gData.parensGet
-              val saveCp = gData.cp
-
-              /*for (k <- (parenIndex until re.parenCount):Range) {
-                  gData.setParens(k, unit(-1), unit(0));
-              }*/
-
-              matchNode(kid) { r => 
-                if (r) { if (loop()) true else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk1() }} 
-                else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk1() }}
+              matchNode(kid)(loop()) || fk1()
             }
             
-            val saveParens = gData.parensGet
-            val saveCp = gData.cp
-
             if ((min == 1):Boolean)
-              matchNode(kid) { r => 
-                if (r) { if (loop()) true else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk2() }}
-                else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk2() }}
+              matchNode(kid)(loop())
             else 
               loop()
             
           } else { // arbitrary counted repetition
 
-            def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) { val f = doLambda { r: Rep[Unit] => k(true) }; f() } else { val f = doLambda { r: Rep[Unit] => k(false) }; f() }
-          
             def loop: Rep[Int => Boolean] = doLambda { i: Rep[Int] =>
 
-              //if (debug)
-              //  println("try loop " + i + " {" + min + ".." + max +  "} of "+ kid + " at " + input.substring(gData.cp))
-              if (debug) println("loop " + System.identityHashCode(kid) + " iter " + i + " /"+gData.cp)
+              if (bool(max < 0) || (i < unit(max))) {
 
-              if (((max < 0): Boolean) || ((i < unit(max)):Rep[Boolean])) {
+                if (matchNode(kid)(loop(i+1))) true
+                else if (i >= min) fk1() else false
 
-                // save and reset parens
-                val saveParens = gData.parensGet
-                val saveCp = gData.cp
-
-                for (k <- (parenIndex until re.parenCount):Range) {
-                    gData.setParens(k, unit(-1), unit(0));
-                }
-
-                matchNode(kid) { res => 
-                  if (debug) println(res)
-
-                  (res && loop(i+1)) || {
-                    if (debug) println("backtrack to loop " + System.identityHashCode(kid) + " iter " + i + " /"+saveCp)
-                    gData.parensSet(saveParens)
-                    gData.cpSet(saveCp)
-                    k1(i >= min)
-                  }
-                }
               } else
-                k1(i >= min)
+                if (i >= min) fk1() else false
             }
             loop(0)
           }
 
         } else { // not greedy
-          Predef.assert(bool(min == 0) && bool(max == -1), "not greedy!")
-          //if (debug) println("not greedy: " + kid + " / " + input.substring(gData.cp))
-          //Predef.assert(max < 0 && min == 0) // TODO: generalize
-          // next.match || (kid.match && this.match)
-
-          val fk1 = doLambda { r: Rep[Unit] => k(true) }
-          val fk2 = doLambda { r: Rep[Unit] => k(false) }
-          
-          val saveParens = gData.parensGet
-          val saveCp = gData.cp
+          Predef.assert(bool(min == 0) && bool(max == -1), "not handling all non-greedy variants!")
 
           def loop: Rep[Unit => Boolean] = doLambda { r: Rep[Unit] =>
-            matchNode(kid) { r => 
-
-              val saveParens1 = gData.parensGet
-              val saveCp1 = gData.cp
-
-              if (r) (if (fk1()) true else { gData.cpSet(saveCp1); gData.parensSet(saveParens1); loop() })
-              else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk2() }}
+            matchNode(kid) { fk1() || loop() }
           }
           
-          if (fk1()) true else { gData.cpSet(saveCp); gData.parensSet(saveParens); loop() }
-          
+          fk1() || loop()
           
         }
       }
