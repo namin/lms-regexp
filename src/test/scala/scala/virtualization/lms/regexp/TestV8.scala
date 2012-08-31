@@ -325,6 +325,9 @@ object TestV8BenchRE1 extends V8Bench {
     
     val rno = RhinoParser.compileREStub(re, "", false)
 
+    val gData = RhinoMatcher.matchStaged(rno, in, 0)
+    val f = rno.stmatcher
+
     def run() = {
       
       //val res1 = RhinoMatcher.matchNaive(rno, in, 0)
@@ -332,16 +335,20 @@ object TestV8BenchRE1 extends V8Bench {
       //println(str2)
       //println("done naive: " + res1)
       
-      val res2 = RhinoMatcher.matchStaged(rno, in, 0)
+      //val res2 = RhinoMatcher.matchStaged(rno, in, 0)
+      gData.skipped = 0
+      gData.cp = 0
+      f()
+      
       //val str2 = if (res2 == null) "null" else res2 //+ "/" + (res2.groups(in).mkString(","))
       //println(str2)
       //println("done staged: " + res2)
     }
     
-    for (i <- 0 until 64) {
+    for (i <- 0 until 10) {
       val start = System.currentTimeMillis
       var i = 0
-      while (i < 2298) {
+      while (i < 2298*64) {
         run()
         i += 1
       }
@@ -359,6 +366,7 @@ object TestV8BenchAll extends V8Bench {
   def main(args: Array[String]): Unit = {
     System.out.println("HELLO")
     Util.reset()
+    Util.printElapsed = true
     Util.dumpCode = true
     Util.optUnsafe = true
     for (i <- 0 until 10)

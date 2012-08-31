@@ -11,69 +11,41 @@ def apply(x0:Unit): Boolean = {
 val x1 = matcher.gData
 val x2 = x1.cp
 val x3 = if (x1.parens == null) null else x1.parens.clone //copy
-val x585 = if (x1.parens == null) null else x1.parens.clone //copy
-val x586 = x1.cp
+val x679 = if (x1.parens == null) null else x1.parens.clone //copy
+val x680 = x1.cp
 val x34 = matcher.input
 val x35 = x34.length
-val x587 = RhinoMatchUtil.flatNMatcher(x1,3,4,x34,x35) // ZFVR
-def x670(): Boolean = {
-val x672 = x1.parensIndex(0)
-val x673 = x1.cp
-val x674 = x673 - x672
-val x675 = x1.setParens(0,x672,x674)
-true
-}
-def x469(): Boolean = {
-val x471 = x1.parensIndex(1)
-val x472 = x1.cp
-val x473 = x472 - x471
-val x474 = x1.setParens(1,x471,x473)
-true
-}
-def x312(): Boolean = {
-val x314 = x1.parensIndex(2)
-val x315 = x1.cp
-val x316 = x315 - x314
-val x317 = x1.setParens(2,x314,x316)
-true
-}
-def x129(): Boolean = {
-val x131 = x1.parensIndex(3)
-val x132 = x1.cp
-val x133 = x132 - x131
-val x134 = x1.setParens(3,x131,x133)
-true
-}
+val x681 = RhinoMatchUtil.flatNMatcher(x1,3,4,x34,x35) // ZFVR
 def x8(): Boolean = {
 val x10 = x1.cp = x2
 val x11 = x1.parens = x3
 val x12 = x1.cp
 val x13 = if (x1.parens == null) null else x1.parens.clone //copy
-val x383 = if (x1.parens == null) null else x1.parens.clone //copy
-val x384 = x1.cp
-val x385 = x1.cp
-val x386 = if (x1.parens == null) null else x1.parens.clone //copy
-val x575 = RhinoMatchUtil.flatNMatcher(x1,26,7,x34,x35) // Sversbk
+val x439 = if (x1.parens == null) null else x1.parens.clone //copy
+val x440 = x1.cp
+val x441 = x1.cp
+val x442 = if (x1.parens == null) null else x1.parens.clone //copy
+val x669 = RhinoMatchUtil.flatNMatcher(x1,26,7,x34,x35) // Sversbk
 def x18(): Boolean = {
 val x20 = x1.cp = x12
 val x21 = x1.parens = x13
 val x22 = x1.cp
 val x23 = if (x1.parens == null) null else x1.parens.clone //copy
-val x231 = if (x1.parens == null) null else x1.parens.clone //copy
-val x232 = x1.cp
-val x233 = RhinoMatchUtil.flatNMatcher(x1,73,5,x34,x35) // Bcren
+val x247 = if (x1.parens == null) null else x1.parens.clone //copy
+val x248 = x1.cp
+val x249 = RhinoMatchUtil.flatNMatcher(x1,73,5,x34,x35) // Bcren
 def x28(): Boolean = {
 val x30 = x1.cp = x22
 val x31 = x1.parens = x23
 val x32 = if (x1.parens == null) null else x1.parens.clone //copy
 val x33 = x1.cp
 val x36 = RhinoMatchUtil.flatNMatcher(x1,94,11,x34,x35) // NccyrJroXvg
-def x146(): Boolean = {
-val x148 = x1.parens = x32
-val x149 = x1.cp = x33
+def x70(): Boolean = {
+val x72 = x1.parens = x32
+val x73 = x1.cp = x33
 false
 }
-val x229 = if (x36) {
+val x245 = if (x36) {
 val x37 = x1.cp
 val x39 = x37 == x35
 val x45 = if (x39) {
@@ -91,412 +63,386 @@ true
 } else {
 false
 }
-val x224 = if (x48) {
+val x240 = if (x48) {
 val x49 = x1.cp
-val x50 = x1.setParens(3,x49,0)
-val x51 = if (x1.parens == null) null else x1.parens.clone //copy
-val x52 = x1.cp
-def x142(): Boolean = {
-val x144 = x1.parens = x51
-val x145 = x1.cp = x52
-val x153 = x146()
-x153
+def x56(): Boolean = {
+val x58 = x1.cp
+val x59 = x58 - x49
+val x60 = x1.setParens(3,x49,x59)
+true
 }
-def x77(x78: (Int)): Boolean = {
-val x79 = x78 < 1
-val x122 = x78 + 1
-val x201 = if (x79) {
-val x80 = if (x1.parens == null) null else x1.parens.clone //copy
-val x81 = x1.cp
-val x126 = x78 >= 0
-def x120(): Boolean = {
-val x123 = x77(x122)
-val x159 = if (x123) {
+def x130(): Boolean = {
+val x132 = if (x1.parens == null) null else x1.parens.clone //copy
+val x133 = x1.cp
+val x134 = x1.cp
+val x136 = x134 == x35
+val x141 = if (x136) {
+false
+} else {
+val x137 = x1.cp
+val x138 = x34.charAt(x137)
+val x139 = Rhino.isDigit(x138)
+x139
+}
+val x144 = if (x141) {
+val x142 = x1.cp += 1
 true
 } else {
-val x124 = x1.parens = x80
-val x125 = x1.cp = x81
-val x157 = if (x126) {
-val x140 = x129()
-x140
+false
+}
+val x156 = if (x144) {
+val x145 = x130()
+val x150 = if (x145) {
+true
 } else {
-val x155 = x142()
-x155
+val x146 = x1.cp = x133
+val x147 = x1.parens = x132
+val x148 = x56()
+x148
 }
-x157
+x150
+} else {
+val x152 = x1.cp = x133
+val x153 = x1.parens = x132
+val x154 = x56()
+x154
 }
-x159
+x156
 }
-val x82 = if (x1.parens == null) null else x1.parens.clone //copy
+def x52(): Boolean = {
+val x79 = if (x1.parens == null) null else x1.parens.clone //copy
+val x80 = x1.cp
+val x81 = if (x1.parens == null) null else x1.parens.clone //copy
+val x82 = x1.cp
 val x83 = x1.cp
-def x169(): Boolean = {
-val x171 = x1.parens = x80
-val x172 = x1.cp = x81
-val x177 = if (x126) {
-val x173 = x129()
-x173
-} else {
-val x175 = x142()
-x175
-}
-x177
-}
-def x165(): Boolean = {
-val x167 = x1.parens = x82
-val x168 = x1.cp = x83
-val x179 = x169()
-x179
-}
-def x96(x97: (Int)): Boolean = {
-val x98 = if (x1.parens == null) null else x1.parens.clone //copy
-val x99 = x1.cp
-val x100 = x1.cp
-val x102 = x100 == x35
-val x107 = if (x102) {
+val x85 = x83 == x35
+val x94 = if (x85) {
 false
 } else {
-val x103 = x1.cp
-val x104 = x34.charAt(x103)
-val x105 = Rhino.isDigit(x104)
-x105
+val x86 = x1.cp
+val x87 = x34.charAt(x86)
+val x88 = '.' == x87
+val x89 = if (x88) {
+true
+} else {
+x88
 }
-val x110 = if (x107) {
-val x108 = x1.cp += 1
+val x92 = if (x89) {
+val x90 = x1.cp += 1
 true
 } else {
 false
 }
-val x114 = if (x110) {
-val x111 = x97 + 1
-val x112 = x96(x111)
-x112
+x92
+}
+def x108(): Boolean = {
+val x111 = x1.cp = x80
+val x112 = x1.parens = x79
+val x113 = x56()
+x113
+}
+def x104(): Boolean = {
+val x106 = x1.parens = x81
+val x107 = x1.cp = x82
+val x115 = x108()
+x115
+}
+val x175 = if (x94) {
+val x117 = if (x1.parens == null) null else x1.parens.clone //copy
+val x118 = x1.cp
+val x119 = x1.cp
+val x121 = x119 == x35
+val x126 = if (x121) {
+false
+} else {
+val x122 = x1.cp
+val x123 = x34.charAt(x122)
+val x124 = Rhino.isDigit(x123)
+x124
+}
+val x129 = if (x126) {
+val x127 = x1.cp += 1
+true
 } else {
 false
 }
-val x185 = if (x114) {
+val x169 = if (x129) {
+val x158 = x130()
+val x163 = if (x158) {
 true
 } else {
-val x115 = x1.parens = x98
-val x116 = x1.cp = x99
-val x117 = x97 >= 1
-val x183 = if (x117) {
-val x163 = x120()
+val x159 = x1.cp = x118
+val x160 = x1.parens = x117
+val x161 = x104()
+x161
+}
 x163
 } else {
-val x181 = x165()
+val x165 = x1.cp = x118
+val x166 = x1.parens = x117
+val x167 = x104()
+x167
+}
+x169
+} else {
+val x171 = x1.parens = x81
+val x172 = x1.cp = x82
+val x173 = x108()
+x173
+}
+x175
+}
+def x196(): Boolean = {
+val x198 = if (x1.parens == null) null else x1.parens.clone //copy
+val x199 = x1.cp
+val x200 = x1.cp
+val x202 = x200 == x35
+val x207 = if (x202) {
+false
+} else {
+val x203 = x1.cp
+val x204 = x34.charAt(x203)
+val x205 = Rhino.isDigit(x204)
+x205
+}
+val x210 = if (x207) {
+val x208 = x1.cp += 1
+true
+} else {
+false
+}
+val x222 = if (x210) {
+val x211 = x196()
+val x216 = if (x211) {
+true
+} else {
+val x212 = x1.cp = x199
+val x213 = x1.parens = x198
+val x214 = x52()
+x214
+}
+x216
+} else {
+val x218 = x1.cp = x199
+val x219 = x1.parens = x198
+val x220 = x52()
+x220
+}
+x222
+}
+val x50 = if (x1.parens == null) null else x1.parens.clone //copy
+val x51 = x1.cp
+val x183 = if (x1.parens == null) null else x1.parens.clone //copy
+val x184 = x1.cp
+val x185 = x1.cp
+val x187 = x185 == x35
+val x192 = if (x187) {
+false
+} else {
+val x188 = x1.cp
+val x189 = x34.charAt(x188)
+val x190 = Rhino.isDigit(x189)
+x190
+}
+val x195 = if (x192) {
+val x193 = x1.cp += 1
+true
+} else {
+false
+}
+def x177(): Boolean = {
+val x179 = x1.parens = x50
+val x180 = x1.cp = x51
+val x181 = x70()
 x181
 }
-x183
-}
-x185
-}
-val x84 = x1.cp
-val x86 = x84 == x35
-val x95 = if (x86) {
-false
-} else {
-val x87 = x1.cp
-val x88 = x34.charAt(x87)
-val x89 = '.' == x88
-val x90 = if (x89) {
+val x235 = if (x195) {
+val x224 = x196()
+val x229 = if (x224) {
 true
 } else {
-x89
-}
-val x93 = if (x90) {
-val x91 = x1.cp += 1
-true
-} else {
-false
-}
-x93
-}
-val x193 = if (x95) {
-val x187 = x96(0)
-x187
-} else {
-val x189 = x1.parens = x82
-val x190 = x1.cp = x83
-val x191 = x169()
-x191
-}
-x193
-} else {
-val x126 = x78 >= 0
-val x199 = if (x126) {
-val x195 = x129()
-x195
-} else {
-val x197 = x142()
-x197
-}
-x199
-}
-x201
-}
-def x75(): Boolean = {
-val x203 = x77(0)
-x203
-}
-def x207(): Boolean = {
-val x209 = x1.parens = x51
-val x210 = x1.cp = x52
-val x211 = x146()
-x211
-}
-def x53(x54: (Int)): Boolean = {
-val x55 = if (x1.parens == null) null else x1.parens.clone //copy
-val x56 = x1.cp
-val x57 = x1.cp
-val x59 = x57 == x35
-val x64 = if (x59) {
-false
-} else {
-val x60 = x1.cp
-val x61 = x34.charAt(x60)
-val x62 = Rhino.isDigit(x61)
-x62
-}
-val x67 = if (x64) {
-val x65 = x1.cp += 1
-true
-} else {
-false
-}
-val x71 = if (x67) {
-val x68 = x54 + 1
-val x69 = x53(x68)
-x69
-} else {
-false
-}
-val x217 = if (x71) {
-true
-} else {
-val x72 = x1.parens = x55
-val x73 = x1.cp = x56
-val x74 = x54 >= 1
-val x215 = if (x74) {
-val x205 = x75()
-x205
-} else {
-val x213 = x207()
-x213
-}
-x215
-}
-x217
-}
-val x219 = x53(0)
-x219
-} else {
-val x221 = x1.parens = x32
-val x222 = x1.cp = x33
-false
-}
-x224
-} else {
-val x226 = x1.parens = x32
-val x227 = x1.cp = x33
-false
+val x225 = x1.cp = x184
+val x226 = x1.parens = x183
+val x227 = x177()
+x227
 }
 x229
-}
-def x329(): Boolean = {
-val x331 = x1.parens = x231
-val x332 = x1.cp = x232
-val x337 = x28()
-x337
-}
-val x381 = if (x233) {
-val x234 = x1.cp
-val x236 = x234 == x35
-val x242 = if (x236) {
-false
 } else {
-val x237 = x1.cp
-val x238 = x34.charAt(x237)
-val x239 = Rhino.isLineTerm(x238)
-val x240 = !x239
+val x231 = x1.cp = x184
+val x232 = x1.parens = x183
+val x233 = x177()
+x233
+}
+x235
+} else {
+val x237 = x1.parens = x32
+val x238 = x1.cp = x33
+false
+}
 x240
+} else {
+val x242 = x1.parens = x32
+val x243 = x1.cp = x33
+false
 }
-val x245 = if (x242) {
-val x243 = x1.cp += 1
+x245
+}
+def x295(): Boolean = {
+val x297 = x1.parens = x247
+val x298 = x1.cp = x248
+val x303 = x28()
+x303
+}
+val x437 = if (x249) {
+val x250 = x1.cp
+val x252 = x250 == x35
+val x258 = if (x252) {
+false
+} else {
+val x253 = x1.cp
+val x254 = x34.charAt(x253)
+val x255 = Rhino.isLineTerm(x254)
+val x256 = !x255
+x256
+}
+val x261 = if (x258) {
+val x259 = x1.cp += 1
 true
 } else {
 false
 }
-val x375 = if (x245) {
-val x246 = x1.cp
-val x247 = x1.setParens(2,x246,0)
-val x248 = if (x1.parens == null) null else x1.parens.clone //copy
-val x249 = x1.cp
-def x325(): Boolean = {
-val x327 = x1.parens = x248
-val x328 = x1.cp = x249
-val x339 = x329()
-x339
+val x431 = if (x261) {
+val x262 = x1.cp
+def x281(): Boolean = {
+val x283 = x1.cp
+val x284 = x283 - x262
+val x285 = x1.setParens(2,x262,x284)
+true
 }
-def x287(x288: (Int)): Boolean = {
-val x289 = if (x1.parens == null) null else x1.parens.clone //copy
-val x290 = x1.cp
-val x291 = x1.setParens(3,-1,0)
-val x292 = x1.cp
-val x294 = x292 == x35
-val x299 = if (x294) {
+def x320(): Boolean = {
+val x322 = if (x1.parens == null) null else x1.parens.clone //copy
+val x323 = x1.cp
+val x324 = x1.cp
+val x326 = x324 == x35
+val x331 = if (x326) {
 false
 } else {
-val x295 = x1.cp
-val x296 = x34.charAt(x295)
-val x297 = Rhino.isDigit(x296)
-x297
+val x327 = x1.cp
+val x328 = x34.charAt(x327)
+val x329 = Rhino.isDigit(x328)
+x329
 }
-val x302 = if (x299) {
-val x300 = x1.cp += 1
+val x334 = if (x331) {
+val x332 = x1.cp += 1
 true
 } else {
 false
 }
-val x306 = if (x302) {
-val x303 = x288 + 1
-val x304 = x287(x303)
-x304
+val x346 = if (x334) {
+val x335 = x320()
+val x340 = if (x335) {
+true
+} else {
+val x336 = x1.cp = x323
+val x337 = x1.parens = x322
+val x338 = x281()
+x338
+}
+x340
+} else {
+val x342 = x1.cp = x323
+val x343 = x1.parens = x322
+val x344 = x281()
+x344
+}
+x346
+}
+val x263 = if (x1.parens == null) null else x1.parens.clone //copy
+val x264 = x1.cp
+def x291(): Boolean = {
+val x293 = x1.parens = x263
+val x294 = x1.cp = x264
+val x305 = x295()
+x305
+}
+def x265(): Boolean = {
+val x267 = x1.cp
+val x269 = x267 == x35
+val x278 = if (x269) {
+false
+} else {
+val x270 = x1.cp
+val x271 = x34.charAt(x270)
+val x272 = '.' == x271
+val x273 = if (x272) {
+true
+} else {
+x272
+}
+val x276 = if (x273) {
+val x274 = x1.cp += 1
+true
 } else {
 false
 }
-val x345 = if (x306) {
-true
-} else {
-val x307 = x1.parens = x289
-val x308 = x1.cp = x290
-val x309 = x288 >= 1
-val x343 = if (x309) {
-val x323 = x312()
-x323
-} else {
-val x341 = x325()
-x341
+x276
 }
-x343
-}
-x345
-}
-def x273(): Boolean = {
-val x275 = x1.cp
-val x277 = x275 == x35
-val x286 = if (x277) {
+val x365 = if (x278) {
+val x307 = if (x1.parens == null) null else x1.parens.clone //copy
+val x308 = x1.cp
+val x309 = x1.cp
+val x311 = x309 == x35
+val x316 = if (x311) {
 false
 } else {
-val x278 = x1.cp
-val x279 = x34.charAt(x278)
-val x280 = '.' == x279
-val x281 = if (x280) {
-true
-} else {
-x280
+val x312 = x1.cp
+val x313 = x34.charAt(x312)
+val x314 = Rhino.isDigit(x313)
+x314
 }
-val x284 = if (x281) {
-val x282 = x1.cp += 1
+val x319 = if (x316) {
+val x317 = x1.cp += 1
 true
 } else {
 false
 }
-x284
-}
-val x353 = if (x286) {
-val x347 = x287(0)
-x347
+val x359 = if (x319) {
+val x348 = x320()
+val x353 = if (x348) {
+true
 } else {
-val x349 = x1.parens = x248
-val x350 = x1.cp = x249
-val x351 = x329()
+val x349 = x1.cp = x308
+val x350 = x1.parens = x307
+val x351 = x291()
 x351
 }
 x353
-}
-def x357(): Boolean = {
-val x359 = x1.parens = x248
-val x360 = x1.cp = x249
-val x361 = x329()
-x361
-}
-def x250(x251: (Int)): Boolean = {
-val x252 = if (x1.parens == null) null else x1.parens.clone //copy
-val x253 = x1.cp
-val x254 = x1.setParens(3,-1,0)
-val x255 = x1.cp
-val x257 = x255 == x35
-val x262 = if (x257) {
-false
 } else {
-val x258 = x1.cp
-val x259 = x34.charAt(x258)
-val x260 = Rhino.isDigit(x259)
-x260
+val x355 = x1.cp = x308
+val x356 = x1.parens = x307
+val x357 = x291()
+x357
 }
-val x265 = if (x262) {
-val x263 = x1.cp += 1
-true
+x359
 } else {
-false
-}
-val x269 = if (x265) {
-val x266 = x251 + 1
-val x267 = x250(x266)
-x267
-} else {
-false
-}
-val x367 = if (x269) {
-true
-} else {
-val x270 = x1.parens = x252
-val x271 = x1.cp = x253
-val x272 = x251 >= 1
-val x365 = if (x272) {
-val x355 = x273()
-x355
-} else {
-val x363 = x357()
+val x361 = x1.parens = x263
+val x362 = x1.cp = x264
+val x363 = x295()
 x363
 }
 x365
 }
-x367
-}
-val x369 = x250(0)
-x369
-} else {
-val x371 = x1.parens = x231
-val x372 = x1.cp = x232
-val x373 = x28()
-x373
-}
-x375
-} else {
-val x377 = x1.parens = x231
-val x378 = x1.cp = x232
-val x379 = x28()
-x379
-}
-x381
-}
-def x486(): Boolean = {
-val x488 = x1.parens = x383
-val x489 = x1.cp = x384
-val x494 = x18()
-x494
-}
-def x387(): Boolean = {
+def x386(): Boolean = {
+val x388 = if (x1.parens == null) null else x1.parens.clone //copy
 val x389 = x1.cp
-val x391 = x389 == x35
-val x397 = if (x391) {
+val x390 = x1.cp
+val x392 = x390 == x35
+val x397 = if (x392) {
 false
 } else {
-val x392 = x1.cp
-val x393 = x34.charAt(x392)
-val x394 = Rhino.isLineTerm(x393)
-val x395 = !x394
+val x393 = x1.cp
+val x394 = x34.charAt(x393)
+val x395 = Rhino.isDigit(x394)
 x395
 }
 val x400 = if (x397) {
@@ -505,393 +451,609 @@ true
 } else {
 false
 }
-val x532 = if (x400) {
-val x401 = x1.cp
-val x402 = x1.setParens(1,x401,0)
-val x403 = if (x1.parens == null) null else x1.parens.clone //copy
-val x404 = x1.cp
-def x482(): Boolean = {
-val x484 = x1.parens = x403
-val x485 = x1.cp = x404
-val x496 = x486()
-x496
+val x412 = if (x400) {
+val x401 = x386()
+val x406 = if (x401) {
+true
+} else {
+val x402 = x1.cp = x389
+val x403 = x1.parens = x388
+val x404 = x265()
+x404
 }
-def x443(x444: (Int)): Boolean = {
-val x445 = if (x1.parens == null) null else x1.parens.clone //copy
-val x446 = x1.cp
-val x447 = x1.setParens(2,-1,0)
-val x448 = x1.setParens(3,-1,0)
-val x449 = x1.cp
-val x451 = x449 == x35
-val x456 = if (x451) {
+x406
+} else {
+val x408 = x1.cp = x389
+val x409 = x1.parens = x388
+val x410 = x265()
+x410
+}
+x412
+}
+val x373 = if (x1.parens == null) null else x1.parens.clone //copy
+val x374 = x1.cp
+val x375 = x1.cp
+val x377 = x375 == x35
+val x382 = if (x377) {
 false
 } else {
-val x452 = x1.cp
-val x453 = x34.charAt(x452)
-val x454 = Rhino.isDigit(x453)
-x454
+val x378 = x1.cp
+val x379 = x34.charAt(x378)
+val x380 = Rhino.isDigit(x379)
+x380
 }
-val x459 = if (x456) {
-val x457 = x1.cp += 1
+val x385 = if (x382) {
+val x383 = x1.cp += 1
 true
 } else {
 false
 }
-val x463 = if (x459) {
-val x460 = x444 + 1
-val x461 = x443(x460)
-x461
-} else {
-false
+def x367(): Boolean = {
+val x369 = x1.parens = x263
+val x370 = x1.cp = x264
+val x371 = x295()
+x371
 }
-val x502 = if (x463) {
+val x425 = if (x385) {
+val x414 = x386()
+val x419 = if (x414) {
 true
 } else {
-val x464 = x1.parens = x445
-val x465 = x1.cp = x446
-val x466 = x444 >= 1
-val x500 = if (x466) {
-val x480 = x469()
-x480
+val x415 = x1.cp = x374
+val x416 = x1.parens = x373
+val x417 = x367()
+x417
+}
+x419
 } else {
-val x498 = x482()
+val x421 = x1.cp = x374
+val x422 = x1.parens = x373
+val x423 = x367()
+x423
+}
+x425
+} else {
+val x427 = x1.parens = x247
+val x428 = x1.cp = x248
+val x429 = x28()
+x429
+}
+x431
+} else {
+val x433 = x1.parens = x247
+val x434 = x1.cp = x248
+val x435 = x28()
+x435
+}
+x437
+}
+def x490(): Boolean = {
+val x492 = x1.parens = x439
+val x493 = x1.cp = x440
+val x498 = x18()
 x498
 }
-x500
-}
-x502
-}
-def x429(): Boolean = {
-val x431 = x1.cp
-val x433 = x431 == x35
-val x442 = if (x433) {
+def x443(): Boolean = {
+val x445 = x1.cp
+val x447 = x445 == x35
+val x453 = if (x447) {
 false
 } else {
-val x434 = x1.cp
-val x435 = x34.charAt(x434)
-val x436 = '.' == x435
-val x437 = if (x436) {
-true
-} else {
-x436
+val x448 = x1.cp
+val x449 = x34.charAt(x448)
+val x450 = Rhino.isLineTerm(x449)
+val x451 = !x450
+x451
 }
-val x440 = if (x437) {
-val x438 = x1.cp += 1
+val x456 = if (x453) {
+val x454 = x1.cp += 1
 true
 } else {
 false
 }
-x440
-}
-val x510 = if (x442) {
-val x504 = x443(0)
-x504
-} else {
-val x506 = x1.parens = x403
-val x507 = x1.cp = x404
-val x508 = x486()
-x508
-}
-x510
-}
-def x514(): Boolean = {
-val x516 = x1.parens = x403
-val x517 = x1.cp = x404
-val x518 = x486()
-x518
-}
-def x405(x406: (Int)): Boolean = {
-val x407 = if (x1.parens == null) null else x1.parens.clone //copy
-val x408 = x1.cp
-val x409 = x1.setParens(2,-1,0)
-val x410 = x1.setParens(3,-1,0)
-val x411 = x1.cp
-val x413 = x411 == x35
-val x418 = if (x413) {
-false
-} else {
-val x414 = x1.cp
-val x415 = x34.charAt(x414)
-val x416 = Rhino.isDigit(x415)
-x416
-}
-val x421 = if (x418) {
-val x419 = x1.cp += 1
+val x626 = if (x456) {
+val x457 = x1.cp
+def x476(): Boolean = {
+val x478 = x1.cp
+val x479 = x478 - x457
+val x480 = x1.setParens(1,x457,x479)
 true
-} else {
+}
+def x515(): Boolean = {
+val x517 = if (x1.parens == null) null else x1.parens.clone //copy
+val x518 = x1.cp
+val x519 = x1.cp
+val x521 = x519 == x35
+val x526 = if (x521) {
 false
-}
-val x425 = if (x421) {
-val x422 = x406 + 1
-val x423 = x405(x422)
-x423
 } else {
-false
-}
-val x524 = if (x425) {
-true
-} else {
-val x426 = x1.parens = x407
-val x427 = x1.cp = x408
-val x428 = x406 >= 1
-val x522 = if (x428) {
-val x512 = x429()
-x512
-} else {
-val x520 = x514()
-x520
-}
-x522
-}
+val x522 = x1.cp
+val x523 = x34.charAt(x522)
+val x524 = Rhino.isDigit(x523)
 x524
 }
-val x526 = x405(0)
-x526
-} else {
-val x528 = x1.parens = x383
-val x529 = x1.cp = x384
-val x530 = x18()
-x530
-}
-x532
-}
-def x534(): Boolean = {
-val x536 = x1.parens = x383
-val x537 = x1.cp = x384
-val x538 = x18()
-x538
-}
-def x540(): Boolean = {
-val x542 = x1.cp = x385
-val x543 = x1.parens = x386
-val x544 = x1.cp
-val x545 = if (x1.parens == null) null else x1.parens.clone //copy
-val x565 = RhinoMatchUtil.flatNMatcher(x1,34,12,x34,x35) // TenaCnenqvfb
-def x554(): Boolean = {
-val x556 = x1.cp = x544
-val x557 = x1.parens = x545
-val x558 = RhinoMatchUtil.flatNMatcher(x1,47,9,x34,x35) // Vprjrnfry
-val x563 = if (x558) {
-val x559 = x387()
-x559
-} else {
-val x561 = x534()
-x561
-}
-x563
-}
-val x573 = if (x565) {
-val x566 = x387()
-val x569 = if (x566) {
+val x529 = if (x526) {
+val x527 = x1.cp += 1
 true
 } else {
-val x567 = x554()
-x567
+false
 }
-x569
-} else {
-val x571 = x554()
-x571
-}
-x573
-}
-val x583 = if (x575) {
-val x576 = x387()
-val x579 = if (x576) {
+val x541 = if (x529) {
+val x530 = x515()
+val x535 = if (x530) {
 true
 } else {
-val x577 = x540()
-x577
+val x531 = x1.cp = x518
+val x532 = x1.parens = x517
+val x533 = x476()
+x533
 }
-x579
+x535
 } else {
-val x581 = x540()
-x581
+val x537 = x1.cp = x518
+val x538 = x1.parens = x517
+val x539 = x476()
+x539
 }
-x583
+x541
 }
-def x687(): Boolean = {
-val x689 = x1.parens = x585
-val x690 = x1.cp = x586
-val x695 = x8()
-x695
+val x458 = if (x1.parens == null) null else x1.parens.clone //copy
+val x459 = x1.cp
+def x486(): Boolean = {
+val x488 = x1.parens = x458
+val x489 = x1.cp = x459
+val x500 = x490()
+x500
 }
-val x739 = if (x587) {
+def x460(): Boolean = {
+val x462 = x1.cp
+val x464 = x462 == x35
+val x473 = if (x464) {
+false
+} else {
+val x465 = x1.cp
+val x466 = x34.charAt(x465)
+val x467 = '.' == x466
+val x468 = if (x467) {
+true
+} else {
+x467
+}
+val x471 = if (x468) {
+val x469 = x1.cp += 1
+true
+} else {
+false
+}
+x471
+}
+val x560 = if (x473) {
+val x502 = if (x1.parens == null) null else x1.parens.clone //copy
+val x503 = x1.cp
+val x504 = x1.cp
+val x506 = x504 == x35
+val x511 = if (x506) {
+false
+} else {
+val x507 = x1.cp
+val x508 = x34.charAt(x507)
+val x509 = Rhino.isDigit(x508)
+x509
+}
+val x514 = if (x511) {
+val x512 = x1.cp += 1
+true
+} else {
+false
+}
+val x554 = if (x514) {
+val x543 = x515()
+val x548 = if (x543) {
+true
+} else {
+val x544 = x1.cp = x503
+val x545 = x1.parens = x502
+val x546 = x486()
+x546
+}
+x548
+} else {
+val x550 = x1.cp = x503
+val x551 = x1.parens = x502
+val x552 = x486()
+x552
+}
+x554
+} else {
+val x556 = x1.parens = x458
+val x557 = x1.cp = x459
+val x558 = x490()
+x558
+}
+x560
+}
+def x581(): Boolean = {
+val x583 = if (x1.parens == null) null else x1.parens.clone //copy
+val x584 = x1.cp
+val x585 = x1.cp
+val x587 = x585 == x35
+val x592 = if (x587) {
+false
+} else {
 val x588 = x1.cp
-val x590 = x588 == x35
-val x596 = if (x590) {
-false
-} else {
-val x591 = x1.cp
-val x592 = x34.charAt(x591)
-val x593 = Rhino.isLineTerm(x592)
-val x594 = !x593
-x594
+val x589 = x34.charAt(x588)
+val x590 = Rhino.isDigit(x589)
+x590
 }
-val x599 = if (x596) {
-val x597 = x1.cp += 1
+val x595 = if (x592) {
+val x593 = x1.cp += 1
 true
 } else {
 false
 }
-val x733 = if (x599) {
-val x600 = x1.cp
-val x601 = x1.setParens(0,x600,0)
-val x602 = if (x1.parens == null) null else x1.parens.clone //copy
-val x603 = x1.cp
-def x683(): Boolean = {
-val x685 = x1.parens = x602
-val x686 = x1.cp = x603
-val x697 = x687()
-x697
+val x607 = if (x595) {
+val x596 = x581()
+val x601 = if (x596) {
+true
+} else {
+val x597 = x1.cp = x584
+val x598 = x1.parens = x583
+val x599 = x460()
+x599
 }
-def x643(x644: (Int)): Boolean = {
-val x645 = if (x1.parens == null) null else x1.parens.clone //copy
-val x646 = x1.cp
-val x647 = x1.setParens(1,-1,0)
-val x648 = x1.setParens(2,-1,0)
-val x649 = x1.setParens(3,-1,0)
-val x650 = x1.cp
-val x652 = x650 == x35
-val x657 = if (x652) {
+x601
+} else {
+val x603 = x1.cp = x584
+val x604 = x1.parens = x583
+val x605 = x460()
+x605
+}
+x607
+}
+val x568 = if (x1.parens == null) null else x1.parens.clone //copy
+val x569 = x1.cp
+val x570 = x1.cp
+val x572 = x570 == x35
+val x577 = if (x572) {
 false
 } else {
-val x653 = x1.cp
-val x654 = x34.charAt(x653)
-val x655 = Rhino.isDigit(x654)
+val x573 = x1.cp
+val x574 = x34.charAt(x573)
+val x575 = Rhino.isDigit(x574)
+x575
+}
+val x580 = if (x577) {
+val x578 = x1.cp += 1
+true
+} else {
+false
+}
+def x562(): Boolean = {
+val x564 = x1.parens = x458
+val x565 = x1.cp = x459
+val x566 = x490()
+x566
+}
+val x620 = if (x580) {
+val x609 = x581()
+val x614 = if (x609) {
+true
+} else {
+val x610 = x1.cp = x569
+val x611 = x1.parens = x568
+val x612 = x562()
+x612
+}
+x614
+} else {
+val x616 = x1.cp = x569
+val x617 = x1.parens = x568
+val x618 = x562()
+x618
+}
+x620
+} else {
+val x622 = x1.parens = x439
+val x623 = x1.cp = x440
+val x624 = x18()
+x624
+}
+x626
+}
+def x628(): Boolean = {
+val x630 = x1.parens = x439
+val x631 = x1.cp = x440
+val x632 = x18()
+x632
+}
+def x634(): Boolean = {
+val x636 = x1.cp = x441
+val x637 = x1.parens = x442
+val x638 = x1.cp
+val x639 = if (x1.parens == null) null else x1.parens.clone //copy
+val x659 = RhinoMatchUtil.flatNMatcher(x1,34,12,x34,x35) // TenaCnenqvfb
+def x648(): Boolean = {
+val x650 = x1.cp = x638
+val x651 = x1.parens = x639
+val x652 = RhinoMatchUtil.flatNMatcher(x1,47,9,x34,x35) // Vprjrnfry
+val x657 = if (x652) {
+val x653 = x443()
+x653
+} else {
+val x655 = x628()
 x655
 }
-val x660 = if (x657) {
-val x658 = x1.cp += 1
+x657
+}
+val x667 = if (x659) {
+val x660 = x443()
+val x663 = if (x660) {
+true
+} else {
+val x661 = x648()
+x661
+}
+x663
+} else {
+val x665 = x648()
+x665
+}
+x667
+}
+val x677 = if (x669) {
+val x670 = x443()
+val x673 = if (x670) {
+true
+} else {
+val x671 = x634()
+x671
+}
+x673
+} else {
+val x675 = x634()
+x675
+}
+x677
+}
+def x727(): Boolean = {
+val x729 = x1.parens = x679
+val x730 = x1.cp = x680
+val x735 = x8()
+x735
+}
+val x869 = if (x681) {
+val x682 = x1.cp
+val x684 = x682 == x35
+val x690 = if (x684) {
+false
+} else {
+val x685 = x1.cp
+val x686 = x34.charAt(x685)
+val x687 = Rhino.isLineTerm(x686)
+val x688 = !x687
+x688
+}
+val x693 = if (x690) {
+val x691 = x1.cp += 1
 true
 } else {
 false
 }
-val x664 = if (x660) {
-val x661 = x644 + 1
-val x662 = x643(x661)
-x662
-} else {
-false
-}
-val x703 = if (x664) {
+val x863 = if (x693) {
+val x694 = x1.cp
+def x713(): Boolean = {
+val x715 = x1.cp
+val x716 = x715 - x694
+val x717 = x1.setParens(0,x694,x716)
 true
-} else {
-val x665 = x1.parens = x645
-val x666 = x1.cp = x646
-val x667 = x644 >= 1
-val x701 = if (x667) {
-val x681 = x670()
-x681
-} else {
-val x699 = x683()
-x699
 }
-x701
-}
-x703
-}
-def x629(): Boolean = {
-val x631 = x1.cp
-val x633 = x631 == x35
-val x642 = if (x633) {
+def x752(): Boolean = {
+val x754 = if (x1.parens == null) null else x1.parens.clone //copy
+val x755 = x1.cp
+val x756 = x1.cp
+val x758 = x756 == x35
+val x763 = if (x758) {
 false
 } else {
-val x634 = x1.cp
-val x635 = x34.charAt(x634)
-val x636 = '.' == x635
-val x637 = if (x636) {
-true
-} else {
-x636
+val x759 = x1.cp
+val x760 = x34.charAt(x759)
+val x761 = Rhino.isDigit(x760)
+x761
 }
-val x640 = if (x637) {
-val x638 = x1.cp += 1
+val x766 = if (x763) {
+val x764 = x1.cp += 1
 true
 } else {
 false
 }
-x640
-}
-val x711 = if (x642) {
-val x705 = x643(0)
-x705
-} else {
-val x707 = x1.parens = x602
-val x708 = x1.cp = x603
-val x709 = x687()
-x709
-}
-x711
-}
-def x715(): Boolean = {
-val x717 = x1.parens = x602
-val x718 = x1.cp = x603
-val x719 = x687()
-x719
-}
-def x604(x605: (Int)): Boolean = {
-val x606 = if (x1.parens == null) null else x1.parens.clone //copy
-val x607 = x1.cp
-val x608 = x1.setParens(1,-1,0)
-val x609 = x1.setParens(2,-1,0)
-val x610 = x1.setParens(3,-1,0)
-val x611 = x1.cp
-val x613 = x611 == x35
-val x618 = if (x613) {
-false
-} else {
-val x614 = x1.cp
-val x615 = x34.charAt(x614)
-val x616 = Rhino.isDigit(x615)
-x616
-}
-val x621 = if (x618) {
-val x619 = x1.cp += 1
+val x778 = if (x766) {
+val x767 = x752()
+val x772 = if (x767) {
 true
 } else {
-false
+val x768 = x1.cp = x755
+val x769 = x1.parens = x754
+val x770 = x713()
+x770
 }
-val x625 = if (x621) {
-val x622 = x605 + 1
-val x623 = x604(x622)
-x623
+x772
 } else {
-false
+val x774 = x1.cp = x755
+val x775 = x1.parens = x754
+val x776 = x713()
+x776
 }
-val x725 = if (x625) {
-true
-} else {
-val x626 = x1.parens = x606
-val x627 = x1.cp = x607
-val x628 = x605 >= 1
-val x723 = if (x628) {
-val x713 = x629()
-x713
-} else {
-val x721 = x715()
-x721
+x778
 }
-x723
-}
-x725
-}
-val x727 = x604(0)
-x727
-} else {
-val x729 = x1.parens = x585
-val x730 = x1.cp = x586
-val x731 = x8()
-x731
-}
-x733
-} else {
-val x735 = x1.parens = x585
-val x736 = x1.cp = x586
-val x737 = x8()
+val x695 = if (x1.parens == null) null else x1.parens.clone //copy
+val x696 = x1.cp
+def x723(): Boolean = {
+val x725 = x1.parens = x695
+val x726 = x1.cp = x696
+val x737 = x727()
 x737
 }
-x739
+def x697(): Boolean = {
+val x699 = x1.cp
+val x701 = x699 == x35
+val x710 = if (x701) {
+false
+} else {
+val x702 = x1.cp
+val x703 = x34.charAt(x702)
+val x704 = '.' == x703
+val x705 = if (x704) {
+true
+} else {
+x704
+}
+val x708 = if (x705) {
+val x706 = x1.cp += 1
+true
+} else {
+false
+}
+x708
+}
+val x797 = if (x710) {
+val x739 = if (x1.parens == null) null else x1.parens.clone //copy
+val x740 = x1.cp
+val x741 = x1.cp
+val x743 = x741 == x35
+val x748 = if (x743) {
+false
+} else {
+val x744 = x1.cp
+val x745 = x34.charAt(x744)
+val x746 = Rhino.isDigit(x745)
+x746
+}
+val x751 = if (x748) {
+val x749 = x1.cp += 1
+true
+} else {
+false
+}
+val x791 = if (x751) {
+val x780 = x752()
+val x785 = if (x780) {
+true
+} else {
+val x781 = x1.cp = x740
+val x782 = x1.parens = x739
+val x783 = x723()
+x783
+}
+x785
+} else {
+val x787 = x1.cp = x740
+val x788 = x1.parens = x739
+val x789 = x723()
+x789
+}
+x791
+} else {
+val x793 = x1.parens = x695
+val x794 = x1.cp = x696
+val x795 = x727()
+x795
+}
+x797
+}
+def x818(): Boolean = {
+val x820 = if (x1.parens == null) null else x1.parens.clone //copy
+val x821 = x1.cp
+val x822 = x1.cp
+val x824 = x822 == x35
+val x829 = if (x824) {
+false
+} else {
+val x825 = x1.cp
+val x826 = x34.charAt(x825)
+val x827 = Rhino.isDigit(x826)
+x827
+}
+val x832 = if (x829) {
+val x830 = x1.cp += 1
+true
+} else {
+false
+}
+val x844 = if (x832) {
+val x833 = x818()
+val x838 = if (x833) {
+true
+} else {
+val x834 = x1.cp = x821
+val x835 = x1.parens = x820
+val x836 = x697()
+x836
+}
+x838
+} else {
+val x840 = x1.cp = x821
+val x841 = x1.parens = x820
+val x842 = x697()
+x842
+}
+x844
+}
+val x805 = if (x1.parens == null) null else x1.parens.clone //copy
+val x806 = x1.cp
+val x807 = x1.cp
+val x809 = x807 == x35
+val x814 = if (x809) {
+false
+} else {
+val x810 = x1.cp
+val x811 = x34.charAt(x810)
+val x812 = Rhino.isDigit(x811)
+x812
+}
+val x817 = if (x814) {
+val x815 = x1.cp += 1
+true
+} else {
+false
+}
+def x799(): Boolean = {
+val x801 = x1.parens = x695
+val x802 = x1.cp = x696
+val x803 = x727()
+x803
+}
+val x857 = if (x817) {
+val x846 = x818()
+val x851 = if (x846) {
+true
+} else {
+val x847 = x1.cp = x806
+val x848 = x1.parens = x805
+val x849 = x799()
+x849
+}
+x851
+} else {
+val x853 = x1.cp = x806
+val x854 = x1.parens = x805
+val x855 = x799()
+x855
+}
+x857
+} else {
+val x859 = x1.parens = x679
+val x860 = x1.cp = x680
+val x861 = x8()
+x861
+}
+x863
+} else {
+val x865 = x1.parens = x679
+val x866 = x1.cp = x680
+val x867 = x8()
+x867
+}
+x869
 }
 }
 /*****************************************
@@ -899,6 +1061,6 @@ x739
 *******************************************/
 
 compilation: ok
----- took 1469ms
+---- took 1791ms
 REGlobalData(48,65 / (-1,-1),(-1,-1),(-1,-1),(5,60))/NccyrJroXvg/528.9,,,,528.9
 done

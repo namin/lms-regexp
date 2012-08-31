@@ -1731,7 +1731,7 @@ object RhinoMatcher {
               val saveCp = gData.cp
 
               for (k <- parenIndex until re.parenCount) {
-                  gData.setParens(k, -1, 0);
+                  gData.setParens(k, -1, -1);
               }
 
               matchNode(kid) { res => 
@@ -1820,7 +1820,7 @@ object RhinoMatcher {
 
     stmatcher.re = re
 
-    if (re.stmatcher == null) {
+    def buildMatcher() = {
       val t = re.startNode
       val m = RhinoNodes.mirror(t, stmatcher)
 
@@ -1836,23 +1836,28 @@ object RhinoMatcher {
       if (Util.dumpCode) println("---- took " + (System.currentTimeMillis - start) + "ms")
       re.stmatcher = fc
     }
+
+    if (re.stmatcher == null) buildMatcher()
     
     matcher.input = input
     matcher.gData = gData
     matcher.re = re
 
-    val end = if (re.startNode.op == REOP_BOL) 0 else input.length
-    var i = inp
-    while (i <= end) {
-      gData.skipped = i
-      gData.cp = i
+    def findOccurrence(): REGlobalData = {
+      val mat = re.stmatcher
+      val end = if (re.startNode.op == REOP_BOL) 0 else input.length
+      var i = inp
+      while (i <= end) {
+        gData.skipped = i
+        gData.cp = i
 
-      val res = re.stmatcher()
-      if (res) return gData
-      i += 1
+        val res = mat()
+        if (res) return gData
+        i += 1
+      }
+      null
     }
-
-    null
+    findOccurrence()
   }
 
 
@@ -2121,9 +2126,10 @@ object RhinoMatcher {
       }
 
       def paren(parenIndex: Int, kid: RENode) = state { k =>
-        gData.setParens(parenIndex, gData.cp, 0);
+        //gData.setParens(parenIndex, gData.cp, 0);
+        val cap_index = gData.cp
         matchNode(kid)(r => k(r && {
-          val cap_index = gData.parensIndex(parenIndex);
+          //val cap_index = gData.parensIndex(parenIndex);
           gData.setParens(parenIndex, cap_index,
                   gData.cp - cap_index);
           true
@@ -2170,64 +2176,113 @@ object RhinoMatcher {
       }
 
       def repeat(kid: RENode, min: Int, max: Int, greedy: Boolean, parenIndex: Int, parenCount: Int) = state { k =>
-        if (!greedy) println("not greedy!")
-        if (true || greedy) {
+        def bool(x: Boolean) = x
+        
+        if (greedy) {
           // (kid.match && this.match) || next.match 
 
-          // prevent code blow-up (somewhat)
-          //def k1: Rep[Boolean => Boolean] = doLambda { r: Rep[Boolean] => k(r) }
-          def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) { val f = doLambda { r: Rep[Unit] => k(true) }; f() } else { val f = doLambda { r: Rep[Unit] => k(false) }; f() }
-          
-          def loop: Rep[Int => Boolean] = doLambda { i: Rep[Int] =>
+          if (bool(min == 0) && bool(max == 1)) { // optional ?
+            
+            val fk1 = doLambda { r: Rep[Unit] => k(true) }
+            val fk2 = doLambda { r: Rep[Unit] => k(false) }
 
-            //if (debug)
-            //  println("try loop " + i + " {" + min + ".." + max +  "} of "+ kid + " at " + input.substring(gData.cp))
-            if (debug) println("loop " + System.identityHashCode(kid) + " iter " + i + " /"+gData.cp)
+            val saveParens = gData.parensGet
+            val saveCp = gData.cp
+            /*for (k <- (parenIndex until re.parenCount):Range) {
+                gData.setParens(k, unit(-1), unit(0));
+            }*/
 
-            if (((max < 0): Boolean) || ((i < unit(max)):Rep[Boolean])) {
-
-              // save and reset parens
+            matchNode(kid) { r => if (!r) {gData.cpSet(saveCp); gData.parensSet(saveParens)}; fk1() }
+            
+          } else if ((bool(min == 0) || bool(min == 1)) && bool(max == -1)) { // unbounded */+
+            
+            val fk1 = doLambda { r: Rep[Unit] => k(true) }
+            val fk2 = doLambda { r: Rep[Unit] => k(false) }
+            
+            def loop: Rep[Unit => Boolean] = doLambda { r: Rep[Unit] =>
               val saveParens = gData.parensGet
               val saveCp = gData.cp
 
-              for (k <- (parenIndex until re.parenCount):Range) {
+              /*for (k <- (parenIndex until re.parenCount):Range) {
                   gData.setParens(k, unit(-1), unit(0));
-              }
+              }*/
 
-              matchNode(kid) { res => 
-                if (debug) println(res)
+              matchNode(kid) { r => 
+                if (r) { if (loop()) true else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk1() }} 
+                else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk1() }}
+            }
+            
+            val saveParens = gData.parensGet
+            val saveCp = gData.cp
 
-                (res && loop(i+1)) || {
-                  if (debug) println("backtrack to loop " + System.identityHashCode(kid) + " iter " + i + " /"+saveCp)
-                  gData.parensSet(saveParens)
-                  gData.cpSet(saveCp)
-                  k1(i >= min)
+            if ((min == 1):Boolean)
+              matchNode(kid) { r => 
+                if (r) { if (loop()) true else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk2() }}
+                else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk2() }}
+            else 
+              loop()
+            
+          } else { // arbitrary counted repetition
+
+            def k1: Rep[Boolean] => Rep[Boolean] = r => if (r) { val f = doLambda { r: Rep[Unit] => k(true) }; f() } else { val f = doLambda { r: Rep[Unit] => k(false) }; f() }
+          
+            def loop: Rep[Int => Boolean] = doLambda { i: Rep[Int] =>
+
+              //if (debug)
+              //  println("try loop " + i + " {" + min + ".." + max +  "} of "+ kid + " at " + input.substring(gData.cp))
+              if (debug) println("loop " + System.identityHashCode(kid) + " iter " + i + " /"+gData.cp)
+
+              if (((max < 0): Boolean) || ((i < unit(max)):Rep[Boolean])) {
+
+                // save and reset parens
+                val saveParens = gData.parensGet
+                val saveCp = gData.cp
+
+                for (k <- (parenIndex until re.parenCount):Range) {
+                    gData.setParens(k, unit(-1), unit(0));
                 }
-              }
-            } else
-              k1(i >= min)
+
+                matchNode(kid) { res => 
+                  if (debug) println(res)
+
+                  (res && loop(i+1)) || {
+                    if (debug) println("backtrack to loop " + System.identityHashCode(kid) + " iter " + i + " /"+saveCp)
+                    gData.parensSet(saveParens)
+                    gData.cpSet(saveCp)
+                    k1(i >= min)
+                  }
+                }
+              } else
+                k1(i >= min)
+            }
+            loop(0)
           }
-          loop(0)
 
         } else { // not greedy
-          Predef.assert(false, "not greedy!")
+          Predef.assert(bool(min == 0) && bool(max == -1), "not greedy!")
           //if (debug) println("not greedy: " + kid + " / " + input.substring(gData.cp))
           //Predef.assert(max < 0 && min == 0) // TODO: generalize
           // next.match || (kid.match && this.match)
 
+          val fk1 = doLambda { r: Rep[Unit] => k(true) }
+          val fk2 = doLambda { r: Rep[Unit] => k(false) }
+          
           val saveParens = gData.parensGet
           val saveCp = gData.cp
 
-          val res = k(true);
-          {
-            //if (debug) println("next: " + res)
-            if (res) true else {              
-              gData.parensSet(saveParens)
-              gData.cpSet(saveCp)
+          def loop: Rep[Unit => Boolean] = doLambda { r: Rep[Unit] =>
+            matchNode(kid) { r => 
 
-              matchNode(kid)(r => r && matchNode(repeat(kid,0,-1,false,parenIndex,parenCount))(k))
-            }
+              val saveParens1 = gData.parensGet
+              val saveCp1 = gData.cp
+
+              if (r) (if (fk1()) true else { gData.cpSet(saveCp1); gData.parensSet(saveParens1); loop() })
+              else { gData.cpSet(saveCp); gData.parensSet(saveParens); fk2() }}
           }
+          
+          if (fk1()) true else { gData.cpSet(saveCp); gData.parensSet(saveParens); loop() }
+          
+          
         }
       }
 

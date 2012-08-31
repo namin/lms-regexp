@@ -9,90 +9,82 @@ import RhinoMatcher.matcher
 class staged$1 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
 val x1 = matcher.gData
-val x9 = matcher.input
-val x10 = x9.length
+val x7 = matcher.input
+val x8 = x7.length
 val x2 = if (x1.parens == null) null else x1.parens.clone //copy
 val x3 = x1.cp
-def x28(): Boolean = {
-val x30 = x1.cp
-val x32 = x30 == x10
-val x41 = if (x32) {
+def x4(): Boolean = {
+val x6 = x1.cp
+val x10 = x6 == x8
+val x19 = if (x10) {
 false
 } else {
-val x33 = x1.cp
-val x34 = x9.charAt(x33)
-val x35 = 'b' == x34
-val x36 = if (x35) {
+val x11 = x1.cp
+val x12 = x7.charAt(x11)
+val x13 = 'b' == x12
+val x14 = if (x13) {
 true
 } else {
-x35
+x13
 }
-val x39 = if (x36) {
-val x37 = x1.cp += 1
-true
-} else {
-false
-}
-x39
-}
-val x49 = if (x41) {
-true
-} else {
-val x44 = x1.parens = x2
-val x45 = x1.cp = x3
-false
-}
-x49
-}
-def x53(): Boolean = {
-val x55 = x1.parens = x2
-val x56 = x1.cp = x3
-false
-}
-def x4(x5: (Int)): Boolean = {
-val x6 = if (x1.parens == null) null else x1.parens.clone //copy
-val x7 = x1.cp
-val x8 = x1.cp
-val x12 = x8 == x10
-val x17 = if (x12) {
-false
-} else {
-val x13 = x1.cp
-val x14 = x9.charAt(x13)
-val x15 = Rhino.isWord(x14)
-x15
-}
-val x20 = if (x17) {
-val x18 = x1.cp += 1
+val x17 = if (x14) {
+val x15 = x1.cp += 1
 true
 } else {
 false
 }
-val x24 = if (x20) {
-val x21 = x5 + 1
-val x22 = x4(x21)
-x22
+x17
+}
+val x27 = if (x19) {
+true
+} else {
+val x22 = x1.parens = x2
+val x23 = x1.cp = x3
+false
+}
+x27
+}
+def x36(): Boolean = {
+val x38 = if (x1.parens == null) null else x1.parens.clone //copy
+val x39 = x1.cp
+val x40 = x1.cp
+val x42 = x40 == x8
+val x47 = if (x42) {
+false
+} else {
+val x43 = x1.cp
+val x44 = x7.charAt(x43)
+val x45 = Rhino.isWord(x44)
+x45
+}
+val x50 = if (x47) {
+val x48 = x1.cp += 1
+true
 } else {
 false
 }
-val x62 = if (x24) {
+val x62 = if (x50) {
+val x51 = x36()
+val x56 = if (x51) {
 true
 } else {
-val x25 = x1.parens = x6
-val x26 = x1.cp = x7
-val x27 = x5 >= 0
-val x60 = if (x27) {
-val x51 = x28()
-x51
-} else {
-val x58 = x53()
-x58
+val x52 = x1.cp = x39
+val x53 = x1.parens = x38
+val x54 = x4()
+x54
 }
+x56
+} else {
+val x58 = x1.cp = x39
+val x59 = x1.parens = x38
+val x60 = x4()
 x60
 }
 x62
 }
-val x64 = x4(0)
+val x34 = if (x1.parens == null) null else x1.parens.clone //copy
+val x35 = x1.cp
+val x64 = x36()
 x64
 }
 }
@@ -101,6 +93,6 @@ x64
 *******************************************/
 
 compilation: ok
----- took 260ms
+---- took 212ms
 REGlobalData(0,4 / null)/aaab
 done
