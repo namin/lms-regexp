@@ -1,4 +1,4 @@
-package scala.virtualization.lms.regexp
+package scala.virtualization.lms.regexp.backtrack
 
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *

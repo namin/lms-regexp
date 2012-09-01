@@ -33,12 +33,21 @@
       }
     }
 
+
+    function RegExpSetup(iter) {
+      var re = /(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?/
+      var str = 'uggc://jjj.snprobbx.pbz/ybtva.cuc'
+      for (var i = 0; i < iter*2298; i++)
+        re.exec(str)
+    }
+
+
     function Run(benchIter) {
       //BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
       //                           NotifyError: PrintError,
       //                           NotifyScore: PrintScore });
       var start = new Date()
-      RegExpSetup(benchIterInner)
+      RegExpSetup(benchIter)
       var elapsed = new Date() - start
       print("elapsed: " + elapsed)
     }

@@ -1,4 +1,4 @@
-package scala.virtualization.lms.regexp
+package scala.virtualization.lms.regexp.backtrack
 
 import org.scalatest._
 
@@ -204,19 +204,21 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
 
   def run2(): Any = {
     
-    if (optUnsafe) {
+    //if (r.patternString == """/(^|[^\\])\"\\\/Qngr\((-?[0-9]+)\)\\\/\"/g""")
+      return ()//println("abort " + r.patternString)
+
+    if (optUnsafe) {     //OPT not actually replacing anything, just doing the matches
     
-    var i = 0
-    val end = s.length
-    var cnt = 0
-    while (i < end) {
-      if (s.charAt(i) == '/') cnt += 1
-      i += 1
-    }
-    return cnt
+      var i = 0
+      val end = s.length
+      var cnt = 0
+      while (i < end) {
+        if (s.charAt(i) == '/') cnt += 1
+        i += 1
+      }
+      return cnt
     }
     
-    //OPT not actually replacing anything, just doing the matches
     
     var idx = 0
     var cnt = 0
@@ -330,7 +332,7 @@ object TestV8BenchRE1 extends V8Bench {
     Util.reset()
     Util.printElapsed = true
     Util.dumpCode = true
-    Util.optUnsafe = true
+    //Util.optUnsafe = true
     
     Rhino.debug = false
     
@@ -373,6 +375,10 @@ object TestV8BenchRE1 extends V8Bench {
 }
 
 
+
+
+
+
 object TestV8BenchAll extends V8Bench {
 
   val REImpl = Util
@@ -382,7 +388,7 @@ object TestV8BenchAll extends V8Bench {
     Util.reset()
     Util.printElapsed = true
     Util.dumpCode = true
-    Util.optUnsafe = true
+    //Util.optUnsafe = true
     for (i <- 0 until 10)
       run(64)
   }  
