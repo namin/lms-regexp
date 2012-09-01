@@ -4,7 +4,7 @@ REGlobalData(0,4 / null)/qqqq
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-import scala.virtualization.lms.regexp._
+import scala.virtualization.lms.regexp.backtrack._
 import RhinoMatcher.matcher
 class staged$5 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
@@ -403,6 +403,6 @@ x271
 *******************************************/
 
 compilation: ok
----- took 1127ms
+---- took 961ms
 REGlobalData(0,4 / null)/qqqq
 done

@@ -4,90 +4,90 @@ REGlobalData(3,8 / (4,3))/aaaab,aaaa
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-import scala.virtualization.lms.regexp._
+import scala.virtualization.lms.regexp.backtrack._
 import RhinoMatcher.matcher
 class staged$2 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
 val x1 = matcher.gData
-val x9 = matcher.input
-val x10 = x9.length
+val x13 = matcher.input
+val x14 = x13.length
 val x2 = x1.cp
 val x3 = x1.cp
-def x29(): Boolean = {
-val x31 = x1.parensIndex(0)
-val x32 = x1.parensLength(0)
-val x33 = x1.cp
-val x34 = x33 - x3
-val x35 = x1.setParens(0,x3,x34)
-val x36 = x1.cp
-val x37 = x1.cp
-val x39 = x37 == x10
-val x48 = if (x39) {
-false
-} else {
-val x40 = x1.cp
-val x41 = x9.charAt(x40)
-val x42 = 'b' == x41
-val x43 = if (x42) {
-true
-} else {
-x42
-}
-val x46 = if (x43) {
-val x44 = x1.cp += 1
-true
-} else {
-false
-}
-x46
-}
-val x51 = if (x48) {
-true
-} else {
-val x49 = x1.setParens(0,x31,x32)
-false
-}
-x51
-}
-def x4(x5: (Int)): Boolean = {
-val x6 = x5 < 4
-val x63 = if (x6) {
-val x7 = x1.cp
+def x4(): Boolean = {
+val x6 = x1.parensIndex(0)
+val x7 = x1.parensLength(0)
 val x8 = x1.cp
-val x12 = x8 == x10
-val x17 = if (x12) {
+val x9 = x8 - x3
+val x10 = x1.setParens(0,x3,x9)
+val x11 = x1.cp
+val x12 = x1.cp
+val x16 = x12 == x14
+val x25 = if (x16) {
 false
 } else {
-val x13 = x1.cp
-val x14 = x9.charAt(x13)
-val x15 = Rhino.isWord(x14)
-x15
+val x17 = x1.cp
+val x18 = x13.charAt(x17)
+val x19 = 'b' == x18
+val x20 = if (x19) {
+true
+} else {
+x19
 }
-val x20 = if (x17) {
-val x18 = x1.cp += 1
+val x23 = if (x20) {
+val x21 = x1.cp += 1
 true
 } else {
 false
 }
-val x27 = if (x20) {
-val x21 = x5 + 1
-val x22 = x4(x21)
-val x25 = if (x22) {
+x23
+}
+val x28 = if (x25) {
 true
 } else {
-val x23 = x1.cp = x7
+val x26 = x1.setParens(0,x6,x7)
 false
 }
-x25
+x28
+}
+def x30(x31: (Int)): Boolean = {
+val x32 = x31 < 4
+val x63 = if (x32) {
+val x33 = x1.cp
+val x34 = x1.cp
+val x36 = x34 == x14
+val x41 = if (x36) {
+false
 } else {
-false
+val x37 = x1.cp
+val x38 = x13.charAt(x37)
+val x39 = Rhino.isWord(x38)
+x39
 }
-val x57 = if (x27) {
+val x44 = if (x41) {
+val x42 = x1.cp += 1
 true
 } else {
-val x28 = x5 >= 4
-val x55 = if (x28) {
-val x53 = x29()
+false
+}
+val x51 = if (x44) {
+val x45 = x31 + 1
+val x46 = x30(x45)
+val x49 = if (x46) {
+true
+} else {
+val x47 = x1.cp = x33
+false
+}
+x49
+} else {
+false
+}
+val x57 = if (x51) {
+true
+} else {
+val x52 = x31 >= 4
+val x55 = if (x52) {
+val x53 = x4()
 x53
 } else {
 false
@@ -96,9 +96,9 @@ x55
 }
 x57
 } else {
-val x28 = x5 >= 4
-val x61 = if (x28) {
-val x59 = x29()
+val x52 = x31 >= 4
+val x61 = if (x52) {
+val x59 = x4()
 x59
 } else {
 false
@@ -107,7 +107,7 @@ x61
 }
 x63
 }
-val x65 = x4(0)
+val x65 = x30(0)
 val x68 = if (x65) {
 true
 } else {
@@ -122,6 +122,6 @@ x68
 *******************************************/
 
 compilation: ok
----- took 278ms
+---- took 210ms
 REGlobalData(3,8 / (4,3))/aaaab,aaaa
 done

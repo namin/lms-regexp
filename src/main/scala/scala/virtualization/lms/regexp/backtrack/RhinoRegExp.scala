@@ -374,7 +374,7 @@ object RhinoNodes extends REGrammar {
   
   import Rhino._
   
-  type RENode = scala.virtualization.lms.regexp.RENode
+  type RENode = scala.virtualization.lms.regexp.backtrack.RENode
   
   def nullNode: RENode = null
   
@@ -556,10 +556,10 @@ object RhinoParser {
   
     import Rhino._
   
-    val RhinoNodes: REGrammar = scala.virtualization.lms.regexp.RhinoNodes
+    val RhinoNodes: REGrammar = scala.virtualization.lms.regexp.backtrack.RhinoNodes
     type RENode = RhinoNodes.RENode
   
-    def infix_externalize(x: RENode) = x.asInstanceOf[scala.virtualization.lms.regexp.RENode]    
+    def infix_externalize(x: RENode) = x.asInstanceOf[scala.virtualization.lms.regexp.backtrack.RENode]    
   
     // TODO: val RhinoNodes: REGrammar = 
   
@@ -1826,14 +1826,14 @@ object RhinoMatcher {
 
       val f = (c:stmatcher.INTF.Rep[Unit]) => m(()=>true)
 
-      stmatcher.IR.dump = Util.dumpCode
-      if (Util.dumpCode) println("----" + new String(re.source))
+      //stmatcher.IR.dump = Util.dumpCode
+      if (stmatcher.IR.dump) println("----" + new String(re.source))
       stmatcher.IR.reset
       val start = System.currentTimeMillis
       val fc = stmatcher.IR.compile(f) //{ (x:stmatcher.INTF.Rep[Unit]) => val g = stmatcher.IR.doLambda(f); stmatcher.IR.doApply(g,x) } // insert lambda to prevent blowup from codemotion pushing stuff into if branches
       stmatcher.IR.reset
       Predef.assert(stmatcher.IR.nVars == 0)
-      if (Util.dumpCode) println("---- took " + (System.currentTimeMillis - start) + "ms")
+      if (stmatcher.IR.dump) println("---- took " + (System.currentTimeMillis - start) + "ms")
       re.stmatcher = fc
     }
 
@@ -1919,7 +1919,7 @@ object RhinoMatcher {
           }
           override def emitForwardDef(sym: Sym[Any]): Unit = {}
           override def emitFileHeader(): Unit = {
-            stream.println("import scala.virtualization.lms.regexp._")
+            stream.println("import scala.virtualization.lms.regexp.backtrack._")
             stream.println("import RhinoMatcher.matcher")
           }
           override def quote(x: Exp[Any]) = x match {  //escapes!
@@ -1987,7 +1987,7 @@ object RhinoMatcher {
       def infix_cp(x: Rep[REGlobalData]) = unchecked[Int](x,".cp")
       def infix_cpSet(x: Rep[REGlobalData], y: Rep[Int]) = unchecked[Int](x,".cp = ",y)
       def infix_cpInc(x: Rep[REGlobalData]) = unchecked[Int](x,".cp += 1")
-      def infix_multiline(x: Rep[REGlobalData]): Rep[Boolean] = if (Util.optUnsafe) false else uncheckedPure[Boolean](x,".multiline")
+      def infix_multiline(x: Rep[REGlobalData]): Boolean = (re.flags & JSREG_MULTILINE) != 0
 
       def infix_parens(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked(x,".parens")
       //def infix_parensGet(x: Rep[REGlobalData]): Rep[Array[Int]] = unchecked(x,".parens") else unchecked("if (",x,".parens == null) null else ",x,".parens.clone //copy")

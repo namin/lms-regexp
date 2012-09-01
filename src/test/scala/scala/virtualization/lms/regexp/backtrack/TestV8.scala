@@ -1,5 +1,6 @@
 package scala.virtualization.lms.regexp.backtrack
 
+import scala.virtualization.lms.regexp.FileDiffSuite
 import org.scalatest._
 
 object Util extends REIntf {
@@ -39,6 +40,15 @@ import java.util.regex._
 
 
 val cache = new scala.collection.mutable.HashMap[String, RECompiled]
+
+def runMatch(rno: RECompiled, s: String, idx: Int) = 
+  if (runNaive) RhinoMatcher.matchNaive(rno, s, idx)
+  else {
+    RhinoMatcher.stmatcher.IR.dump = dumpCode
+    val res = RhinoMatcher.matchStaged(rno, s, idx)
+    RhinoMatcher.stmatcher.IR.dump = false
+    res
+  }
 
 
 def infix_R(s: String): Regexp = new Regexp(s)
@@ -127,8 +137,7 @@ def infix_exec(r: Regexp, s: String): Any = {
       return null
     }
 
-    val gData = if (runNaive) RhinoMatcher.matchNaive(r.rno, s, r.lastIndex)
-                else RhinoMatcher.matchStaged(r.rno, s, r.lastIndex)
+    val gData = runMatch(r.rno, s, r.lastIndex)
     if (gData == null) {
       r.lastIndex = 0
       return null
@@ -205,7 +214,7 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
   def run2(): Any = {
     
     //if (r.patternString == """/(^|[^\\])\"\\\/Qngr\((-?[0-9]+)\)\\\/\"/g""")
-      return ()//println("abort " + r.patternString)
+      //return ()//println("abort " + r.patternString)
 
     if (optUnsafe) {     //OPT not actually replacing anything, just doing the matches
     
@@ -227,7 +236,7 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
     def fix(res: String) = if (res.nonEmpty && res.last == '\n') res.init else res
     
     while (true) {
-      val gData = if (runNaive) RhinoMatcher.matchNaive(r.rno, s, idx) else RhinoMatcher.matchStaged(r.rno, s, idx)
+      val gData = runMatch(r.rno, s, idx)
 
       if (gData == null) {
         acc append s.substring(idx, s.length)
@@ -257,121 +266,6 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
   log(key, run2())
 }
 
-}
-
-
-
-class TestRhino extends FileDiffSuite {
-
-  def run(re: String, in: String) = {
-    Util.reset()
-    Util.dumpCode = true
-    
-    println(re + " @ " + in)
-    val start = System.currentTimeMillis
-    val rno = RhinoParser.compileREStub(re, "", false)
-
-    val res1 = RhinoMatcher.matchNaive(rno, in, 0)
-    val str1 = if (res1 == null) "null" else res1 + "/" + (res1.groups(in).mkString(","))
-    println(str1)
-
-    val res2 = RhinoMatcher.matchStaged(rno, in, 0)
-    val str2 = if (res2 == null) "null" else res2 + "/" + (res2.groups(in).mkString(","))
-    println(str2)
-    
-    expect(str1)(str2)
-
-    println("done")
-  }
-
-  def test1 = withOutFileChecked("test-out/rhino1") {
-    run("""aab|aac""", "aaac")
-  }
-
-  def test2 = withOutFileChecked("test-out/rhino2") {
-    run("""\w*b""", "aaabc")
-  }
-
-  def test3 = withOutFileChecked("test-out/rhino3") {
-    run("""(\w{4})b""", "aaaaaaabc")
-  }
-
-  def test4 = withOutFileChecked("test-out/rhino4") {
-    // 3000 - 4000 ms
-    // (why?)
-    run("""(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?""",
-    "uggc://jjj.snprobbx.pbz/ybtva.cuc")
-  }
-
-  def test5 = withOutFileChecked("test-out/rhino5") {
-    // 800 ms
-    // need to locate Nccyr
-    run("""(?:ZFVR.(\d+\.\d+))|(?:(?:Sversbk|TenaCnenqvfb|Vprjrnfry).(\d+\.\d+))|(?:Bcren.(\d+\.\d+))|(?:NccyrJroXvg.(\d+(?:\.\d+)?))""",
-    "Zbmvyyn/5.0 (Jvaqbjf; H; Jvaqbjf AG 5.1; ra-HF) NccyrJroXvg/528.9 (XUGZY, yvxr Trpxb) Puebzr/2.0.157.0 Fnsnev/528.9")
-  }
-
-  def test6 = withOutFileChecked("test-out/rhino6") {
-    run("""qqqq|qqq|qq|q|ZZZZ|ZZZ|ZZ|Z|llll|ll|l|uu|u|UU|U|zz|z|ff|f|gg|g|sss|ss|s|mmm|mm|m""",
-    "qqqq, ZZZ q, llll")
-  }
-
-  def test7 = withOutFileChecked("test-out/rhino7") {
-    run("""(\\\"|\x00-|\x1f|\x7f-|\x9f|\u00ad|\u0600-|\u0604|\u070f|\u17b4|\u17b5|\u200c-|\u200f|\u2028-|\u202f|\u2060-|\u206f|\ufeff|\ufff0-|\uffff)""",
-    "GnoThvq")
-  }
-  
-}
-
-
-object TestV8BenchRE1 extends V8Bench {
-
-  override val REImpl = Util
-
-  def main(args: Array[String]): Unit = {
-    System.out.println("HELLO")
-    Util.reset()
-    Util.printElapsed = true
-    Util.dumpCode = true
-    //Util.optUnsafe = true
-    
-    Rhino.debug = false
-    
-    val re = """(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?"""
-    val in = "uggc://jjj.snprobbx.pbz/ybtva.cuc"
-    
-    val rno = RhinoParser.compileREStub(re, "", false)
-
-    val gData = RhinoMatcher.matchStaged(rno, in, 0)
-    val f = rno.stmatcher
-
-    def run() = {
-      
-      //val res1 = RhinoMatcher.matchNaive(rno, in, 0)
-      //val str2 = if (res2 == null) "null" else res2 //+ "/" + (res2.groups(in).mkString(","))
-      //println(str2)
-      //println("done naive: " + res1)
-      
-      //val res2 = RhinoMatcher.matchStaged(rno, in, 0)
-      gData.skipped = 0
-      gData.cp = 0
-      f()
-      
-      //val str2 = if (res2 == null) "null" else res2 //+ "/" + (res2.groups(in).mkString(","))
-      //println(str2)
-      //println("done staged: " + res2)
-    }
-    
-    for (i <- 0 until 10) {
-      val start = System.currentTimeMillis
-      var i = 0
-      while (i < 2298*64) {
-        run()
-        i += 1
-      }
-      println("elapsed: " + (System.currentTimeMillis - start))
-    }
-  }  
-  
 }
 
 

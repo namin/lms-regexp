@@ -1,6 +1,6 @@
 package scala.virtualization.lms.regexp.backtrack.handopt
 
-object TestRE1MatcherX  {
+object TestRE1MatcherHandopt  {
 
   def run0: Unit = {
     System.out.println("re1matcher0")
@@ -10,7 +10,7 @@ object TestRE1MatcherX  {
     val cp = 0
     val f = new re1matcher0()
 
-    def run() = {
+    def run = {
       f(cp, in)
     }
     
@@ -18,10 +18,10 @@ object TestRE1MatcherX  {
       val start = System.currentTimeMillis
       var i = 0
       while (i < 2298*64) {
-        run()
+        run
         i += 1
       }
-      println("elapsed: " + (System.currentTimeMillis - start))
+      System.out.println("elapsed: " + (System.currentTimeMillis - start))
     }
   }  
   
@@ -34,7 +34,7 @@ object TestRE1MatcherX  {
     val cp = 0
     val f = new re1matcher1()
 
-    def run() = {
+    def run = {
       f(cp, in)
     }
     
@@ -42,16 +42,16 @@ object TestRE1MatcherX  {
       val start = System.currentTimeMillis
       var i = 0
       while (i < 2298*64) {
-        run()
+        run
         i += 1
       }
-      println("elapsed: " + (System.currentTimeMillis - start))
+      System.out.println("elapsed: " + (System.currentTimeMillis - start))
     }
   }  
 
   def main(args: Array[String]): Unit = {
-    run0()
-    run1()
+    run0
+    run1
   }
 
 }
