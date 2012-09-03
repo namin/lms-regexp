@@ -14,6 +14,7 @@ var printElapsed = false
 var dumpCode = false
 var runNaive = false
 var optUnsafe = false
+var disableReplace = false
 
 def reset() = {
   printKey = false
@@ -72,7 +73,176 @@ class Regexp(val patternString: String) {
     if (special(patternString) == s) patternString
     else s
   }
+    
+  override def toString = patternString
+}
   
+
+class MatchResult(val index: Int, val input: String, val array: Array[String]) {
+  override def toString = array.map(s=>if (s eq null) "" else s).mkString(",")
+}
+
+
+def infix_exec(r: Regexp, s: String): Any = {  
+  
+  def run(): Any = {
+    
+    if (r.global && r.lastIndex > s.length()) { 
+      r.lastIndex = 0 
+      return null
+    }
+
+    val gData = runMatch(r.rno, s, r.lastIndex)
+    if (gData == null) {
+      r.lastIndex = 0
+      return null
+    }
+    
+    if (r.global)
+      r.lastIndex = gData.cp
+    
+    val groups = if (optUnsafe) null else gData.groups(s)
+    
+    //println(gData)
+    
+    new MatchResult(gData.skipped, s, groups)
+  }
+
+  if (!printKey) return run()
+  
+  val key = "exec " + r + " @ " + s
+  log(key, run())
+}
+
+def infix_split(s: String, r: Regexp): Any = {
+  def run(): Any = {
+    val data = s.split(r.special(r.patternString)) // TODO: use Rhino
+    new MatchResult(0,s,data)
+  }
+  
+  if (!printKey) return run()
+  
+  val key = "split " + r + " @ " + s  
+  log(key, run())
+}
+
+def infix_matches(s: String, r: Regexp): Any = {
+  
+  // without /g, same as r.exec(s): return array with first match of each group
+  // with /g, return all matches of whole expr
+  
+  def run(): Any = {
+    // str.match(regexp)
+    // if not global flag, then RegExp.exec, else array with all matches
+    if (!r.global) {
+        assert(false)
+        return r.exec(s) // this will cause an extra line of output: 'exec ...'
+    }
+
+    /*// array with all matches
+    val m = r.pat.right.get.matcher(s);
+    val data = new scala.collection.mutable.ArrayBuffer[String]
+    while (m.find()) {
+      data += m.group()
+    }
+    
+    if (data.isEmpty) return null
+    new MatchResult(0,s,data.toArray) // TODO: use Rhino
+    */ return null
+  }
+
+  if (!printKey) return run()
+
+  val key = "match " + r + " @ " + s
+  log(key, run())
+}
+
+def infix_replace(s: String, r: Regexp, s2: String): Any = {
+
+  def run(): Any = {
+    
+    //if (r.patternString == """/(^|[^\\])\"\\\/Qngr\((-?[0-9]+)\)\\\/\"/g""")
+      //return ()//println("abort " + r.patternString)
+
+    if (disableReplace) {     //OPT not actually replacing anything, just doing the matches
+      return null
+      /*var i = 0
+      val end = s.length
+      var cnt = 0
+      while (i < end) {
+        if (s.charAt(i) == '/') cnt += 1
+        i += 1
+      }
+      return cnt*/
+    }
+    
+    
+    var idx = 0
+    var cnt = 0
+    val acc = new java.lang.StringBuilder    
+    
+    def fix(res: String) = if (res.nonEmpty && res.last == '\n') res.init else res
+    
+    while (true) {
+      val gData = runMatch(r.rno, s, idx)
+
+      if (gData == null) {
+        acc append s.substring(idx, s.length)
+        return fix(acc.toString)
+      }
+    
+      acc append s.substring(idx, gData.skipped)
+      acc append s2
+      
+      if (!r.global || gData.cp >= s.length) {
+        acc append s.substring(gData.cp, s.length)
+        return fix(acc.toString)
+      }
+      
+      if (gData.cp == idx) {   // need to make progress (don't check same pos again...)
+        acc append s.substring(gData.cp, gData.cp + 1)
+        idx = gData.cp + 1
+      } else
+        idx = gData.cp
+      cnt += 1
+    }
+  }
+
+  if (!printKey) return run()
+  
+  val key = "replace " + r + " @ " + s + " -- " + s2
+  log(key, run())
+}
+
+}
+
+
+
+object UtilJDK extends REIntf {
+
+import java.util.regex._
+
+
+def infix_R(s: String): Regexp = new Regexp(s)
+
+class Regexp(val patternString: String) {
+  
+  var caseInsensitive = patternString.substring(patternString.lastIndexOf("/")).contains("i")
+  var global = patternString.substring(patternString.lastIndexOf("/")).contains("g")
+  var lastIndex = 0
+  
+  def special(s: String) = s match {
+    case """/^[\s[]?shapgvba/""" => """^[\s\[]?shapgvba"""
+    case _ => 
+      s.substring(1, s.lastIndexOf("/"))
+  }
+  
+  def unspecial(s: String) = {
+    if (special(patternString) == s) patternString
+    else s
+  }
+  
+  // cache? no, Pattern.compile should worry about it
   lazy val pat = try { 
     if (caseInsensitive) Right(Pattern.compile(special(patternString), Pattern.CASE_INSENSITIVE))
     else Right(Pattern.compile(special(patternString))) 
@@ -130,33 +300,10 @@ def infix_exec(r: Regexp, s: String): Any = {
   }
   
   
-  def run2(): Any = {
-    
-    if (r.global && r.lastIndex > s.length()) { 
-      r.lastIndex = 0 
-      return null
-    }
+  if (!Util.printKey) return run()
 
-    val gData = runMatch(r.rno, s, r.lastIndex)
-    if (gData == null) {
-      r.lastIndex = 0
-      return null
-    }
-    
-    if (r.global)
-      r.lastIndex = gData.cp
-    
-    val groups = if (optUnsafe) null else gData.groups(s)
-    
-    //println(gData)
-    
-    new MatchResult(gData.skipped, s, groups)
-  }
-
-  if (!printKey) return run2()
-  
   val key = "exec " + r + " @ " + s
-  log(key, run2())
+  Util.log(key, run())
 }
 
 def infix_split(s: String, r: Regexp): Any = {
@@ -165,10 +312,10 @@ def infix_split(s: String, r: Regexp): Any = {
     new MatchResult(0,s,data)
   }
   
-  if (!printKey) return run()
+  if (!Util.printKey) return run()
   
-  val key = "split " + r + " @ " + s  
-  log(key, run())
+  val key = "split " + r + " @ " + s
+  Util.log(key, run())
 }
 
 def infix_matches(s: String, r: Regexp): Any = {
@@ -195,75 +342,29 @@ def infix_matches(s: String, r: Regexp): Any = {
     new MatchResult(0,s,data.toArray)
   }
 
-  if (!printKey) return run()
+  if (!Util.printKey) return run()
 
   val key = "match " + r + " @ " + s
-  log(key, run())
+  Util.log(key, run())
 }
 
 def infix_replace(s: String, r: Regexp, s2: String): Any = {
 
-  def run(): Any = { //return "TODO"
+  def run(): Any = {
     
+    if (Util.disableReplace)
+      return null
+
     val m = r.pat.right.get.matcher(s);
     
     val res = if (!r.global) m.replaceFirst(s2) else m.replaceAll(s2)
     if (res.nonEmpty && res.last == '\n') res.init else res
   }
 
-  def run2(): Any = {
-    
-    //if (r.patternString == """/(^|[^\\])\"\\\/Qngr\((-?[0-9]+)\)\\\/\"/g""")
-      //return ()//println("abort " + r.patternString)
-
-    if (optUnsafe) {     //OPT not actually replacing anything, just doing the matches
-    
-      var i = 0
-      val end = s.length
-      var cnt = 0
-      while (i < end) {
-        if (s.charAt(i) == '/') cnt += 1
-        i += 1
-      }
-      return cnt
-    }
-    
-    
-    var idx = 0
-    var cnt = 0
-    val acc = new java.lang.StringBuilder    
-    
-    def fix(res: String) = if (res.nonEmpty && res.last == '\n') res.init else res
-    
-    while (true) {
-      val gData = runMatch(r.rno, s, idx)
-
-      if (gData == null) {
-        acc append s.substring(idx, s.length)
-        return fix(acc.toString)
-      }
-    
-      acc append s.substring(idx, gData.skipped)
-      acc append s2
-      
-      if (!r.global || gData.cp >= s.length) {
-        acc append s.substring(gData.cp, s.length)
-        return fix(acc.toString)
-      }
-      
-      if (gData.cp == idx) {   // need to make progress (don't check same pos again...)
-        acc append s.substring(gData.cp, gData.cp + 1)
-        idx = gData.cp + 1
-      } else
-        idx = gData.cp
-      cnt += 1
-    }
-  }
-
-  if (!printKey) return run2()
+  if (!Util.printKey) return run()
   
   val key = "replace " + r + " @ " + s + " -- " + s2
-  log(key, run2())
+  Util.log(key, run())
 }
 
 }
@@ -271,9 +372,23 @@ def infix_replace(s: String, r: Regexp, s2: String): Any = {
 
 
 
+object TestV8BenchAllNaive extends V8Bench {
 
+  val REImpl = Util
+  
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.runNaive = true
+    Util.printElapsed = true
+    
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
 
-object TestV8BenchAll extends V8Bench {
+object TestV8BenchAllStaged extends V8Bench {
 
   val REImpl = Util
   
@@ -282,12 +397,121 @@ object TestV8BenchAll extends V8Bench {
     Util.reset()
     Util.printElapsed = true
     Util.dumpCode = true
-    //Util.optUnsafe = true
+
     for (i <- 0 until 10)
       run(64)
   }  
   
 }
+
+
+object TestV8BenchAllStagedUnsafe extends V8Bench {
+
+  val REImpl = Util
+  
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.printElapsed = true
+    Util.dumpCode = true
+    Util.optUnsafe = true
+
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
+
+
+
+object TestV8BenchAllJDK extends V8Bench {
+
+  val REImpl = UtilJDK
+  
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.printElapsed = true
+    
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
+
+object TestV8BenchNoReplaceNaive extends V8Bench {
+
+  val REImpl = Util
+  
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.printElapsed = true
+    Util.runNaive = true
+    Util.disableReplace = true
+    
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
+
+object TestV8BenchNoReplaceStaged extends V8Bench {
+
+  val REImpl = Util
+  
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.printElapsed = true
+    Util.dumpCode = true
+    Util.disableReplace = true
+    
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
+
+object TestV8BenchNoReplaceStagedUnsafe extends V8Bench {
+
+  val REImpl = Util
+  
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.printElapsed = true
+    Util.dumpCode = true
+    Util.disableReplace = true
+    Util.optUnsafe = true
+
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
+
+
+
+object TestV8BenchNoReplaceJDK extends V8Bench {
+
+  val REImpl = UtilJDK
+  
+  def main(args: Array[String]): Unit = {
+    System.out.println("HELLO")
+    Util.reset()
+    Util.printElapsed = true
+    Util.disableReplace = true
+    
+    for (i <- 0 until 10)
+      run(64)
+  }  
+  
+}
+
+
+
+
 
 
 class TestV8 extends V8Bench with FileDiffSuite {

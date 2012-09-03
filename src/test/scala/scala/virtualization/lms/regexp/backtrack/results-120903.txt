@@ -1,0 +1,305 @@
+Numbers taken Sep 3, 2012, MacBook Pro 2.6 GHz, Java 1.6.0_33 64-bit server
+
+
+Summary
+=======
+
+safari
+
+450   all
+190   no replace
+9     just re1
+
+chrome
+
+400   all
+300   no replace
+40    just re1
+
+staged
+
+2000  all
+800   no replace
+40    just re1
+
+jdk
+
+2750  all
+1100  no replace
+113   just re1
+
+naive
+
+30000 all
+10000 no replace
+3600  just re1
+
+
+
+Raw Data
+========
+
+## Complete Benchmark
+
+# Safari
+
+elapsed: 540
+elapsed: 451
+elapsed: 442
+elapsed: 443
+elapsed: 449
+elapsed: 442
+elapsed: 488
+elapsed: 447
+elapsed: 452
+elapsed: 451
+
+
+# Chrome
+
+elapsed: 411
+elapsed: 395
+elapsed: 393
+elapsed: 394
+elapsed: 423
+elapsed: 394
+elapsed: 393
+elapsed: 395
+elapsed: 396
+elapsed: 395
+
+
+# Scala naive unstaged
+
+elapsed: 30750
+elapsed: 30336
+elapsed: 30267
+elapsed: 30250
+elapsed: 30204
+elapsed: 30155
+elapsed: 30089
+elapsed: 30177
+elapsed: 30154
+elapsed: 29821
+
+
+# Staged
+
+elapsed: 30195
+elapsed: 2276
+elapsed: 2175
+elapsed: 2136
+elapsed: 2120
+elapsed: 2099
+elapsed: 2096
+elapsed: 2086
+elapsed: 2076
+elapsed: 2079
+
+
+# Staged (skipping final submatch extraction)
+
+elapsed: 28007
+elapsed: 2047
+elapsed: 1941
+elapsed: 1922
+elapsed: 1887
+elapsed: 1884
+elapsed: 1875
+elapsed: 1869
+elapsed: 1846
+elapsed: 1844
+
+
+# JDK
+
+elapsed: 3377
+elapsed: 2882
+elapsed: 2806
+elapsed: 2785
+elapsed: 2788
+elapsed: 2775
+elapsed: 2797
+elapsed: 2776
+elapsed: 2787
+elapsed: 2769
+
+
+
+
+
+
+
+
+## Disable replace
+
+# Safari
+
+elapsed: 268
+elapsed: 199
+elapsed: 207
+elapsed: 185
+elapsed: 191
+elapsed: 181
+elapsed: 195
+elapsed: 188
+elapsed: 189
+elapsed: 187
+
+# Chrome
+
+elapsed: 309
+elapsed: 304
+elapsed: 312
+elapsed: 304
+elapsed: 299
+elapsed: 300
+elapsed: 300
+elapsed: 302
+elapsed: 301
+elapsed: 305
+
+
+# Scala naive unstaged
+
+elapsed: 11389
+elapsed: 10879
+elapsed: 10947
+elapsed: 10638
+elapsed: 10709
+elapsed: 10717
+elapsed: 10748
+elapsed: 10817
+elapsed: 10806
+elapsed: 10845
+
+
+# Staged
+
+elapsed: 25872
+elapsed: 920
+elapsed: 880
+elapsed: 840
+elapsed: 831
+elapsed: 812
+elapsed: 797
+elapsed: 787
+elapsed: 791
+elapsed: 795
+
+
+# Staged (skipping final submatch extraction)
+
+elapsed: 18939
+elapsed: 671
+elapsed: 614
+elapsed: 581
+elapsed: 573
+elapsed: 569
+elapsed: 545
+elapsed: 536
+elapsed: 530
+elapsed: 550
+
+
+# JDK
+
+elapsed: 1408
+elapsed: 1305
+elapsed: 1183
+elapsed: 1172
+elapsed: 1168
+elapsed: 1170
+elapsed: 1160
+elapsed: 1167
+elapsed: 1172
+elapsed: 1172
+
+
+
+
+
+## RE1 only
+
+# Safari
+
+elapsed: 12
+elapsed: 8
+elapsed: 9
+elapsed: 9
+elapsed: 9
+elapsed: 9
+elapsed: 9
+elapsed: 8
+elapsed: 9
+elapsed: 9
+
+# Chrome
+
+elapsed: 43
+elapsed: 42
+elapsed: 41
+elapsed: 42
+elapsed: 42
+elapsed: 42
+elapsed: 41
+elapsed: 42
+elapsed: 42
+elapsed: 42
+
+
+Naive
+
+elapsed: 3830
+elapsed: 3614
+elapsed: 3629
+elapsed: 3608
+elapsed: 3607
+elapsed: 3605
+elapsed: 3603
+elapsed: 3616
+elapsed: 3605
+elapsed: 3601
+
+
+Staged
+
+elapsed: 122
+elapsed: 41
+elapsed: 42
+elapsed: 41
+elapsed: 42
+elapsed: 41
+elapsed: 40
+elapsed: 41
+elapsed: 42
+elapsed: 41
+
+
+JDK
+
+elapsed: 116
+elapsed: 113
+elapsed: 113
+elapsed: 112
+elapsed: 112
+elapsed: 113
+elapsed: 113
+elapsed: 113
+elapsed: 113
+elapsed: 113
+
+
+Hand optimized
+
+elapsed: 24
+elapsed: 10
+elapsed: 7
+elapsed: 6
+elapsed: 7
+elapsed: 6
+elapsed: 7
+elapsed: 6
+elapsed: 7
+elapsed: 7
+

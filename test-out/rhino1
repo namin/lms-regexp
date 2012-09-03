@@ -28,6 +28,6 @@ x11
 *******************************************/
 
 compilation: ok
----- took 455ms
+---- took 821ms
 REGlobalData(1,4 / null)/aac
 done
