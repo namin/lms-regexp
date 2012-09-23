@@ -6,9 +6,11 @@ organization := "EPFL"
 
 resolvers += ScalaToolsSnapshots
 
-resolvers += dropboxScalaTestRepo
+//resolvers += dropboxScalaTestRepo
 
-scalaOrganization := "org.scala-lang"
+resolvers += prereleaseScalaTest
+
+scalaOrganization := "org.scala-lang.virtualized"
 
 //scalaBinaryVersion := virtScala // necessary??
 
@@ -27,7 +29,7 @@ libraryDependencies += "org.scala-lang" % "scala-compiler" % virtScala
 
 libraryDependencies += scalaTest
 
-libraryDependencies += "EPFL" % "lms_2.10.0-M1-virtualized" % "0.2"
+libraryDependencies += "EPFL" %% "lms" % "0.2"
 
 // tests are not thread safe
 parallelExecution in Test := false
