@@ -31,6 +31,14 @@ object BitCoded {
   val c1: Bit = true
   val epsilon: Code = List()
 
+  def str(c: Code): String = {
+    c.map(if (_) "1" else "0").mkString
+  }
+
+  def unstr(s: String): Code = {
+    s.map(c => if (c == '0') c0 else c1).toList
+  }
+
   def code(v : V): Code = v match {
     case V0() => epsilon
     case V1() => epsilon
