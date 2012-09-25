@@ -4,6 +4,7 @@ import org.scalatest._
 
 class TestBitCoded extends Suite {
   import BitCoded._
+  import Parsing._
 
   // ((ab)(c|d)|(abc))*
   val exE = Estar(Eplus(
@@ -32,6 +33,7 @@ class TestBitCoded extends Suite {
   val ex1code = "001011"
   val ex2code = "0010001"
 
+  val exE2 = Eprod(Echar('a'), Eprod(Estar(Eplus(Echar('b'), Echar('c'))), Echar('a')))
 
   def testCode1 = {
     expect(ex1code){str(code(ex1))}
@@ -47,5 +49,17 @@ class TestBitCoded extends Suite {
 
   def testDecode2 = {
     expect(ex2){decode(exE)(unstr(ex2code))}
+  }
+
+  def testNfa = {
+    val nfa = NFA.fromE(exE)
+    val codes = NFA.run(nfa)("abdabc".toList)
+    expect(Set(ex1code, ex2code))(codes.map(str))
+  }
+
+  def testNfa2 = {
+    val nfa = NFA.fromE(exE2)
+    val codes = NFA.run(nfa)("abca".toList)
+    expect(Set("00011"))(codes.map(str))
   }
 }

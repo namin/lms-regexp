@@ -1,5 +1,9 @@
 package scala.virtualization.lms.regexp
 
+/**
+ * Bit-coded Regular Expression Parsing by Lasse Nielsen and Fritz Henglein
+ */
+
 sealed abstract class V { v =>
   val e : E { type T >: v.type }
 }
@@ -20,16 +24,14 @@ case class Eplus(e1: E, e2: E) extends E { type T = Vplus }
 case class Eprod(e1: E, e2: E) extends E { type T = Vprod }
 case class Estar(es: E) extends E { type T = Vstar }
 
-/**
- * Bit-coded Regular Expression Parsing
- * by Lasse Nielsen and Fritz Henglein
- */
 object BitCoded {
   type Code = List[Bit]
   type Bit = Boolean
   val c0: Bit = false
   val c1: Bit = true
   val epsilon: Code = List()
+
+  def one(c: Bit): Code = List(c)
 
   def str(c: Code): String = {
     c.map(if (_) "1" else "0").mkString
@@ -72,5 +74,71 @@ object BitCoded {
     }
     val (v, `epsilon`) = rec(e)(d)
     v
+  }
+}
+
+object Parsing {
+  import BitCoded._
+
+  case class Tr(fromState: Int, toState: Int, input: Option[Char], output: List[Bit]) {
+    def mapStates(f: Int => Int) = Tr(f(fromState), f(toState), input, output)
+  }
+  case class NFA(nStates: Int, transitions: Set[Tr])
+
+  object NFA {
+    def mapStates(ts: Set[Tr], f: Int => Int): Set[Tr] = ts.map(_.mapStates(f))
+    def inout(n: Int, f: Int => Int = s => s): (Int,Int) = (f(0), f(n-1))
+
+    def fromE(e: E): NFA = e match {
+      case E0 => NFA(2, Set())
+      case E1 => NFA(1, Set())
+      case Echar(c) =>
+        val (in0,out0) = inout(2)
+        NFA(2, Set(Tr(in0, out0, Some(c), epsilon)))
+      case Eprod(e1, e2) =>
+        val NFA(n1, t1) = fromE(e1)
+        val NFA(n2, t2) = fromE(e2)
+        val f2 = (s: Int) => s + n1 - 1
+        NFA(n1 + n2 - 1,t1 ++ mapStates(t2, f2))
+      case Eplus(e1, e2) =>
+        val NFA(n1, t1) = fromE(e1)
+        val NFA(n2, t2) = fromE(e2)
+        val f1 = (s: Int) => s + 1
+        val f2 = (s: Int) => s + 1 + n1
+        val (in1, out1) = inout(n1, f1)
+        val (in2, out2) = inout(n2, f2)
+        val n = n1 + n2 + 2
+        val (in0,out0) = inout(n)
+        NFA(n, mapStates(t1, f1) ++ mapStates(t2, f2) ++ Set(
+	  Tr(in0, in1, None, one(c0)),
+	  Tr(in0, in2, None, one(c1)),
+	  Tr(out1, out0, None, epsilon),
+	  Tr(out2, out0, None, epsilon)
+	))
+      case Estar(es) =>
+        val NFA(ns,ts) = fromE(es)
+        val fs = (s: Int) => s + 1
+        val n = ns + 2
+        val (ins,outs) = inout(ns, fs)
+        val (in0,out0) = inout(n)
+        NFA(n, mapStates(ts, fs) ++ Set(
+	  Tr(in0, ins, None, one(c0)),
+	  Tr(outs, in0, None, epsilon),
+	  Tr(in0, out0, None, one(c1))
+	))
+      case _ => ???
+    }
+
+    def run(nfa: NFA)(str: List[Char]): Set[Code] = {
+      val NFA(n, t) = nfa
+      val (in0,out0) = inout(n)
+      var paths = Set((in0, str, epsilon))
+      var results = Set[Code]()
+      while (!paths.isEmpty) {
+	results ++= paths.collect{case (`out0`, Nil, output) => output.reverse}
+	paths = paths.filter{case (s,cs,d) => !cs.isEmpty}.flatMap{case (s,c::cs,d) => t.collect{case Tr(`s`, toState, Some(`c`), output) => (toState, cs, output ++ d)}} ++ paths.flatMap{case (s,cs,d) => t.collect{case Tr(`s`, toState, None, output) => (toState, cs, output ++ d)}}
+      }
+      return results
+    }
   }
 }
