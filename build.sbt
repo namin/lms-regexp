@@ -29,7 +29,7 @@ libraryDependencies += "org.scala-lang" % "scala-compiler" % virtScala
 
 libraryDependencies += scalaTest
 
-libraryDependencies += "EPFL" %% "lms" % "0.2"
+libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
 
 // tests are not thread safe
 parallelExecution in Test := false
