@@ -257,5 +257,30 @@ object Parsing {
 
       result
     }
+
+    def run(dfa: DFA)(str: List[Char]): Option[Code] = {
+      var states = List(0)
+      var outputMaps = List[Map[NState, (NState, Code)]]()
+      for (c <- str) {
+        val ts = dfa.transitions.filter(t => t.fromState == states.head && t.input == c)
+        if (ts.isEmpty) return None
+        assert(ts.size == 1)
+        val t = ts.head
+        states = t.toState :: states
+        outputMaps = t.outputMap :: outputMaps
+      }
+      if (!dfa.finals.contains(states.head)) return None
+
+      var code = epsilon
+      var nfaState = dfa.nfaFinal
+      for (m <- outputMaps) {
+        val (prevNfaState, extraCode) = m(nfaState)
+        code = extraCode ++ code
+        nfaState = prevNfaState
+      }
+      code = dfa.initMap(nfaState) ++ code
+
+      Some(code)
+    }
   }
 }

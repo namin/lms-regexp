@@ -84,4 +84,29 @@ class TestBitCoded extends Suite {
       DFA.fromNFA(nfa)
     }
   }
+
+  def testParsing = {
+    val nfa = NFA.fromE(exE)
+    val dfa = DFA.fromNFA(nfa)
+    expect(Some(ex1code)){
+      (DFA.run(dfa)("abdabc".toList)).map(str)
+    }
+    expect(None){
+      (DFA.run(dfa)("abdabca".toList)).map(str)
+    }
+    expect(None){
+      (DFA.run(dfa)("abdabcx".toList)).map(str)
+    }
+  }
+
+  def testParsing2 = {
+    val nfa = NFA.fromE(exE2)
+    val dfa = DFA.fromNFA(nfa)
+    expect(Some("00011")){
+      (DFA.run(dfa)("abca".toList)).map(str)
+    }
+    expect(None){
+      (DFA.run(dfa)("abc".toList)).map(str)
+    }
+  }
 }
