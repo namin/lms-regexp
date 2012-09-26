@@ -30,6 +30,20 @@ object BitCoded {
   val c1: Bit = true
   val epsilon: Code = List()
 
+  def compareCodes(a: Code, b: Code): Boolean = {
+    def rec(a: Code, b: Code): Boolean = {
+      if (a.isEmpty && b.isEmpty) false
+      else if (a.head < b.head) true
+      else if (a.head > b.head) false
+      else rec(a.tail, b.tail)
+    }
+    val na = a.length
+    val nb = b.length
+    if (na < nb) true
+    else if (na > nb) false
+    else rec(a, b)
+  }
+
   def one(c: Bit): Code = List(c)
 
   def str(c: Code): String = {
@@ -144,11 +158,75 @@ object Parsing {
   type NState = Int
   type DState = Int
   case class DTr(fromState: DState, toState: DState, input: Char, outputMap: Map[NState, (NState, Code)])
-  case class DFA(nStates: Int, finals: Set[DState], transitions: Set[DTr], stateMap: Map[DState, Set[NState]], initMap: Map[NState, Code])
+  case class DFA(nStates: Int, finals: Set[DState], transitions: Set[DTr], stateMap: Map[DState, Set[NState]], initMap: Map[NState, Code], nfaFinal: NState)
 
   object DFA {
+    // adapted from http://www.cs.nuim.ie/~jpower/Courses/Previous/parsing/node9.html
     def fromNFA(nfa: NFA): DFA = {
-      ???
+      val closures = epsilonClosures(nfa)
+
+      val (nfaIn,nfaOut) = NFA.inout(nfa.nStates)
+      val dfaIn = 0
+      var nStates = 1
+      val inClosure = closures(nfaIn)
+      var stateMap = Map(dfaIn -> inClosure.keySet)
+      var invStateMap = Map(inClosure.keySet -> dfaIn)
+      val initMap = inClosure
+      var transitions = Set[DTr]()
+
+      var stack = collection.immutable.Stack[DState]()
+      stack = stack.push(dfaIn)
+
+      while (!stack.isEmpty) {
+        val dfaState = stack.top
+        stack = stack.pop
+        val nfaStates = stateMap(dfaState)
+
+        val possibleInputs: Set[Char] = for (tr <- nfa.transitions;
+          if nfaStates.contains(tr.fromState);
+          if tr.input != None) yield tr.input.get
+
+        for (c <- possibleInputs) {
+          val fromCtoDirect: Set[(NState, Code, NState)] =
+            for (tr <- nfa.transitions;
+              if nfaStates.contains(tr.fromState);
+              if tr.input == Some(c))
+            yield (tr.fromState, tr.output, tr.toState)
+          val fromCtoClosed: Set[(NState, Code, NState)] =
+            for ((fromState, code, toState) <- fromCtoDirect;
+              (eState: NState, eCode: Code) <- closures(toState).toSet)
+            yield (fromState, code ++ eCode, eState)
+
+          val outputMap: Map[NState, (NState, Code)] =
+            for (((fromState, toState), choices) <- fromCtoClosed.groupBy(x => (x._1, x._3));
+              code = choices.map(_._2).toList.sortWith(compareCodes).head)
+            yield (toState -> (fromState, code))
+
+          val toStates = outputMap.keySet
+          val toDfaState = invStateMap.get(toStates) match {
+            case Some(s) => s
+            case None =>
+              val s = nStates
+              nStates = nStates + 1
+              stateMap = stateMap.updated(s, toStates)
+              invStateMap = invStateMap.updated(toStates, s)
+              stack = stack.push(s)
+              s
+          }
+
+          transitions = transitions + DTr(
+            dfaState,
+            toDfaState,
+            c,
+            outputMap
+          )
+        }
+      }
+
+      val finals = for ((dfaState, nfaStates) <- stateMap.toSet;
+        if nfaStates.contains(nfaOut)) yield dfaState
+
+      DFA(nStates, finals, transitions, stateMap, initMap, nfaOut)
     }
 
     // adapted from http://www.cs.uaf.edu/~cs631/notes/strings/aho2ed/Fig3_33.gif

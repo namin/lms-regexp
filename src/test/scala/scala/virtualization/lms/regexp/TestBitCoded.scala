@@ -74,4 +74,14 @@ class TestBitCoded extends Suite {
       DFA.epsilonClosures(nfa)
     }
   }
+
+  def testDFA = {
+    val nfa = NFA.fromE(exStar1)
+    expect(DFA(1, Set(0), Set(),
+      Map(0 -> Set(0, 1, 2)),
+      Map(0 -> List(), 1 -> List(false), 2 -> List(true)),
+      2)){
+      DFA.fromNFA(nfa)
+    }
+  }
 }
