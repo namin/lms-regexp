@@ -1,8 +1,7 @@
 package scala.virtualization.lms.regexp
 
-/**
- * Bit-coded Regular Expression Parsing by Lasse Nielsen and Fritz Henglein
- */
+// Bit-coded Regular Expression Parsing by Lasse Nielsen and Fritz Henglein
+// http://www.diku.dk/hjemmesider/ansatte/henglein/papers/henglein2011b.pdf
 
 sealed abstract class V { v =>
   val e : E { type T >: v.type }
@@ -139,6 +138,46 @@ object Parsing {
 	paths = paths.filter{case (s,cs,d) => !cs.isEmpty}.flatMap{case (s,c::cs,d) => t.collect{case NTr(`s`, toState, Some(`c`), output) => (toState, cs, output ++ d)}} ++ paths.flatMap{case (s,cs,d) => t.collect{case NTr(`s`, toState, None, output) => (toState, cs, output ++ d)}}
       }
       return results
+    }
+  }
+
+  type NState = Int
+  type DState = Int
+  case class DTr(fromState: DState, toState: DState, input: Char, outputMap: Map[NState, (NState, Code)])
+  case class DFA(nStates: Int, finals: Set[DState], transitions: Set[DTr], stateMap: Map[DState, Set[NState]], initMap: Map[NState, Code])
+
+  object DFA {
+    def fromNFA(nfa: NFA): DFA = {
+      ???
+    }
+
+    // adapted from http://www.cs.uaf.edu/~cs631/notes/strings/aho2ed/Fig3_33.gif
+    def epsilonClosures(nfa: NFA): Map[NState, Map[NState, Code]] = {
+      var result = Map[NState, Map[NState, Code]]()
+      var stack = collection.immutable.Stack[(NState, NState)]()
+      for (t <- 0 to nfa.nStates-1) {
+        result = result.updated(t, Map(t -> epsilon))
+        stack = stack.push((t,t))
+      }
+
+      while (!stack.isEmpty) {
+        val (t,root) = stack.top
+        stack = stack.pop
+
+        for (tr <- nfa.transitions;
+          if tr.fromState == t;
+          if tr.input == None;
+          u = tr.toState;
+          if !result(root).contains(u);
+          o = tr.output) {
+          val rootMap = result(root)
+          val c = rootMap(t) ++ o
+          result = result.updated(root, rootMap.updated(u, c))
+          stack = stack.push((u,root))
+        }
+      }
+
+      result
     }
   }
 }
