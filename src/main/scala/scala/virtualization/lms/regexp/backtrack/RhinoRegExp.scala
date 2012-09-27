@@ -179,7 +179,7 @@ object Rhino {
         return isJSLineTerminator(c);
     }
 
-    def isREWhiteSpace(c: Int): Boolean =
+    def isREWhiteSpace(c: Char): Boolean =
     {
         return isJSWhitespaceOrLineTerminator(c);
     }
@@ -1663,7 +1663,7 @@ object RhinoMatcher {
         prefix && {
           val saveCp = gData.cp
           val saveParens = if (gData.parens == null) null else gData.parens.toList
-          matchNode(kid1)(r => k(r) || {
+          matchNode(kid1)(r => r && k(r) || {
             gData.cp = saveCp
             gData.parens = if (saveParens == null) null else saveParens.toArray
             matchNode(kid2)(k) })}
@@ -2694,7 +2694,7 @@ object RhinoMatchUtil {
                 case 's'=>
                     i = (charSet.length - 1)
                     while (i >= 0) {
-                        if (isREWhiteSpace(i))
+                        if (isREWhiteSpace(i.toChar))
                             addCharacterToCharSet(charSet, (i).toChar);
                         i -= 1
                     }
@@ -2702,7 +2702,7 @@ object RhinoMatchUtil {
                 case 'S'=>
                     i = (charSet.length - 1)
                     while (i >= 0) {
-                        if (!isREWhiteSpace(i))
+                        if (!isREWhiteSpace(i.toChar))
                             addCharacterToCharSet(charSet, (i).toChar);
                         i -= 1
                     }

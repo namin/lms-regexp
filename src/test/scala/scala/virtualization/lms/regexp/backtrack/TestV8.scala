@@ -114,6 +114,9 @@ def infix_exec(r: Regexp, s: String): Any = {
   log(key, run())
 }
 
+// FIXME: split and matches still use the JDK matcher. these case
+// are uncommon in the benchmark suite though.
+
 def infix_split(s: String, r: Regexp): Any = {
   def run(): Any = {
     val data = s.split(r.special(r.patternString)) // TODO: use Rhino
@@ -139,8 +142,8 @@ def infix_matches(s: String, r: Regexp): Any = {
         return r.exec(s) // this will cause an extra line of output: 'exec ...'
     }
 
-    /*// array with all matches
-    val m = r.pat.right.get.matcher(s);
+    // array with all matches
+    val m = Pattern.compile(r.special(r.patternString)).matcher(s)
     val data = new scala.collection.mutable.ArrayBuffer[String]
     while (m.find()) {
       data += m.group()
@@ -148,7 +151,6 @@ def infix_matches(s: String, r: Regexp): Any = {
     
     if (data.isEmpty) return null
     new MatchResult(0,s,data.toArray) // TODO: use Rhino
-    */ return null
   }
 
   if (!printKey) return run()

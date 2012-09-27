@@ -1,0 +1,325 @@
+([a-zA-Z]|\s)+ @ Fubpxjnir Synfu 9.0  e115
+REGlobalData(0,16 / (1,15))/Fubpxjnir Synfu , 
+----([a-zA-Z]|\s)+
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+import scala.virtualization.lms.regexp.backtrack._
+import RhinoMatcher.matcher
+class staged$237(px35:scala.virtualization.lms.regexp.backtrack.RECharSet) extends ((Unit)=>(Boolean)) {
+def apply(x0:Unit): Boolean = {
+val x3 = matcher.gData
+val x4 = x3.cp
+val x75 = x3.cp
+val x76 = x3.cp
+val x29 = matcher.input
+val x30 = x29.length
+val x78 = x76 == x30
+val x83 = if (x78) {
+false
+} else {
+val x79 = x3.cp
+val x35 = px35 // static data: RECharSet(123,2)
+val x80 = x29.charAt(x79)
+val x81 = RhinoMatchUtil.classMatcher(x3,x35,x80)
+x81
+}
+val x86 = if (x83) {
+val x84 = x3.cp += 1
+true
+} else {
+false
+}
+val x92 = if (x86) {
+val x35 = px35 // static data: RECharSet(123,2)
+def x12(): Boolean = {
+val x14 = x3.cp
+val x27 = x3.cp
+val x28 = x3.cp
+val x32 = x28 == x30
+val x38 = if (x32) {
+false
+} else {
+val x33 = x3.cp
+val x34 = x29.charAt(x33)
+val x36 = RhinoMatchUtil.classMatcher(x3,x35,x34)
+x36
+}
+val x41 = if (x38) {
+val x39 = x3.cp += 1
+true
+} else {
+false
+}
+val x47 = if (x41) {
+def x15(): Boolean = {
+val x17 = x3.parensIndex(0)
+val x18 = x3.parensLength(0)
+val x19 = x3.cp
+val x20 = x19 - x14
+val x21 = x3.setParens(0,x14,x20)
+val x22 = x12()
+val x25 = if (x22) {
+true
+} else {
+val x23 = x3.setParens(0,x17,x18)
+false
+}
+x25
+}
+val x42 = x15()
+val x45 = if (x42) {
+true
+} else {
+val x43 = x3.cp = x27
+false
+}
+x45
+} else {
+false
+}
+val x67 = if (x47) {
+true
+} else {
+val x48 = x3.cp
+val x49 = x3.cp
+val x51 = x49 == x30
+val x56 = if (x51) {
+false
+} else {
+val x52 = x3.cp
+val x53 = x29.charAt(x52)
+val x54 = Rhino.isREWhiteSpace(x53)
+x54
+}
+val x59 = if (x56) {
+val x57 = x3.cp += 1
+true
+} else {
+false
+}
+val x65 = if (x59) {
+def x15(): Boolean = {
+val x17 = x3.parensIndex(0)
+val x18 = x3.parensLength(0)
+val x19 = x3.cp
+val x20 = x19 - x14
+val x21 = x3.setParens(0,x14,x20)
+val x22 = x12()
+val x25 = if (x22) {
+true
+} else {
+val x23 = x3.setParens(0,x17,x18)
+false
+}
+x25
+}
+val x60 = x15()
+val x63 = if (x60) {
+true
+} else {
+val x61 = x3.cp = x48
+false
+}
+x63
+} else {
+false
+}
+x65
+}
+val x68 = if (x67) {
+true
+} else {
+true
+}
+x68
+}
+def x5(): Boolean = {
+val x7 = x3.parensIndex(0)
+val x8 = x3.parensLength(0)
+val x9 = x3.cp
+val x10 = x9 - x4
+val x11 = x3.setParens(0,x4,x10)
+val x70 = x12()
+val x73 = if (x70) {
+true
+} else {
+val x71 = x3.setParens(0,x7,x8)
+false
+}
+x73
+}
+val x87 = x5()
+val x90 = if (x87) {
+true
+} else {
+val x88 = x3.cp = x75
+false
+}
+x90
+} else {
+false
+}
+val x112 = if (x92) {
+true
+} else {
+val x93 = x3.cp
+val x94 = x3.cp
+val x96 = x94 == x30
+val x101 = if (x96) {
+false
+} else {
+val x97 = x3.cp
+val x98 = x29.charAt(x97)
+val x99 = Rhino.isREWhiteSpace(x98)
+x99
+}
+val x104 = if (x101) {
+val x102 = x3.cp += 1
+true
+} else {
+false
+}
+val x110 = if (x104) {
+val x35 = px35 // static data: RECharSet(123,2)
+def x12(): Boolean = {
+val x14 = x3.cp
+val x27 = x3.cp
+val x28 = x3.cp
+val x32 = x28 == x30
+val x38 = if (x32) {
+false
+} else {
+val x33 = x3.cp
+val x34 = x29.charAt(x33)
+val x36 = RhinoMatchUtil.classMatcher(x3,x35,x34)
+x36
+}
+val x41 = if (x38) {
+val x39 = x3.cp += 1
+true
+} else {
+false
+}
+val x47 = if (x41) {
+def x15(): Boolean = {
+val x17 = x3.parensIndex(0)
+val x18 = x3.parensLength(0)
+val x19 = x3.cp
+val x20 = x19 - x14
+val x21 = x3.setParens(0,x14,x20)
+val x22 = x12()
+val x25 = if (x22) {
+true
+} else {
+val x23 = x3.setParens(0,x17,x18)
+false
+}
+x25
+}
+val x42 = x15()
+val x45 = if (x42) {
+true
+} else {
+val x43 = x3.cp = x27
+false
+}
+x45
+} else {
+false
+}
+val x67 = if (x47) {
+true
+} else {
+val x48 = x3.cp
+val x49 = x3.cp
+val x51 = x49 == x30
+val x56 = if (x51) {
+false
+} else {
+val x52 = x3.cp
+val x53 = x29.charAt(x52)
+val x54 = Rhino.isREWhiteSpace(x53)
+x54
+}
+val x59 = if (x56) {
+val x57 = x3.cp += 1
+true
+} else {
+false
+}
+val x65 = if (x59) {
+def x15(): Boolean = {
+val x17 = x3.parensIndex(0)
+val x18 = x3.parensLength(0)
+val x19 = x3.cp
+val x20 = x19 - x14
+val x21 = x3.setParens(0,x14,x20)
+val x22 = x12()
+val x25 = if (x22) {
+true
+} else {
+val x23 = x3.setParens(0,x17,x18)
+false
+}
+x25
+}
+val x60 = x15()
+val x63 = if (x60) {
+true
+} else {
+val x61 = x3.cp = x48
+false
+}
+x63
+} else {
+false
+}
+x65
+}
+val x68 = if (x67) {
+true
+} else {
+true
+}
+x68
+}
+def x5(): Boolean = {
+val x7 = x3.parensIndex(0)
+val x8 = x3.parensLength(0)
+val x9 = x3.cp
+val x10 = x9 - x4
+val x11 = x3.setParens(0,x4,x10)
+val x70 = x12()
+val x73 = if (x70) {
+true
+} else {
+val x71 = x3.setParens(0,x7,x8)
+false
+}
+x73
+}
+val x105 = x5()
+val x108 = if (x105) {
+true
+} else {
+val x106 = x3.cp = x93
+false
+}
+x108
+} else {
+false
+}
+x110
+}
+x112
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+
+compilation: ok
+---- took 246ms
+REGlobalData(0,16 / (1,15))/Fubpxjnir Synfu , 
+done

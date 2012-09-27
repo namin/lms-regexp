@@ -6,7 +6,7 @@ REGlobalData(48,65 / (-1,-1),(-1,-1),(-1,-1),(5,60))/NccyrJroXvg/528.9,,,,528.9
 *******************************************/
 import scala.virtualization.lms.regexp.backtrack._
 import RhinoMatcher.matcher
-class staged$4 extends ((Unit)=>(Boolean)) {
+class staged$235 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
 val x3 = matcher.gData
 val x4 = x3.cp
@@ -1465,6 +1465,6 @@ x642
 *******************************************/
 
 compilation: ok
----- took 4149ms
+---- took 3527ms
 REGlobalData(48,65 / (-1,-1),(-1,-1),(-1,-1),(5,60))/NccyrJroXvg/528.9,,,,528.9
 done
