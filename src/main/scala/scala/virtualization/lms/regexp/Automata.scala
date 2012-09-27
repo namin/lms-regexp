@@ -212,12 +212,6 @@ trait RegexpToNFA extends Regexp { this: NFAtoDFA =>
     rec()
   }
 
-  def opt(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
-    val (nn, en) = nio()
-    val (nx, ex) = x(nio)
-    (nn ++ nx, en || ex)
-  }
-
   def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => (Nil, true)))
 }
 

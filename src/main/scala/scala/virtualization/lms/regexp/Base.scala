@@ -9,11 +9,9 @@ trait Regexp {
   def alt(x: RE, y: RE): RE
   def seq(x: RE, y: RE): RE
   def star(x: RE): RE
-  def opt(x: RE): RE
 
-  def plus(x: RE): RE = {
-    seq(x, star(x))
-  }
+  def opt(x: RE): RE = alt(x, id)
+  def plus(x: RE): RE =  seq(x, star(x))
   def many(f: (RE, RE) => RE)(xs: RE*): RE = xs.length match {
     case 0 => id
     case 1 => xs(0)
