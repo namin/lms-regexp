@@ -180,7 +180,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
   }
 }
 
-trait RegexpToNFA { this: NFAtoDFA =>
+trait RegexpToNFA extends Regexp { this: NFAtoDFA =>
   type RE = (() => (NIO, Boolean)) => (NIO, Boolean)
 
   def wrap(cset: CharSet): RE = { nio: (() => (NIO, Boolean)) =>
@@ -203,13 +203,6 @@ trait RegexpToNFA { this: NFAtoDFA =>
 
   val id = {nio: (() => (NIO, Boolean)) => nio()}
 
-  def many(f: (RE, RE) => RE)(xs: RE*): RE = xs.length match {
-    case 0 => id
-    case 1 => xs(0)
-    case 2 => f(xs(0), xs(1))
-    case n => f(xs(0), many(f)(xs.slice(1, n) : _*))
-  }
-
   def star(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
     val (nn, en) = nio()
     def rec(): (NIO, Boolean) = {
@@ -217,10 +210,6 @@ trait RegexpToNFA { this: NFAtoDFA =>
       (nn ++ nx, en || ex)
     }
     rec()
-  }
-
-  def plus(x: RE): RE = {
-    seq(x, star(x))
   }
 
   def opt(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
