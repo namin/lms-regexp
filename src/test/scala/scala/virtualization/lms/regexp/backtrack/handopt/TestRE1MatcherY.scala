@@ -55,7 +55,7 @@ object TestRE1MatcherStaged {
     System.out.println("run staged")
     
     Rhino.debug = false
-    RhinoMatcher.stmatcher.IR.dump = true
+    RhinoMatcher.stmatcher.IR.dumpGeneratedCode = true
     
     val re = """(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?"""
     val in = "uggc://jjj.snprobbx.pbz/ybtva.cuc"
@@ -103,7 +103,7 @@ object TestRE1MatcherJDK {
     System.out.println("run jdk")
     
     Rhino.debug = false
-    RhinoMatcher.stmatcher.IR.dump = true
+    RhinoMatcher.stmatcher.IR.dumpGeneratedCode = true
     
     val re = """(((\w+):\/\/)([^\/:]*)(:(\d+))?)?([^#?]*)(\?([^#]*))?(#(.*))?"""
     val in = "uggc://jjj.snprobbx.pbz/ybtva.cuc"

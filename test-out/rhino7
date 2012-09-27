@@ -35,14 +35,6 @@ false
 }
 x24
 }
-def x3(): Boolean = {
-val x5 = x1.parensIndex(0)
-val x6 = x1.parensLength(0)
-val x7 = x1.cp
-val x8 = x7 - x2
-val x9 = x1.setParens(0,x2,x8)
-true
-}
 val x50 = if (x26) {
 val x27 = x1.cp
 val x28 = x1.cp
@@ -67,6 +59,14 @@ false
 x37
 }
 val x45 = if (x39) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x40 = x3()
 val x43 = if (x40) {
 true
@@ -124,6 +124,14 @@ val x84 = if (x71) {
 val x72 = x1.cp
 val x73 = RhinoMatchUtil.flatNMatcher(x1,8,3,x14,x15) // 00-
 val x79 = if (x73) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x74 = x3()
 val x77 = if (x74) {
 true
@@ -181,6 +189,14 @@ val x118 = if (x105) {
 val x106 = x1.cp
 val x107 = RhinoMatchUtil.flatNMatcher(x1,14,2,x14,x15) // 1f
 val x113 = if (x107) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x108 = x3()
 val x111 = if (x108) {
 true
@@ -238,6 +254,14 @@ val x152 = if (x139) {
 val x140 = x1.cp
 val x141 = RhinoMatchUtil.flatNMatcher(x1,19,3,x14,x15) // 7f-
 val x147 = if (x141) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x142 = x3()
 val x145 = if (x142) {
 true
@@ -295,6 +319,14 @@ val x186 = if (x173) {
 val x174 = x1.cp
 val x175 = RhinoMatchUtil.flatNMatcher(x1,25,2,x14,x15) // 9f
 val x181 = if (x175) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x176 = x3()
 val x179 = if (x176) {
 true
@@ -348,6 +380,14 @@ false
 x204
 }
 val x212 = if (x206) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x207 = x3()
 val x210 = if (x207) {
 true
@@ -365,6 +405,14 @@ true
 val x217 = x1.cp
 val x218 = RhinoMatchUtil.flatNMatcher(x1,30,2,x14,x15) // ?-
 val x224 = if (x218) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x219 = x3()
 val x222 = if (x219) {
 true
@@ -402,6 +450,14 @@ false
 x239
 }
 val x247 = if (x241) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x242 = x3()
 val x245 = if (x242) {
 true
@@ -439,6 +495,14 @@ false
 x262
 }
 val x270 = if (x264) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x265 = x3()
 val x268 = if (x265) {
 true
@@ -476,6 +540,14 @@ false
 x285
 }
 val x293 = if (x287) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x288 = x3()
 val x291 = if (x288) {
 true
@@ -513,6 +585,14 @@ false
 x308
 }
 val x316 = if (x310) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x311 = x3()
 val x314 = if (x311) {
 true
@@ -530,6 +610,14 @@ true
 val x321 = x1.cp
 val x322 = RhinoMatchUtil.flatNMatcher(x1,41,2,x14,x15) // ?-
 val x328 = if (x322) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x323 = x3()
 val x326 = if (x323) {
 true
@@ -567,6 +655,14 @@ false
 x343
 }
 val x351 = if (x345) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x346 = x3()
 val x349 = if (x346) {
 true
@@ -584,6 +680,14 @@ true
 val x356 = x1.cp
 val x357 = RhinoMatchUtil.flatNMatcher(x1,46,2,x14,x15) // ?-
 val x363 = if (x357) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x358 = x3()
 val x361 = if (x358) {
 true
@@ -621,6 +725,14 @@ false
 x378
 }
 val x386 = if (x380) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x381 = x3()
 val x384 = if (x381) {
 true
@@ -638,6 +750,14 @@ true
 val x391 = x1.cp
 val x392 = RhinoMatchUtil.flatNMatcher(x1,51,2,x14,x15) // ?-
 val x398 = if (x392) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x393 = x3()
 val x396 = if (x393) {
 true
@@ -675,6 +795,14 @@ false
 x413
 }
 val x421 = if (x415) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x416 = x3()
 val x419 = if (x416) {
 true
@@ -712,6 +840,14 @@ false
 x436
 }
 val x444 = if (x438) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x439 = x3()
 val x442 = if (x439) {
 true
@@ -729,6 +865,14 @@ true
 val x449 = x1.cp
 val x450 = RhinoMatchUtil.flatNMatcher(x1,58,2,x14,x15) // ?-
 val x456 = if (x450) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x451 = x3()
 val x454 = if (x451) {
 true
@@ -766,6 +910,14 @@ false
 x467
 }
 val x475 = if (x469) {
+def x3(): Boolean = {
+val x5 = x1.parensIndex(0)
+val x6 = x1.parensLength(0)
+val x7 = x1.cp
+val x8 = x7 - x2
+val x9 = x1.setParens(0,x2,x8)
+true
+}
 val x470 = x3()
 val x473 = if (x470) {
 true
@@ -823,6 +975,6 @@ x513
 *******************************************/
 
 compilation: ok
----- took 1400ms
+---- took 12213ms
 null
 done

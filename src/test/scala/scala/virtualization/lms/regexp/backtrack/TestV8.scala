@@ -45,9 +45,9 @@ val cache = new scala.collection.mutable.HashMap[String, RECompiled]
 def runMatch(rno: RECompiled, s: String, idx: Int) = 
   if (runNaive) RhinoMatcher.matchNaive(rno, s, idx)
   else {
-    RhinoMatcher.stmatcher.IR.dump = dumpCode
+    RhinoMatcher.stmatcher.IR.dumpGeneratedCode = dumpCode
     val res = RhinoMatcher.matchStaged(rno, s, idx)
-    RhinoMatcher.stmatcher.IR.dump = false
+    RhinoMatcher.stmatcher.IR.dumpGeneratedCode = false
     res
   }
 

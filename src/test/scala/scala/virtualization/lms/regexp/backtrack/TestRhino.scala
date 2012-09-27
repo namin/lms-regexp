@@ -6,7 +6,7 @@ import scala.virtualization.lms.regexp.FileDiffSuite
 class TestRhino extends FileDiffSuite {
 
   def run(re: String, in: String) = {
-    RhinoMatcher.stmatcher.IR.dump = true
+    RhinoMatcher.stmatcher.IR.dumpGeneratedCode = true
     
     println(re + " @ " + in)
 

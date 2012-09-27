@@ -1827,13 +1827,13 @@ object RhinoMatcher {
       val f = (c:stmatcher.INTF.Rep[Unit]) => m(()=>true)
 
       //stmatcher.IR.dump = Util.dumpCode
-      if (stmatcher.IR.dump) println("----" + new String(re.source))
+      if (stmatcher.IR.dumpGeneratedCode) println("----" + new String(re.source))
       stmatcher.IR.reset
       val start = System.currentTimeMillis
       val fc = stmatcher.IR.compile(f) //{ (x:stmatcher.INTF.Rep[Unit]) => val g = stmatcher.IR.doLambda(f); stmatcher.IR.doApply(g,x) } // insert lambda to prevent blowup from codemotion pushing stuff into if branches
       stmatcher.IR.reset
       Predef.assert(stmatcher.IR.nVars == 0)
-      if (stmatcher.IR.dump) println("---- took " + (System.currentTimeMillis - start) + "ms")
+      if (stmatcher.IR.dumpGeneratedCode) println("---- took " + (System.currentTimeMillis - start) + "ms")
       re.stmatcher = fc
     }
 

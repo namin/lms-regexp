@@ -9,10 +9,10 @@ import RhinoMatcher.matcher
 class staged$2 extends ((Unit)=>(Boolean)) {
 def apply(x0:Unit): Boolean = {
 val x1 = matcher.gData
-val x13 = matcher.input
-val x14 = x13.length
 val x2 = x1.cp
 val x3 = x1.cp
+val x13 = matcher.input
+val x14 = x13.length
 def x4(): Boolean = {
 val x6 = x1.parensIndex(0)
 val x7 = x1.parensLength(0)
@@ -122,6 +122,6 @@ x68
 *******************************************/
 
 compilation: ok
----- took 210ms
+---- took 282ms
 REGlobalData(3,8 / (4,3))/aaaab,aaaa
 done
