@@ -12,10 +12,9 @@ trait Regexp {
 
   def opt(x: RE): RE = alt(x, id)
   def plus(x: RE): RE =  seq(x, star(x))
-  def many(f: (RE, RE) => RE)(xs: RE*): RE = xs.length match {
-    case 0 => id
-    case 1 => xs(0)
-    case 2 => f(xs(0), xs(1))
-    case n => f(xs(0), many(f)(xs.slice(1, n) : _*))
+  def many(f: (RE, RE) => RE)(x: RE, xs: RE*): RE = xs.length match {
+    case 0 => x
+    case 1 => f(x, xs(0))
+    case n => f(x, many(f)(xs(0), xs.slice(1, n) : _*))
   }
 }
