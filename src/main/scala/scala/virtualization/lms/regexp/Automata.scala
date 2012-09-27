@@ -67,7 +67,7 @@ trait ScalaGenDFAOps extends StabilityCalculator with ScalaGenBase {
 }
 
 
-trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
+trait NFAtoDFA extends DFAOps with ClosureCompare { this: DSLBase =>
   type NIO = List[NTrans]
   
   case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO) extends Ordered[NTrans] {
@@ -215,17 +215,9 @@ trait RegexpToNFA extends Regexp { this: NFAtoDFA =>
   def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => (Nil, true)))
 }
 
-trait IfThenElseExpExtra extends IfThenElseExp {
-  import scala.reflect.SourceContext
-  override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) =
-    if (thenp == elsep) thenp else super.__ifThenElse(cond, thenp, elsep)
-}
+trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with DSLBase
 
-trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
-
-trait ImplBase extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala {
-  override val verbosity = 1
-}
+trait ImplBase extends DSL with DFAOpsExp with DSLBaseExp
 
 trait AutomataCodegenBase extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
   val IR: ImplBase

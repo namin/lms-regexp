@@ -1,5 +1,7 @@
 package scala.virtualization.lms.regexp
 
+import scala.virtualization.lms.common._
+
 trait Regexp {
   type RE
 
@@ -18,3 +20,13 @@ trait Regexp {
     case n => f(x, many(f)(xs(0), xs.slice(1, n) : _*))
   }
 }
+
+trait IfThenElseExpExtra extends IfThenElseExp {
+  import scala.reflect.SourceContext
+  override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) =
+    if (thenp == elsep) thenp else super.__ifThenElse(cond, thenp, elsep)
+}
+
+trait DSLBase extends NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
+
+trait DSLBaseExp extends NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala
