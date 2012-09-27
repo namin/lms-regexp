@@ -37,6 +37,8 @@ class TestBitCoded extends Suite {
 
   val exStar1 = Estar(E1)
 
+  val exStar2 = Eprod(Estar(Echar('a')), Estar(Echar('a')))
+
   def testCode1 = {
     expect(ex1code){str(code(ex1))}
   }
@@ -107,6 +109,14 @@ class TestBitCoded extends Suite {
     }
     expect(None){
       (DFA.run(dfa)("abc".toList)).map(str)
+    }
+  }
+
+  def testParsing3 = {
+    val nfa = NFA.fromE(exStar2)
+    val dfa = DFA.fromNFA(nfa)
+    expect(Some("00011")){
+      (DFA.run(dfa)("aaa".toList)).map(str)
     }
   }
 }
