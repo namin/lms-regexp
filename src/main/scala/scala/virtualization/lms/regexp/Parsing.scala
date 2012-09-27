@@ -23,6 +23,21 @@ case class Eplus(e1: E, e2: E) extends E { type T = Vplus }
 case class Eprod(e1: E, e2: E) extends E { type T = Vprod }
 case class Estar(es: E) extends E { type T = Vstar }
 
+trait RegexpE extends Regexp {
+  type RE = E
+
+  override val id = E1
+  override def c(c: Char) = Echar(c)
+  // TODO: optimize
+  override def in(a: Char, b: Char): RE = {
+    if (a > b) E0
+    else alt(Echar(a), in((a+1).toChar, b))
+  }
+  override def alt(x: RE, y: RE) = Eplus(x, y)
+  override def seq(x: RE, y: RE) = Eprod(x, y)
+  override def star(x: RE) = Estar(x)
+}
+
 object BitCoded {
   type Code = List[Bit]
   type Bit = Boolean
