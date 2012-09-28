@@ -22,6 +22,7 @@ case class Echar(c: Char) extends E { type T = Vchar }
 case class Eplus(e1: E, e2: E) extends E { type T = Vplus }
 case class Eprod(e1: E, e2: E) extends E { type T = Vprod }
 case class Estar(es: E) extends E { type T = Vstar }
+case class Egroup(e0: E) extends E { type T = e0.T }
 
 trait RegexpE extends Regexp {
   type RE = E
@@ -36,6 +37,8 @@ trait RegexpE extends Regexp {
   override def alt(x: RE, y: RE) = Eplus(x, y)
   override def seq(x: RE, y: RE) = Eprod(x, y)
   override def star(x: RE) = Estar(x)
+
+  def g(x: RE) = Egroup(x)
 }
 
 object BitCoded {
@@ -99,9 +102,14 @@ object BitCoded {
         val (Vstar(vt),drr) = rec(e)(dr)
         (Vstar(vh :: vt)(es), drr)
       case (Estar(es), `c1`::d) => (Vstar(List())(es), d)
+      case (Egroup(e0), d) => rec(e0)(d)
     }
     val (v, `epsilon`) = rec(e)(d)
     v
+  }
+
+  def groups(e: E)(d: Code): List[(Int,Int)] = {
+    ???
   }
 }
 
@@ -154,7 +162,7 @@ object Parsing {
 	  NTr(outs, in0, None, epsilon),
 	  NTr(in0, out0, None, one(c1))
 	))
-      case _ => ???
+      case Egroup(e0) => fromE(e0)
     }
 
     def run(nfa: NFA)(str: List[Char]): Set[Code] = {
