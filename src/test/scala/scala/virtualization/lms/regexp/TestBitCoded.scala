@@ -37,7 +37,7 @@ class TestBitCoded extends Suite {
 
   val exStar1 = Estar(E1)
 
-  val exStar2 = Eprod(Estar(Echar('a')), Estar(Echar('a')))
+  val exStar2 = Eprod(Egroup(Estar(Echar('a'))), Estar(Echar('a')))
 
   def testCode1 = {
     expect(ex1code){str(code(ex1))}
@@ -118,5 +118,10 @@ class TestBitCoded extends Suite {
     expect(Some("00011")){
       (DFA.run(dfa)("aaa".toList)).map(str)
     }
+  }
+
+  def testGrouping1 = {
+    val a = groups(exStar2)(unstr("00011"))
+    expect(List(Some(0, 3)).toIndexedSeq){a}
   }
 }
