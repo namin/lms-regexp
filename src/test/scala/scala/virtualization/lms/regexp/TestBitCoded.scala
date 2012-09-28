@@ -121,7 +121,21 @@ class TestBitCoded extends Suite {
   }
 
   def testGrouping1 = {
-    val a = groups(exStar2)(unstr("00011"))
-    expect(List(Some(0, 3)).toIndexedSeq){a}
+    val r = groups(exStar2)(unstr("00011"))
+    expect(List(Some(0, 3)).toIndexedSeq){r}
+  }
+
+  def testGrouping2 = {
+    val e = Estar(Egroup(Estar(Egroup(Egroup(
+      Eplus(Egroup(Echar('a')), Eplus(
+	    Egroup(Echar('b')),
+	    Egroup(Echar('c')))))))))
+    val nfa = NFA.fromE(e)
+    val dfa = DFA.fromNFA(nfa)
+    val c = DFA.run(dfa)("ccc".toList)
+    expect(true){c != None}
+    val r = groups(e)(c.get)
+    expect(List(Some(0, 3), Some(2, 3), Some(2, 3),
+      None, None, Some(2, 3)).toIndexedSeq){r}
   }
 }
