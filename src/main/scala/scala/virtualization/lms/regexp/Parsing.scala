@@ -22,6 +22,24 @@ case class Echar(c: Char) extends E { type T = Vchar }
 case class Eplus(e1: E, e2: E) extends E { type T = Vplus }
 case class Eprod(e1: E, e2: E) extends E { type T = Vprod }
 case class Estar(es: E) extends E { type T = Vstar }
+case class Egroup(e0: E) extends E { type T = e0.T }
+
+trait RegexpE extends Regexp {
+  type RE = E
+
+  override val id = E1
+  override def c(c: Char) = Echar(c)
+  // TODO: optimize
+  override def in(a: Char, b: Char): RE = {
+    if (a > b) E0
+    else alt(Echar(a), in((a+1).toChar, b))
+  }
+  override def alt(x: RE, y: RE) = Eplus(x, y)
+  override def seq(x: RE, y: RE) = Eprod(x, y)
+  override def star(x: RE) = Estar(x)
+
+  def g(x: RE) = Egroup(x)
+}
 
 object BitCoded {
   type Code = List[Bit]
@@ -84,9 +102,51 @@ object BitCoded {
         val (Vstar(vt),drr) = rec(e)(dr)
         (Vstar(vh :: vt)(es), drr)
       case (Estar(es), `c1`::d) => (Vstar(List())(es), d)
+      case (Egroup(e0), d) => rec(e0)(d)
     }
     val (v, `epsilon`) = rec(e)(d)
     v
+  }
+
+  def groups(e: E)(d: Code): IndexedSeq[Option[(Int,Int)]] = {
+    def undefs(e: Any): List[Option[(Int,Int)]] = e match {
+      case Egroup(e0) => None :: undefs(e0)
+      case it: Iterable[Any] => it.toList.flatMap(undefs(_))
+      case p: Product => p.productIterator.toList.flatMap(undefs(_))
+      case _ => Nil
+    }
+    def rec(e : E)(d: Code)(i: Int): (List[Option[(Int,Int)]], Int, Code) = (e,d) match {
+      case (E1, d) => (List(), 0, d)
+      case (Echar(c), d) => (List(), 1, d)
+      case (Eplus(e1, e2), `c0`::d) =>
+        val (v1, n1, d1) = rec(e1)(d)(i)
+        val v2 = undefs(e2)
+        (v1 ++ v2, n1, d1)
+      case (Eplus(e1, e2), `c1`::d) =>
+        val v1 = undefs(e1)
+	val (v2, n2, d2) = rec(e2)(d)(i)
+	(v1 ++ v2, n2, d2)
+      case (Eprod(e1, e2), d) =>
+        val (v1, n1, d1) = rec(e1)(d)(i)
+        val (v2, n2, d2) = rec(e2)(d1)(i+n1)
+        (v1 ++ v2, n1+n2, d2)
+      case (Estar(es), d) =>
+        var last = undefs(es)
+        var nr = 0
+        var dr = d
+        while (dr.head != c1) {
+	  val (lastc, nd, drc) = rec(es)(dr.tail)(i+nr)
+	  last = lastc
+	  dr = drc
+	  nr += nd
+	}
+        (last, nr, dr.tail)
+      case (Egroup(e0), d) =>
+        val (v0, n0, d0) = rec(e0)(d)(i)
+        (Some((i, (i+n0))) :: v0, n0, d0)
+    }
+    val (v0, _, `epsilon`) = rec(e)(d)(0)
+    v0.toIndexedSeq
   }
 }
 
@@ -139,7 +199,7 @@ object Parsing {
 	  NTr(outs, in0, None, epsilon),
 	  NTr(in0, out0, None, one(c1))
 	))
-      case _ => ???
+      case Egroup(e0) => fromE(e0)
     }
 
     def run(nfa: NFA)(str: List[Char]): Set[Code] = {

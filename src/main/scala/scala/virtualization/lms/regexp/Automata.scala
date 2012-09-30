@@ -67,7 +67,7 @@ trait ScalaGenDFAOps extends StabilityCalculator with ScalaGenBase {
 }
 
 
-trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse =>
+trait NFAtoDFA extends DFAOps with ClosureCompare { this: DSLBase =>
   type NIO = List[NTrans]
   
   case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO) extends Ordered[NTrans] {
@@ -180,7 +180,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: NumericOps with LiftNu
   }
 }
 
-trait RegexpToNFA { this: NFAtoDFA =>
+trait RegexpToNFA extends Regexp { this: NFAtoDFA =>
   type RE = (() => (NIO, Boolean)) => (NIO, Boolean)
 
   def wrap(cset: CharSet): RE = { nio: (() => (NIO, Boolean)) =>
@@ -203,13 +203,6 @@ trait RegexpToNFA { this: NFAtoDFA =>
 
   val id = {nio: (() => (NIO, Boolean)) => nio()}
 
-  def many(f: (RE, RE) => RE)(xs: RE*): RE = xs.length match {
-    case 0 => id
-    case 1 => xs(0)
-    case 2 => f(xs(0), xs(1))
-    case n => f(xs(0), many(f)(xs.slice(1, n) : _*))
-  }
-
   def star(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
     val (nn, en) = nio()
     def rec(): (NIO, Boolean) = {
@@ -219,30 +212,12 @@ trait RegexpToNFA { this: NFAtoDFA =>
     rec()
   }
 
-  def plus(x: RE): RE = {
-    seq(x, star(x))
-  }
-
-  def opt(x: RE): RE = { nio: (() => (NIO, Boolean)) =>
-    val (nn, en) = nio()
-    val (nx, ex) = x(nio)
-    (nn ++ nx, en || ex)
-  }
-
   def convertREtoDFA(re: RE): DIO = convertNFAtoDFA(re(() => (Nil, true)))
 }
 
-trait IfThenElseExpExtra extends IfThenElseExp {
-  import scala.reflect.SourceContext
-  override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) =
-    if (thenp == elsep) thenp else super.__ifThenElse(cond, thenp, elsep)
-}
+trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with DSLBase
 
-trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
-
-trait ImplBase extends DSL with DFAOpsExp with NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala {
-  override val verbosity = 1
-}
+trait ImplBase extends DSL with DFAOpsExp with DSLBaseExp
 
 trait AutomataCodegenBase extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
   val IR: ImplBase

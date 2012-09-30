@@ -3,13 +3,16 @@ package scala.virtualization.lms.regexp
 import org.scalatest._
 
 class TestRegexp extends Suite {
-  trait Examples extends DSL {
+  trait BaseExamples extends Regexp {
+    lazy val digit = in('0', '9')
+    lazy val usd = many(seq)(c('u'), c('s'), c('d'), c(' '), opt(alt(c('+'), c('-'))),
+      plus(digit), c('.'), digit, digit)
+  }
+
+  trait Examples extends BaseExamples with DSL {
     val aab = many(seq)(star(wildcard), c('A'), c('A'), c('B'))
     val aabx = many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(c('X')))
     val aabany = many(seq)(star(wildcard), c('A'), c('A'), c('B'), star(wildcard))
-    val digit = in('0', '9')
-    val usd = many(seq)(c('u'), c('s'), c('d'), c(' '), opt(alt(c('+'), c('-'))),
-                        plus(digit), c('.'), digit, digit)
     val fool = alt(seq(wildcard, opt(c('B'))), seq(wildcard, opt(c('A'))))
     val fool2 = many(alt)(seq(wildcard, opt(c('B'))), seq(wildcard, opt(c('C'))), seq(wildcard, c('A')))
     val fool3 = many(alt)(seq(wildcard, opt(c('B'))), seq(wildcard, opt(c('C'))), seq(c('X'), c('A')))
@@ -42,6 +45,12 @@ class TestRegexp extends Suite {
       }
       state.out % 2 == 1
     }
+  }
+
+  trait BitCodedEvaluator extends RegexpE {
+    import Parsing._
+    def recompile(re: E): DFA = DFA.fromNFA(NFA.fromE(re))
+    def fullmatch(dfa: DFA)(input: String): Boolean = DFA.run(dfa)(input.toList) != None
   }
 
   def testAAB = {
@@ -100,6 +109,16 @@ class TestRegexp extends Suite {
     expect(false){exs.begmatch(fc)("  usd 1234.01  ")}
     expect(false){exs.begmatch(fc)("")}
     expect(false){exs.fullmatch(fc)("")}
+
+    val bcexs = new BaseExamples with BitCodedEvaluator
+    val dfa = bcexs.recompile(bcexs.usd)
+
+    expect(true){bcexs.fullmatch(dfa)("usd 1234.00")}
+    expect(true){bcexs.fullmatch(dfa)("usd 1234.01")}
+    expect(false){bcexs.fullmatch(dfa)("usd 1234.01  ")}
+    expect(false){bcexs.fullmatch(dfa)("usd1234.00")}
+    expect(false){bcexs.fullmatch(dfa)("usd 1234")}
+    expect(false){bcexs.fullmatch(dfa)("")}
   }
 
   def testFool = {
