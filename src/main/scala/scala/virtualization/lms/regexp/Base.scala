@@ -30,3 +30,7 @@ trait IfThenElseExpExtra extends IfThenElseExp {
 trait DSLBase extends NumericOps with LiftNumeric with Functions with Equal with OrderingOps with BooleanOps with IfThenElse
 
 trait DSLBaseExp extends NumericOpsExp with LiftNumeric with EqualExpOpt with OrderingOpsExp with BooleanOpsExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp with FunctionsExternalDef with CompileScala
+
+trait DSLGenBase extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal {
+  val IR: DSLBaseExp
+}

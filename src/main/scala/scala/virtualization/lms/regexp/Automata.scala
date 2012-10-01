@@ -219,7 +219,7 @@ trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with DSLBase
 
 trait ImplBase extends DSL with DFAOpsExp with DSLBaseExp
 
-trait AutomataCodegenBase extends ScalaGenNumericOps with ScalaGenEqual with ScalaGenOrderingOps with ScalaGenBooleanOps with ScalaGenIfThenElseFat with ScalaGenFunctionsExternal with ScalaGenDFAOps {
+trait AutomataCodegenBase extends DSLGenBase with ScalaGenDFAOps {
   val IR: ImplBase
 }
 

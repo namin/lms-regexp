@@ -5,6 +5,15 @@ import org.scalatest._
 class TestBitCoded extends Suite {
   import BitCoded._
   import Parsing._
+  import StagedParsing._
+
+  trait Evaluator extends BitCodedDSL with BitCodedDSLImpl {
+    def compileGroups(e: E) = {
+      val f = groups(e) _
+      val fc = compile(f)
+      fc
+    }
+  }
 
   // ((ab)(c|d)|(abc))*
   val exE = Estar(Eplus(
@@ -137,5 +146,9 @@ class TestBitCoded extends Suite {
     val r = groups(e)(c.get)
     expect(List(Some(0, 3), Some(2, 3), Some(2, 3),
       None, None, Some(2, 3)).toIndexedSeq){r}
+
+    val ev = new Evaluator {}
+    val fc = ev.compileGroups(e)
+    expect(List((0,3),(2,3),(2,3),null,null,(2,3))){fc(c.get)}
   }
 }

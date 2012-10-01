@@ -108,13 +108,13 @@ object BitCoded {
     v
   }
 
+  def undefs(e: Any): List[Option[(Int,Int)]] = e match {
+    case Egroup(e0) => None :: undefs(e0)
+    case it: Iterable[Any] => it.toList.flatMap(undefs(_))
+    case p: Product => p.productIterator.toList.flatMap(undefs(_))
+    case _ => Nil
+  }
   def groups(e: E)(d: Code): IndexedSeq[Option[(Int,Int)]] = {
-    def undefs(e: Any): List[Option[(Int,Int)]] = e match {
-      case Egroup(e0) => None :: undefs(e0)
-      case it: Iterable[Any] => it.toList.flatMap(undefs(_))
-      case p: Product => p.productIterator.toList.flatMap(undefs(_))
-      case _ => Nil
-    }
     def rec(e : E)(d: Code)(i: Int): (List[Option[(Int,Int)]], Int, Code) = (e,d) match {
       case (E1, d) => (List(), 0, d)
       case (Echar(c), d) => (List(), 1, d)
@@ -341,6 +341,65 @@ object Parsing {
       code = dfa.initMap(nfaState) ++ code
 
       Some(code)
+    }
+  }
+}
+
+object StagedParsing {
+  import scala.virtualization.lms.common._
+
+  trait BitCodedDSL extends Base with ParsingDSLBase {
+    def undefs0(e: E): Rep[List[(Int,Int)]] = unit(BitCoded.undefs(e).flatMap(_ match {
+      case None => Some(null)
+      case t => t
+    }))
+    def groups0(e: E)(d: Rep[List[Boolean]], i: Rep[Int]): Rep[(List[(Int,Int)], Int, List[Boolean])] = e match {
+      case E1 => make_tuple3(List[(Int,Int)](), 0, d)
+      case Echar(c) => make_tuple3(List[(Int,Int)](), 1, d)
+      case Eplus(e1, e2) =>
+        if (d.head) {
+          val v1 = undefs0(e1)
+          val (v2, n2, d2) = t3(groups0(e2)(d.tail, i))
+          (v1 ++ v2, n2, d2)
+        } else {
+          val (v1, n1, d1) = t3(groups0(e1)(d.tail, i))
+          val v2 = undefs0(e2)
+          (v1 ++ v2, n1, d1)
+        }
+      case Eprod(e1, e2) =>
+        val (v1, n1, d1) = t3(groups0(e1)(d, i))
+        val (v2, n2, d2) = t3(groups0(e2)(d1, i+n1))
+        (v1 ++ v2, n1+n2, d2)
+      case Estar(es) =>
+        // TODO: rewrite without vars?
+        val last = var_new(undefs0(es))
+        val nr = var_new(unit(0))
+        val dr = var_new(d)
+        while (boolean_negate(dr.head)) {
+          val (lastc, nd, drc) = t3(groups0(es)(dr.tail, i + readVar(nr)))
+          var_assign(last, lastc)
+          var_assign(dr, drc)
+          var_assign(nr, nr + nd)
+        }
+      make_tuple3(readVar(last), nr, dr.tail)
+      case Egroup(e0) =>
+        val (v0,  n0, d0) = t3(groups0(e0)(d, i))
+        ((i, (i+n0)) :: v0, n0, d0)
+    }
+    def groups(e: E)(d: Rep[List[Boolean]]): Rep[List[(Int,Int)]] = {
+      val (v0, _, _) = t3(groups0(e)(d, 0))
+      v0
+    }
+  }
+
+  trait ParsingDSLBase extends DSLBase with ListOps with TupleOps with While
+  trait ParsingDSLBaseExp extends DSLBaseExp with ListOpsExp with TupleOpsExp with WhileExp
+  trait ParsingDSLGenBase extends DSLGenBase with ScalaGenListOps with ScalaGenTupleOps with ScalaGenWhile with ScalaGenVariables {
+    val IR: ParsingDSLBaseExp
+  }
+  trait BitCodedDSLImpl extends ParsingDSLBaseExp {q =>
+    object codegen extends ParsingDSLGenBase {
+      val IR: q.type = q
     }
   }
 }
