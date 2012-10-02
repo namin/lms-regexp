@@ -437,8 +437,8 @@ object StagedParsing {
   }
 
   trait ParsingDSLBase extends DSLBase with ListOps with TupleOps with While
-  trait ParsingDSLBaseExp extends DSLBaseExp with ListOpsExp with TupleOpsExp with WhileExp with IfThenElseExp
-  trait ParsingDSLGenBase extends DSLGenBase with ScalaGenListOps with ScalaGenTupleOps with ScalaGenWhile with ScalaGenVariables with ScalaGenIfThenElse {
+  trait ParsingDSLBaseExp extends DSLBaseExp with ListOpsExp with TupleOpsExp with WhileExp with IfThenElseExpOpt with IfThenElseFatExp
+  trait ParsingDSLGenBase extends DSLGenBase with ScalaGenListOps with ScalaGenTupleOps with ScalaGenWhile with ScalaGenVariables with ScalaGenIfThenElseFat {
     val IR: ParsingDSLBaseExp
   }
   trait BitCodedDSLImpl extends ParsingDSLBaseExp {q =>
