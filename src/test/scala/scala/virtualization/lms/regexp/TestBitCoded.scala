@@ -20,6 +20,20 @@ class TestBitCoded extends FileDiffSuite {
       }
       assertFileEqualsCheck(prefix+name)
     }
+
+    def compileMatcher(e: E) = {
+      val f = matcher(e) _
+      val fc = compile(f)
+      fc
+    }
+
+    def checkCodeMatcher(e: E, name: String) = {
+      withOutFile(prefix+name) {
+        val f = matcher(e) _
+        codegen.emitSource(f, "Matcher", new java.io.PrintWriter(System.out))
+      }
+      assertFileEqualsCheck(prefix+name)
+    }
   }
 
   // ((ab)(c|d)|(abc))*
@@ -158,6 +172,11 @@ class TestBitCoded extends FileDiffSuite {
     val fc = go.compileGroups(e)
     expect(List((0,3),(2,3),(2,3),null,null,(2,3))){fc(c.get)}
 
-    go.checkCodeGroups(e, "parse_abcstar")
+    go.checkCodeGroups(e, "parse_groups_abcstar")
+
+    val fm = go.compileMatcher(e)
+    expect(c.get){fm("ccc".toList)}
+
+    go.checkCodeMatcher(e, "parse_matcher_abcstar")
   }
 }

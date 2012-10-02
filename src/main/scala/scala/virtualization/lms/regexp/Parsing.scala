@@ -347,6 +347,7 @@ object Parsing {
 
 object StagedParsing {
   import scala.virtualization.lms.common._
+  import Parsing._
 
   trait BitCodedDSL extends Base with ParsingDSLBase {
     def undefs0(e: E): Rep[List[(Int,Int)]] = unit(BitCoded.undefs(e).flatMap(_ match {
@@ -390,11 +391,54 @@ object StagedParsing {
       val (v0, _, _) = t3(groups0(e)(d, 0))
       v0
     }
+
+    def matcher(e: E)(s: Rep[List[Char]]): Rep[List[Boolean]] = {
+      val dfa = DFA.fromNFA(NFA.fromE(e))
+      val curStr = var_new(s)
+      val nextState = var_new(unit(0))
+      val outputMaps = var_new(List[Int => (Int, List[Boolean])]())
+      val nextStateFinal = var_new(unit(false))
+      while (!curStr.isEmpty && nextState != -1) {
+	val curState = readVar(nextState)
+	var_assign(nextState, -1)
+	val c = curStr.head
+	var_assign(curStr, curStr.tail)
+	for (state <- 0 to dfa.nStates-1) {
+	  if (curState == unit(state)) {
+	    val ts = dfa.transitions.filter(t => t.fromState == state)
+	    for (t <- ts) {
+	      if (c == unit(t.input)) {
+		var_assign(nextState, t.toState)
+		var_assign(nextStateFinal, unit(dfa.finals.contains(t.toState)))
+		var_assign(outputMaps, unit(t.outputMap) :: outputMaps)
+	      }
+	    }
+	  }
+	}
+      }
+      if (nextState == -1 || !nextStateFinal) null else {
+	val code = var_new(List[Boolean]())
+	val nfaState = var_new(unit(dfa.nfaFinal))
+	while (!outputMaps.isEmpty) {
+	  val m = outputMaps.head
+	  var_assign(outputMaps, outputMaps.tail)
+	  val (prevNfaState, extraCode) = t2(m(nfaState))
+	  var_assign(code, extraCode ++ code)
+	  var_assign(nfaState, prevNfaState)
+	}
+	for ((initNfaState, begCode) <- dfa.initMap) {
+	  if (readVar(nfaState) == unit(initNfaState)) {
+	    var_assign(code, unit(begCode) ++ code)
+	  }
+	}
+	code
+      }
+    }
   }
 
   trait ParsingDSLBase extends DSLBase with ListOps with TupleOps with While
-  trait ParsingDSLBaseExp extends DSLBaseExp with ListOpsExp with TupleOpsExp with WhileExp
-  trait ParsingDSLGenBase extends DSLGenBase with ScalaGenListOps with ScalaGenTupleOps with ScalaGenWhile with ScalaGenVariables {
+  trait ParsingDSLBaseExp extends DSLBaseExp with ListOpsExp with TupleOpsExp with WhileExp with IfThenElseExp
+  trait ParsingDSLGenBase extends DSLGenBase with ScalaGenListOps with ScalaGenTupleOps with ScalaGenWhile with ScalaGenVariables with ScalaGenIfThenElse {
     val IR: ParsingDSLBaseExp
   }
   trait BitCodedDSLImpl extends ParsingDSLBaseExp {q =>

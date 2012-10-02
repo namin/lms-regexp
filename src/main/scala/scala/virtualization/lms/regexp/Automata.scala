@@ -217,9 +217,9 @@ trait RegexpToNFA extends Regexp { this: NFAtoDFA =>
 
 trait DSL extends DFAOps with NFAtoDFA with RegexpToNFA with DSLBase
 
-trait ImplBase extends DSL with DFAOpsExp with DSLBaseExp
+trait ImplBase extends DSL with DFAOpsExp with DSLBaseExp with IfThenElseExpExtra with IfThenElseExpOpt with IfThenElseFatExp
 
-trait AutomataCodegenBase extends DSLGenBase with ScalaGenDFAOps {
+trait AutomataCodegenBase extends DSLGenBase with ScalaGenDFAOps with ScalaGenIfThenElseFat {
   val IR: ImplBase
 }
 
