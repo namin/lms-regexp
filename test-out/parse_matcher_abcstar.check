@@ -1,0 +1,303 @@
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+class Matcher extends ((scala.collection.immutable.List[Char])=>(scala.collection.immutable.List[Boolean])) {
+def apply(x370:scala.collection.immutable.List[Char]): scala.collection.immutable.List[Boolean] = {
+var x371: scala.collection.immutable.List[Char] = x370
+var x372: Int = 0
+val x27 = List()
+var x373: scala.collection.immutable.List[scala.Function1[Int, scala.Tuple2[Int, scala.collection.immutable.List[Boolean]]]] = x27
+var x374: Boolean = false
+val x488 = while ({val x375 = x371
+val x378 = x372
+val x376 = x375.isEmpty
+val x377 = !x376
+val x379 = x378 != -1
+val x380 = x377 && x379
+x380}) {
+val x382 = x372
+x372 = -1
+val x384 = x371
+val x386 = x384.tail
+x371 = x386
+val x388 = x382 == 0
+val x414 = if (x388) {
+val x385 = x384.head
+val x389 = x385 == 'a'
+val x396 = if (x389) {
+x372 = 3
+x374 = true
+val x392 = x373
+val x393 = Map(0 -> (3,List(true)), 5 -> (3,List(false, true)), 1 -> (3,List()), 6 -> (3,List(false, true, false)), 13 -> (3,List(true, true)), 2 -> (3,List(false)), 12 -> (3,List(true)), 3 -> (3,List(false, false)), 11 -> (3,List()), 8 -> (3,List(false, true, true)), 4 -> (3,List())) :: x392
+x373 = x393
+()
+} else {
+()
+}
+val x397 = x385 == 'c'
+val x404 = if (x397) {
+x372 = 2
+x374 = true
+val x400 = x373
+val x401 = Map(0 -> (8,List(true)), 5 -> (8,List(false, true)), 10 -> (8,List()), 1 -> (8,List()), 6 -> (8,List(false, true, false)), 9 -> (8,List()), 13 -> (8,List(true, true)), 2 -> (8,List(false)), 12 -> (8,List(true)), 3 -> (8,List(false, false)), 11 -> (8,List()), 8 -> (8,List(false, true, true))) :: x400
+x373 = x401
+()
+} else {
+()
+}
+val x405 = x385 == 'b'
+val x412 = if (x405) {
+x372 = 1
+x374 = true
+val x408 = x373
+val x409 = Map(0 -> (6,List(true)), 5 -> (6,List(false, true)), 10 -> (6,List()), 1 -> (6,List()), 6 -> (6,List(false, true, false)), 13 -> (6,List(true, true)), 2 -> (6,List(false)), 12 -> (6,List(true)), 7 -> (6,List()), 3 -> (6,List(false, false)), 11 -> (6,List()), 8 -> (6,List(false, true, true))) :: x408
+x373 = x409
+()
+} else {
+()
+}
+()
+} else {
+()
+}
+val x415 = x382 == 1
+val x438 = if (x415) {
+val x385 = x384.head
+val x397 = x385 == 'c'
+val x422 = if (x397) {
+x372 = 2
+x374 = true
+val x418 = x373
+val x419 = Map(0 -> (8,List(true)), 5 -> (8,List(false, true)), 10 -> (8,List()), 1 -> (8,List()), 6 -> (8,List(false, true, false)), 9 -> (8,List()), 13 -> (8,List(true, true)), 2 -> (8,List(false)), 12 -> (8,List(true)), 3 -> (8,List(false, false)), 11 -> (8,List()), 8 -> (8,List(false, true, true))) :: x418
+x373 = x419
+()
+} else {
+()
+}
+val x405 = x385 == 'b'
+val x429 = if (x405) {
+x372 = 1
+x374 = true
+val x425 = x373
+val x426 = Map(0 -> (6,List(true)), 5 -> (6,List(false, true)), 10 -> (6,List()), 1 -> (6,List()), 6 -> (6,List(false, true, false)), 13 -> (6,List(true, true)), 2 -> (6,List(false)), 12 -> (6,List(true)), 7 -> (6,List()), 3 -> (6,List(false, false)), 11 -> (6,List()), 8 -> (6,List(false, true, true))) :: x425
+x373 = x426
+()
+} else {
+()
+}
+val x389 = x385 == 'a'
+val x436 = if (x389) {
+x372 = 3
+x374 = true
+val x432 = x373
+val x433 = Map(0 -> (3,List(true)), 5 -> (3,List(false, true)), 1 -> (3,List()), 6 -> (3,List(false, true, false)), 13 -> (3,List(true, true)), 2 -> (3,List(false)), 12 -> (3,List(true)), 3 -> (3,List(false, false)), 11 -> (3,List()), 8 -> (3,List(false, true, true)), 4 -> (3,List())) :: x432
+x373 = x433
+()
+} else {
+()
+}
+()
+} else {
+()
+}
+val x439 = x382 == 2
+val x462 = if (x439) {
+val x385 = x384.head
+val x389 = x385 == 'a'
+val x446 = if (x389) {
+x372 = 3
+x374 = true
+val x442 = x373
+val x443 = Map(0 -> (3,List(true)), 5 -> (3,List(false, true)), 1 -> (3,List()), 6 -> (3,List(false, true, false)), 13 -> (3,List(true, true)), 2 -> (3,List(false)), 12 -> (3,List(true)), 3 -> (3,List(false, false)), 11 -> (3,List()), 8 -> (3,List(false, true, true)), 4 -> (3,List())) :: x442
+x373 = x443
+()
+} else {
+()
+}
+val x405 = x385 == 'b'
+val x453 = if (x405) {
+x372 = 1
+x374 = true
+val x449 = x373
+val x450 = Map(0 -> (6,List(true)), 5 -> (6,List(false, true)), 10 -> (6,List()), 1 -> (6,List()), 6 -> (6,List(false, true, false)), 13 -> (6,List(true, true)), 2 -> (6,List(false)), 12 -> (6,List(true)), 7 -> (6,List()), 3 -> (6,List(false, false)), 11 -> (6,List()), 8 -> (6,List(false, true, true))) :: x449
+x373 = x450
+()
+} else {
+()
+}
+val x397 = x385 == 'c'
+val x460 = if (x397) {
+x372 = 2
+x374 = true
+val x456 = x373
+val x457 = Map(0 -> (8,List(true)), 5 -> (8,List(false, true)), 10 -> (8,List()), 1 -> (8,List()), 6 -> (8,List(false, true, false)), 9 -> (8,List()), 13 -> (8,List(true, true)), 2 -> (8,List(false)), 12 -> (8,List(true)), 3 -> (8,List(false, false)), 11 -> (8,List()), 8 -> (8,List(false, true, true))) :: x456
+x373 = x457
+()
+} else {
+()
+}
+()
+} else {
+()
+}
+val x463 = x382 == 3
+val x486 = if (x463) {
+val x385 = x384.head
+val x389 = x385 == 'a'
+val x470 = if (x389) {
+x372 = 3
+x374 = true
+val x466 = x373
+val x467 = Map(0 -> (3,List(true)), 5 -> (3,List(false, true)), 1 -> (3,List()), 6 -> (3,List(false, true, false)), 13 -> (3,List(true, true)), 2 -> (3,List(false)), 12 -> (3,List(true)), 3 -> (3,List(false, false)), 11 -> (3,List()), 8 -> (3,List(false, true, true)), 4 -> (3,List())) :: x466
+x373 = x467
+()
+} else {
+()
+}
+val x397 = x385 == 'c'
+val x477 = if (x397) {
+x372 = 2
+x374 = true
+val x473 = x373
+val x474 = Map(0 -> (8,List(true)), 5 -> (8,List(false, true)), 10 -> (8,List()), 1 -> (8,List()), 6 -> (8,List(false, true, false)), 9 -> (8,List()), 13 -> (8,List(true, true)), 2 -> (8,List(false)), 12 -> (8,List(true)), 3 -> (8,List(false, false)), 11 -> (8,List()), 8 -> (8,List(false, true, true))) :: x473
+x373 = x474
+()
+} else {
+()
+}
+val x405 = x385 == 'b'
+val x484 = if (x405) {
+x372 = 1
+x374 = true
+val x480 = x373
+val x481 = Map(0 -> (6,List(true)), 5 -> (6,List(false, true)), 10 -> (6,List()), 1 -> (6,List()), 6 -> (6,List(false, true, false)), 13 -> (6,List(true, true)), 2 -> (6,List(false)), 12 -> (6,List(true)), 7 -> (6,List()), 3 -> (6,List(false, false)), 11 -> (6,List()), 8 -> (6,List(false, true, true))) :: x480
+x373 = x481
+()
+} else {
+()
+}
+()
+} else {
+()
+}
+()
+}
+val x489 = x372
+val x491 = x374
+val x490 = x489 == -1
+val x492 = !x491
+val x493 = x490 || x492
+val x571 = if (x493) {
+null
+} else {
+var x494: scala.collection.immutable.List[Boolean] = x27
+var x495: Int = 13
+val x513 = while ({val x496 = x373
+val x497 = x496.isEmpty
+val x498 = !x497
+x498}) {
+val x500 = x373
+val x502 = x500.tail
+x373 = x502
+val x504 = x495
+val x501 = x500.head
+val x505 = x501(x504)
+val x508 = x494
+val x507 = x505._2
+val x509 = x507 ::: x508
+x494 = x509
+val x506 = x505._1
+x495 = x506
+()
+}
+val x514 = x495
+val x515 = x514 == 0
+val x520 = if (x515) {
+val x516 = x494
+val x517 = List() ::: x516
+x494 = x517
+()
+} else {
+()
+}
+val x521 = x514 == 5
+val x526 = if (x521) {
+val x522 = x494
+val x523 = List(false, false, true) ::: x522
+x494 = x523
+()
+} else {
+()
+}
+val x527 = x514 == 1
+val x532 = if (x527) {
+val x528 = x494
+val x529 = List(false) ::: x528
+x494 = x529
+()
+} else {
+()
+}
+val x533 = x514 == 6
+val x538 = if (x533) {
+val x534 = x494
+val x535 = List(false, false, true, false) ::: x534
+x494 = x535
+()
+} else {
+()
+}
+val x539 = x514 == 13
+val x544 = if (x539) {
+val x540 = x494
+val x541 = List(true) ::: x540
+x494 = x541
+()
+} else {
+()
+}
+val x545 = x514 == 2
+val x550 = if (x545) {
+val x546 = x494
+val x547 = List(false, false) ::: x546
+x494 = x547
+()
+} else {
+()
+}
+val x551 = x514 == 12
+val x556 = if (x551) {
+val x552 = x494
+val x553 = List(false, true) ::: x552
+x494 = x553
+()
+} else {
+()
+}
+val x557 = x514 == 3
+val x562 = if (x557) {
+val x558 = x494
+val x559 = List(false, false, false) ::: x558
+x494 = x559
+()
+} else {
+()
+}
+val x563 = x514 == 8
+val x568 = if (x563) {
+val x564 = x494
+val x565 = List(false, false, true, true) ::: x564
+x494 = x565
+()
+} else {
+()
+}
+val x569 = x494
+x569
+}
+x571
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/

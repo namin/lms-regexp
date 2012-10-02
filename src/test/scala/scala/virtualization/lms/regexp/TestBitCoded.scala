@@ -2,9 +2,39 @@ package scala.virtualization.lms.regexp
 
 import org.scalatest._
 
-class TestBitCoded extends Suite {
+class TestBitCoded extends FileDiffSuite {
   import BitCoded._
   import Parsing._
+  import StagedParsing._
+
+  trait Go extends BitCodedDSL with BitCodedDSLImpl {
+    def compileGroups(e: E) = {
+      val f = groups(e) _
+      val fc = compile(f)
+      fc
+    }
+    def checkCodeGroups(e: E, name: String) = {
+      withOutFile(prefix+name) {
+        val f = groups(e) _
+        codegen.emitSource(f, "Groups", new java.io.PrintWriter(System.out))
+      }
+      assertFileEqualsCheck(prefix+name)
+    }
+
+    def compileMatcher(e: E) = {
+      val f = matcher(e) _
+      val fc = compile(f)
+      fc
+    }
+
+    def checkCodeMatcher(e: E, name: String) = {
+      withOutFile(prefix+name) {
+        val f = matcher(e) _
+        codegen.emitSource(f, "Matcher", new java.io.PrintWriter(System.out))
+      }
+      assertFileEqualsCheck(prefix+name)
+    }
+  }
 
   // ((ab)(c|d)|(abc))*
   val exE = Estar(Eplus(
@@ -137,5 +167,16 @@ class TestBitCoded extends Suite {
     val r = groups(e)(c.get)
     expect(List(Some(0, 3), Some(2, 3), Some(2, 3),
       None, None, Some(2, 3)).toIndexedSeq){r}
+
+    val go = new Go {}
+    val fc = go.compileGroups(e)
+    expect(List((0,3),(2,3),(2,3),null,null,(2,3))){fc(c.get)}
+
+    go.checkCodeGroups(e, "parse_groups_abcstar")
+
+    val fm = go.compileMatcher(e)
+    expect(c.get){fm("ccc".toList)}
+
+    go.checkCodeMatcher(e, "parse_matcher_abcstar")
   }
 }

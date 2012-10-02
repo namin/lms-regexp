@@ -34,7 +34,7 @@ object MyBuild extends Build {
 
   def normalAndOptimised(dir: String) = Seq(
     //benchProject(dir, /*noAssertions ++ */scalaAt(dir)),
-    benchProject(dir + "Opt", noAssertions ++ scalaAt(dir) ++ optimise)
+    benchProject(StringUtilities.normalize(dir.replaceAll("""\.""", "o") + "Opt"), noAssertions ++ scalaAt(dir) ++ optimise)
   )
 
   def benchProject(name: String, extraSettings: Seq[Setting[_]] = Seq.empty) =
