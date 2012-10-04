@@ -47,3 +47,11 @@ object ParsingMain extends App {
   val exs = new ParsingExamples with ParsingCodeGenerator
   exs.output(List((exs.ex1, "1")))
 }
+
+object RhinoMain extends App {
+  import backtrack._
+  val ex1: String = "^((a*ab)|a*(c))$"
+  RhinoMatcher.stmatcher.IR.dumpGeneratedCode = true
+  val rno = RhinoParser.compileREStub(ex1, "", false)
+  val res2 = RhinoMatcher.matchStaged(rno, "", 0)
+}
