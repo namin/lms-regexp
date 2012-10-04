@@ -27,4 +27,13 @@ class TestConsistency extends Suite {
       }
     }
   }
+
+  def testPAll() = {
+    for (pmatcher <- PMatcherType.values) {
+      val m = pmatcher.create()
+      expect(true, pmatcher) {m.matches("aaaaaaab")}
+      expect(true, pmatcher) {m.matches("aaaaaaac")}
+      expect(false, pmatcher) {m.matches("aaaaaaax")}
+    }
+  }
 }

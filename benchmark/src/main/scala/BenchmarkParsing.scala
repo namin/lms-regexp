@@ -4,7 +4,7 @@ class BenchmarkParsing extends SimpleScalaBenchmark {
   @Param
   val pmatcherType : PMatcherType = null
   // can go up to 100000 with LMS, but not Rhino
-  @Param(Array("1000", "100", "10"))
+  @Param(Array("10000", "1000", "100", "10"))
   val length: Int = 0
 
   var pmatcher : PMatcher = _

@@ -36,7 +36,10 @@ object ParsingMain extends App {
       val out = new java.io.PrintWriter("benchmark/src/main/scala/LMSP.scala")
 
       for((e,suffix) <- res) {
-	val f = (x: Rep[List[Char]]) => groups(e)(matcher(e)(x))
+	val f = (x: Rep[List[Char]]) => {
+	  val r = matcher(e)(x)
+	  if (r == unit(null)) r else groups(e)(r)
+	}
         codegen.emitSource(f, "PMatch" + suffix, out)
       }
 

@@ -6,7 +6,7 @@ object Runner {
     if      (!args.isEmpty && args.head == "quick") CaliperRunner.main(classOf[BenchmarkQuick], args.tail)
     else if (!args.isEmpty && args.head == "long")  CaliperRunner.main(classOf[BenchmarkLong] , args.tail)
     else if (!args.isEmpty && args.head == "big")   CaliperRunner.main(classOf[BenchmarkBig] , args.tail)
-    else if (!args.isEmpty && args.head == "parsing")   CaliperRunner.main(classOf[BenchmarkParsing] , args.tail)
+    else if (!args.isEmpty && args.head == "parsing")   CaliperRunner.main(classOf[BenchmarkParsing] , if (args.tail.isEmpty) Array("-Jstack=-Xss10m") else args.tail)
     else CaliperRunner.main(classOf[Benchmark], args)
   }
   
