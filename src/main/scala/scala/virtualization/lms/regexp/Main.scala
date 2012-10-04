@@ -28,7 +28,7 @@ object Main extends App {
 
 object ParsingMain extends App {
   trait ParsingExamples extends RegexpE {
-    val ex1 = alt(many(seq)(g(star(c('a'))), c('a'), c('b')), seq(star(c('a')), g(c('c'))))
+    val ex1 = alt(many(seq)(g(star(c('a'))), star(c('a')), c('b')), seq(star(c('a')), g(c('c'))))
   }
 
   trait ParsingCodeGenerator extends StagedParsing.BitCodedDSL with StagedParsing.BitCodedDSLImpl {
@@ -53,7 +53,7 @@ object ParsingMain extends App {
 
 object RhinoMain extends App {
   import backtrack._
-  val ex1: String = "^((a*ab)|a*(c))$"
+  val ex1: String = "^((a*a*b)|a*(c))$"
   RhinoMatcher.stmatcher.IR.dumpGeneratedCode = true
   val rno = RhinoParser.compileREStub(ex1, "", false)
   val res2 = RhinoMatcher.matchStaged(rno, "", 0)

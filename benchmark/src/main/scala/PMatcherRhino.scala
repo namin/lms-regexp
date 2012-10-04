@@ -4,7 +4,7 @@ class PMatcherRhino() extends PMatcher {
   import RhinoMatcher.matcher
 
   private val fc = new RhinoP1
-  private val ex: String = "^((a*ab)|a*(c))$"
+  private val ex: String = "^((a*a*b)|a*(c))$"
   private val re = RhinoParser.compileREStub(ex, "", false)
   re.stmatcher = fc
   private val inp: Int = 0
