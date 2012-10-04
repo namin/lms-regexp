@@ -25,3 +25,25 @@ object Main extends App {
   val exs = new Examples with CodeGenerator
   exs.output(List((exs.aab, "AAB"), (exs.aabany, "AABany"), (exs.usd, "USD"), (exs.anything, "Anything"), (exs.cook, "Cook")))
 }
+
+object ParsingMain extends App {
+  trait ParsingExamples extends RegexpE {
+    val ex1 = alt(many(seq)(g(star(c('a'))), c('a'), c('b')), seq(star(c('a')), g(c('c'))))
+  }
+
+  trait ParsingCodeGenerator extends StagedParsing.BitCodedDSL with StagedParsing.BitCodedDSLImpl {
+     def output(res: List[(E, String)]) = {
+      val out = new java.io.PrintWriter("benchmark/src/main/scala/LMSP.scala")
+
+      for((e,suffix) <- res) {
+	val f = (x: Rep[List[Char]]) => groups(e)(matcher(e)(x))
+        codegen.emitSource(f, "PMatch" + suffix, out)
+      }
+
+      out.close()
+    }
+  }
+
+  val exs = new ParsingExamples with ParsingCodeGenerator
+  exs.output(List((exs.ex1, "1")))
+}
