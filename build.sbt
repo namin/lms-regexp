@@ -1,35 +1,28 @@
 name := "lms-regexp"
 
-version := "0.1"
+version := "0.2"
 
 organization := "EPFL"
 
-resolvers += ScalaToolsSnapshots
-
-//resolvers += dropboxScalaTestRepo
-
-resolvers += prereleaseScalaTest
-
 scalaOrganization := "org.scala-lang.virtualized"
 
-//scalaBinaryVersion := virtScala // necessary??
+scalaVersion := "2.10.2"
 
-scalaVersion := virtScala
+libraryDependencies += "org.scala-lang.virtualized" % "scala-compiler" % "2.10.2"
+
+libraryDependencies += "org.scala-lang.virtualized" % "scala-library" % "2.10.2"
+
+libraryDependencies += "org.scala-lang.virtualized" % "scala-reflect" % "2.10.2"
+
+libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
+
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0.M5b" % "test"
+
+libraryDependencies += "org.scala-lang.virtualized" % "scala-actors" % "2.10.2-RC1" % "test"
 
 scalacOptions += "-Yvirtualize"
 
-//scalacOptions += "-Yvirtpatmat"
-
-//scalacOptions in Compile ++= Seq(/*Unchecked, */Deprecation)
-
-// needed for scala.tools, which is apparently not included in sbt's built in version
-libraryDependencies += "org.scala-lang" % "scala-library" % virtScala
-
-libraryDependencies += "org.scala-lang" % "scala-compiler" % virtScala
-
-libraryDependencies += scalaTest
-
-libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
+scalacOptions += "-deprecation"
 
 // tests are not thread safe
 parallelExecution in Test := false
@@ -40,6 +33,6 @@ publishArtifact in (Compile, packageDoc) := false
 // continuations
 autoCompilerPlugins := true
 
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % virtScala)
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.2")
 
 scalacOptions += "-P:continuations:enable"

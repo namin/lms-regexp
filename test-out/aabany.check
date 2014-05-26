@@ -15,26 +15,24 @@ var x32 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Byte
 var x4 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Byte]]]
 var x10 = null.asInstanceOf[scala.virtualization.lms.regexp.Automaton[Char, Byte]]
 var x7 = null.asInstanceOf[scala.Function1[Char, scala.virtualization.lms.regexp.Automaton[Char, Byte]]]
-x18 = {x19: (Char) => 
-val x20 = x19 == 'A'
-val x24 = if (x20) {
-x21
+x1 = {x2: (Char) => 
+val x3 = x2 == 'A'
+val x33 = if (x3) {
+x32
 } else {
-x23
+x28
 }
-x24
+x33
 }
-x21 = scala.virtualization.lms.regexp.Automaton(3.toByte,x18)
-x15 = {x16: (Char) => 
-val x17 = x16 == 'A'
-val x25 = if (x17) {
-x21
+x4 = {x5: (Char) => 
+val x6 = x5 == 'A'
+val x31 = if (x6) {
+x10
 } else {
-x23
+x28
 }
-x25
+x31
 }
-x26 = scala.virtualization.lms.regexp.Automaton(3.toByte,x15)
 x12 = {x13: (Char) => 
 val x14 = x13 == 'A'
 val x27 = if (x14) {
@@ -61,26 +59,28 @@ x29
 x30
 }
 x10 = scala.virtualization.lms.regexp.Automaton(0.toByte,x7)
-x4 = {x5: (Char) => 
-val x6 = x5 == 'A'
-val x31 = if (x6) {
-x10
+x15 = {x16: (Char) => 
+val x17 = x16 == 'A'
+val x25 = if (x17) {
+x21
 } else {
-x28
+x23
 }
-x31
+x25
 }
-x32 = scala.virtualization.lms.regexp.Automaton(0.toByte,x4)
-x1 = {x2: (Char) => 
-val x3 = x2 == 'A'
-val x33 = if (x3) {
-x32
+x18 = {x19: (Char) => 
+val x20 = x19 == 'A'
+val x24 = if (x20) {
+x21
 } else {
-x28
+x23
 }
-x33
+x24
 }
+x21 = scala.virtualization.lms.regexp.Automaton(3.toByte,x18)
+x26 = scala.virtualization.lms.regexp.Automaton(3.toByte,x15)
 x28 = scala.virtualization.lms.regexp.Automaton(0.toByte,x1)
+x32 = scala.virtualization.lms.regexp.Automaton(0.toByte,x4)
 x28
 }
 }
