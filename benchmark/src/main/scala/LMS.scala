@@ -18,16 +18,6 @@ val x17 = if (x2) {
 }
 x17
 }
-else if (id == 3) {
-val x4 = c
-val x5 = x4 == 'A'
-val x15 = if (x5) {
-6
-} else {
-0
-}
-x15
-}
 else if (id == 6) {
 val x7 = c
 val x8 = x7 == 'A'
@@ -43,6 +33,16 @@ val x13 = if (x10) {
 x13
 }
 x14
+}
+else if (id == 3) {
+val x4 = c
+val x5 = x4 == 'A'
+val x15 = if (x5) {
+6
+} else {
+0
+}
+x15
 }
 else { throw new RuntimeException("invalid state " + id) }
 i += 1
@@ -58,16 +58,6 @@ false
 }
 x17
 }
-else if (id == 3) {
-val x4 = c
-val x5 = x4 == 'A'
-val x15 = if (x5) {
-false
-} else {
-false
-}
-x15
-}
 else if (id == 6) {
 val x7 = c
 val x8 = x7 == 'A'
@@ -84,6 +74,16 @@ x13
 }
 x14
 }
+else if (id == 3) {
+val x4 = c
+val x5 = x4 == 'A'
+val x15 = if (x5) {
+false
+} else {
+false
+}
+x15
+}
 else { throw new RuntimeException("invalid state " + id) }
 }
 }
@@ -97,7 +97,63 @@ val n_dec = n-1
 while (i < n_dec) {
 val c = input.charAt(i)
 id =
-if (id == 18) {
+if (id == 35) {
+val x36 = c
+val x37 = x36 == 'A'
+val x41 = if (x37) {
+return true
+} else {
+return true
+}
+x41
+}
+else if (id == 32) {
+val x33 = c
+val x34 = x33 == 'A'
+val x42 = if (x34) {
+return true
+} else {
+return true
+}
+x42
+}
+else if (id == 29) {
+val x30 = c
+val x31 = x30 == 'A'
+val x44 = if (x31) {
+return true
+} else {
+return true
+}
+x44
+}
+else if (id == 24) {
+val x25 = c
+val x26 = x25 == 'A'
+val x47 = if (x26) {
+24
+} else {
+val x28 = x25 == 'B'
+val x46 = if (x28) {
+return true
+} else {
+18
+}
+x46
+}
+x47
+}
+else if (id == 21) {
+val x22 = c
+val x23 = x22 == 'A'
+val x48 = if (x23) {
+24
+} else {
+18
+}
+x48
+}
+else if (id == 18) {
 val x19 = c
 val x20 = x19 == 'A'
 val x50 = if (x20) {
@@ -107,23 +163,37 @@ val x50 = if (x20) {
 }
 x50
 }
-else if (id == 21) {
-val x22 = c
-val x23 = x22 == 'A'
-val x48 = if (x23) {
-24
-} else {
-18
+else { throw new RuntimeException("invalid state " + id) }
+i += 1
 }
-x48
+val c = input.charAt(i)
+if (id == 35) {
+val x36 = c
+val x37 = x36 == 'A'
+val x41 = if (x37) {
+true
+} else {
+true
+}
+x41
+}
+else if (id == 32) {
+val x33 = c
+val x34 = x33 == 'A'
+val x42 = if (x34) {
+true
+} else {
+true
+}
+x42
 }
 else if (id == 29) {
 val x30 = c
 val x31 = x30 == 'A'
 val x44 = if (x31) {
-return true
+true
 } else {
-return true
+true
 }
 x44
 }
@@ -131,43 +201,29 @@ else if (id == 24) {
 val x25 = c
 val x26 = x25 == 'A'
 val x47 = if (x26) {
-24
+false
 } else {
 val x28 = x25 == 'B'
 val x46 = if (x28) {
-return true
+true
 } else {
-18
+false
 }
 x46
 }
 x47
 }
-else if (id == 32) {
-val x33 = c
-val x34 = x33 == 'A'
-val x42 = if (x34) {
-return true
+else if (id == 21) {
+val x22 = c
+val x23 = x22 == 'A'
+val x48 = if (x23) {
+false
 } else {
-return true
+false
 }
-x42
+x48
 }
-else if (id == 35) {
-val x36 = c
-val x37 = x36 == 'A'
-val x41 = if (x37) {
-return true
-} else {
-return true
-}
-x41
-}
-else { throw new RuntimeException("invalid state " + id) }
-i += 1
-}
-val c = input.charAt(i)
-if (id == 18) {
+else if (id == 18) {
 val x19 = c
 val x20 = x19 == 'A'
 val x50 = if (x20) {
@@ -176,62 +232,6 @@ false
 false
 }
 x50
-}
-else if (id == 21) {
-val x22 = c
-val x23 = x22 == 'A'
-val x48 = if (x23) {
-false
-} else {
-false
-}
-x48
-}
-else if (id == 29) {
-val x30 = c
-val x31 = x30 == 'A'
-val x44 = if (x31) {
-true
-} else {
-true
-}
-x44
-}
-else if (id == 24) {
-val x25 = c
-val x26 = x25 == 'A'
-val x47 = if (x26) {
-false
-} else {
-val x28 = x25 == 'B'
-val x46 = if (x28) {
-true
-} else {
-false
-}
-x46
-}
-x47
-}
-else if (id == 32) {
-val x33 = c
-val x34 = x33 == 'A'
-val x42 = if (x34) {
-true
-} else {
-true
-}
-x42
-}
-else if (id == 35) {
-val x36 = c
-val x37 = x36 == 'A'
-val x41 = if (x37) {
-true
-} else {
-true
-}
-x41
 }
 else { throw new RuntimeException("invalid state " + id) }
 }
@@ -552,22 +552,6 @@ x139
 }
 x140
 }
-else if (id == 123) {
-val x124 = c
-val x125 = x124 == 'A'
-val x137 = if (x125) {
-123
-} else {
-val x127 = x124 == 'B'
-val x136 = if (x127) {
-128
-} else {
-return false
-}
-x136
-}
-x137
-}
 else if (id == 128) {
 val x129 = c
 val x130 = x129 == 'A'
@@ -583,6 +567,22 @@ return false
 x133
 }
 x134
+}
+else if (id == 123) {
+val x124 = c
+val x125 = x124 == 'A'
+val x137 = if (x125) {
+123
+} else {
+val x127 = x124 == 'B'
+val x136 = if (x127) {
+128
+} else {
+return false
+}
+x136
+}
+x137
 }
 else { throw new RuntimeException("invalid state " + id) }
 i += 1
@@ -608,22 +608,6 @@ x139
 }
 x140
 }
-else if (id == 123) {
-val x124 = c
-val x125 = x124 == 'A'
-val x137 = if (x125) {
-true
-} else {
-val x127 = x124 == 'B'
-val x136 = if (x127) {
-true
-} else {
-false
-}
-x136
-}
-x137
-}
 else if (id == 128) {
 val x129 = c
 val x130 = x129 == 'A'
@@ -639,6 +623,22 @@ false
 x133
 }
 x134
+}
+else if (id == 123) {
+val x124 = c
+val x125 = x124 == 'A'
+val x137 = if (x125) {
+true
+} else {
+val x127 = x124 == 'B'
+val x136 = if (x127) {
+true
+} else {
+false
+}
+x136
+}
+x137
 }
 else { throw new RuntimeException("invalid state " + id) }
 }
