@@ -7,6 +7,6 @@ public enum RegexpType {
 
     public final String re;
     RegexpType(String re) {
-	this.re = re;
+        this.re = re;
     }
 }

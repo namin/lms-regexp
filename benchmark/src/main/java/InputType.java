@@ -9,10 +9,10 @@ public enum InputType {
 
     public final String text;
     InputType(String text) {
-	this.text = text;
+        this.text = text;
     }
 
     private static String garbage(int n) {
-	return new String(new char[n]).replace("\0", "no no no");
+        return new String(new char[n]).replace("\0", "no no no");
     }
 }

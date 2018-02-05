@@ -1,21 +1,23 @@
-import com.google.caliper.Param
+import org.scalameter.api._
+import org.scalameter.picklers.noPickler._
 
-class Benchmark extends SimpleScalaBenchmark {
-  @Param
-  val matcherType : MatcherType = null
-  @Param(Array("ANY_AAB", "ANY_AAB_ANY", "USD", "COOK")) // all but ANY
-  val regexpType : RegexpType = null
-  @Param
-  val inputType : InputType = null
+object Benchmark extends Bench.LocalTime {
+  val matcherType : Gen[MatcherType] = Gen.enumeration("matcher")(MatcherType.values:_*)
+  val regexpType : Gen[RegexpType] = Gen.enumeration("regexp")(RegexpType.values.filter(_!=RegexpType.ANY):_*)
+  val inputType : Gen[InputType] = Gen.enumeration("input")(InputType.values:_*)
 
-  var regexp : RegexpMatcher = _
-  var input : String = _
-  override def setUp() {
-    regexp = matcherType.create(regexpType)
-    input = inputType.text
-  }
+  def exs : Gen[(RegexpMatcher,String)] =
+    for (
+      m <- matcherType;
+      r <- regexpType;
+      i <- inputType) yield (m.create(r), i.text)
 
-  def timeMatching(reps: Int) = repeat(reps) {
-    if (regexp.matches(input)) reps else -reps
+  performance of "matcher" in {
+    measure method "matches" in {
+      using(exs) in { ex =>
+        val (regexp,input) = ex
+        regexp.matches(input)
+      }
+    }
   }
 }

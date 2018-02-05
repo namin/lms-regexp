@@ -1,6 +1,6 @@
-import com.google.caliper.SimpleBenchmark
-
-trait SimpleScalaBenchmark extends SimpleBenchmark {
+// TODO: this was recommended with Google Caliper.
+//  Investigate whether a similar scheme is needed for Scala Meter.
+object Utils {
   
   // helper method to keep the actual benchmarking methods a bit cleaner
   // your code snippet should always return a value that cannot be "optimized away"
@@ -15,5 +15,4 @@ trait SimpleScalaBenchmark extends SimpleBenchmark {
     }
     result
   }
-
 }

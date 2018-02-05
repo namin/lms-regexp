@@ -1,29 +1,23 @@
-import com.google.caliper.Param
+import org.scalameter.api._
+import org.scalameter.picklers.noPickler._
 
-class BenchmarkQuick extends SimpleScalaBenchmark {
-  @Param
-  val matcherType : MatcherType = null
+object BenchmarkQuick extends Bench.LocalTime {
+  val matchers : Gen[MatcherType] = Gen.enumeration("matcher")(MatcherType.values:_*)
 
-  var regexps : Array[RegexpMatcher] = _
-  var inputs : Array[String] = _
-  override def setUp() {
-    regexps = for (regexpType <- RegexpType.values) yield matcherType.create(regexpType)
-    inputs = for (inputType <- InputType.values) yield inputType.text
-  }
+  val inputs = for (inputType <- InputType.values) yield inputType.text
 
-  def timeMatching(reps: Int) = repeat(reps) {
-    var count = 0
-    var i = 0
-    val n = regexps.length
-    val m = inputs.length
-    while (i < n) {
-      var j = 0
-      while (j < m) {
-        if (regexps(i).matches(inputs(j))) count += 1 else count += -1
-        j += 1
+  performance of "matcher" in {
+    measure method "matches" in {
+      using(matchers) in { m =>
+        var count = 0
+        val regexps = for (regexpType <- RegexpType.values) yield m.create(regexpType)
+        for (regexp <- regexps; input <- inputs) {
+          if (regexp.matches(input)) {
+            count += 1
+          }
+        }
+        count
       }
-      i += 1
     }
-    count
   }
 }

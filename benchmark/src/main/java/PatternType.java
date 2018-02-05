@@ -7,7 +7,7 @@ public enum PatternType {
     public final String rep;
     public final String end;
     PatternType(String rep, String end) {
-	this.rep = rep;
-	this.end = end;
+        this.rep = rep;
+        this.end = end;
     }
 }

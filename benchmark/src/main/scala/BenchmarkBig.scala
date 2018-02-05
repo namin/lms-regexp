@@ -1,30 +1,36 @@
-import com.google.caliper.Param
+import org.scalameter.api._
+import org.scalameter.picklers.noPickler._
 
-class BenchmarkBig extends SimpleScalaBenchmark {
-  @Param(Array("LMS", "DK"))
-  val matcherType : MatcherType = null
-  @Param(Array("ANY_AAB", "ANY_AAB_ANY", "COOK"))
-  val regexpType : RegexpType = null
-  @Param
-  val patternType : PatternType = null
-  @Param(Array("10000000"))
-  val length: Int = 0
+object BenchmarkBig extends Bench.LocalTime {
+  val matcherType : Gen[MatcherType] = Gen.enumeration("matcher")(MatcherType.LMS, MatcherType.DK)
+  val regexpType : Gen[RegexpType] = Gen.enumeration("regexp")(RegexpType.ANY_AAB, RegexpType.ANY_AAB_ANY, RegexpType.COOK)
+  val patternType : Gen[PatternType] = Gen.enumeration("pattern")(PatternType.values:_*)
+  val length: Gen[Int] =   Gen.single("length")(10000000)
 
-  var regexp : RegexpMatcher = _
-  var input : String = _
-  override def setUp() {
-    regexp = matcherType.create(regexpType)
+  def exs : Gen[(RegexpMatcher,String)] =
+    for (
+      m <- matcherType;
+      r <- regexpType;
+      p <- patternType;
+      l <- length) yield (m.create(r), input(p,l))
+
+  def input(pattern: PatternType, length: Int): String = {
     val sb = new StringBuilder()
-    var i = patternType.end.length;
+    var i = pattern.end.length
     while (i < length) {
-      sb.append(patternType.rep)
-      i += patternType.rep.length;
+      sb.append(pattern.rep)
+      i += pattern.rep.length
     }
-    sb.append(patternType.end)
-    input = sb.toString
+    sb.append(pattern.end)
+    sb.toString
   }
 
-  def timeMatching(reps: Int) = repeat(reps) {
-    if (regexp.matches(input)) reps else -reps
+  performance of "matcher" in {
+    measure method "matches" in {
+      using(exs) in { ex =>
+        val (regexp,input) = ex
+        regexp.matches(input)
+      }
+    }
   }
 }
