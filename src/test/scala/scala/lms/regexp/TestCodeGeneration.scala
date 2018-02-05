@@ -1,4 +1,4 @@
-package scala.virtualization.lms.regexp
+package scala.lms.regexp
 
 class TestCodeGeneration extends FileDiffSuite {
   trait Go extends Impl {

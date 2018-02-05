@@ -1,4 +1,4 @@
-package scala.virtualization.lms.regexp
+package scala.lms.regexp
 
 import org.scalatest._
 

@@ -1,13 +1,14 @@
-package scala.virtualization.lms.regexp
+package scala.lms.regexp
 
 import java.io.{PrintStream,File,FileInputStream,FileOutputStream,ByteArrayOutputStream}
 import org.scalatest._
 
 trait FileDiffSuite extends Suite {
   val prefix = "test-out/"
+  val suffix = ".actual.scala"
 
   def withOutFile(name: String)(func: => Unit): Unit = {
-    val file = new File(name)
+    val file = new File(name+suffix)
     file.getParentFile.mkdirs()
     withOutput(new PrintStream(new FileOutputStream(file)))(func)
   }
@@ -39,7 +40,7 @@ trait FileDiffSuite extends Suite {
     new String(buf)
   }
   def assertFileEqualsCheck(name: String): Unit = {
-    expect(readFile(name+".check")){readFile(name)}
-    new File(name) delete ()
+    expect(readFile(name+".check.scala")){readFile(name+suffix)}
+    new File(name+suffix) delete ()
   }
 }

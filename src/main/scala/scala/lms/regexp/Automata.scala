@@ -1,10 +1,11 @@
-package scala.virtualization.lms.regexp
+package scala.lms.regexp
 
-import scala.virtualization.lms.common._
-import scala.virtualization.lms.internal.NestedBlockTraversal
-import scala.virtualization.lms.util.ClosureCompare
+import scala.lms.common._
+import scala.lms.internal.NestedBlockTraversal
+import scala.lms.util.ClosureCompare
 
-trait DFAOps extends Base {
+trait DFAOps extends Base with PrimitiveOps {
+  implicit def dfaStateTyp: Typ[DfaState]
 
   type DfaState = Automaton[Char,Byte]
 
@@ -15,7 +16,8 @@ trait DFAOps extends Base {
 }
 
 
-trait DFAOpsExp extends BaseExp with DFAOps { this: Functions => 
+trait DFAOpsExp extends BaseExp with PrimitiveOpsExp with DFAOps { this: Functions => 
+  implicit def dfaStateTyp: Typ[DfaState]   = manifestTyp
 
   case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
   
@@ -61,7 +63,7 @@ trait ScalaGenDFAOps extends StabilityCalculator with ScalaGenBase {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case dfa@DFAState(b,f) =>
-      emitValDef(sym, "scala.virtualization.lms.regexp.Automaton(" + encodeOut(b, sym, dfa) + ".toByte," + quote(f) + ")")
+      emitValDef(sym, "scala.lms.regexp.Automaton(" + encodeOut(b, sym, dfa) + ".toByte," + quote(f) + ")")
     case _ => super.emitNode(sym, rhs)
   }
 }
@@ -144,7 +146,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: DSLBase =>
     case _ => Some(s1)
   }
 
-  def exploreNFA[A:Manifest](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
+  def exploreNFA[A:Typ](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
     case Nil => k(false, Nil)
     case NTrans(W, e, s)::rest =>
       val (xs1, xs2) = xs.partition(_.c != W)
@@ -239,7 +241,7 @@ trait AutomataCodegenOpt extends AutomataCodegenBase {
   def pack(dio: => DIO): (Exp[String] => Exp[Boolean]) = {
     (x: Exp[String]) => dio.asInstanceOf[Exp[Boolean]]
   }
-  override def emitSource[A,B](f: Exp[A] => Exp[B], className: String, out: PrintWriter)(implicit mA: Manifest[A], mB: Manifest[B]): List[(Sym[Any], Any)] = {
+  override def emitSource[A,B](f: Exp[A] => Exp[B], className: String, out: PrintWriter)(implicit mA: Typ[A], mB: Typ[B]): List[(Sym[Any], Any)] = {
     emitAutomata(f(null).asInstanceOf[DIO], className, out)
     List()
   }

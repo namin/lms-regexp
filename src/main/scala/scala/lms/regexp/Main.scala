@@ -1,4 +1,4 @@
-package scala.virtualization.lms.regexp
+package scala.lms.regexp
 
 object Main extends App {
   trait Examples extends DSL {

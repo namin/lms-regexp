@@ -18,16 +18,6 @@ val x17 = if (x2) {
 }
 x17
 }
-else if (id == 3) {
-val x4 = c
-val x5 = x4 == 'A'
-val x15 = if (x5) {
-6
-} else {
-0
-}
-x15
-}
 else if (id == 6) {
 val x7 = c
 val x8 = x7 == 'A'
@@ -44,6 +34,16 @@ x13
 }
 x14
 }
+else if (id == 3) {
+val x4 = c
+val x5 = x4 == 'A'
+val x15 = if (x5) {
+6
+} else {
+0
+}
+x15
+}
 else { throw new RuntimeException("invalid state " + id) }
 i += 1
 }
@@ -57,16 +57,6 @@ false
 false
 }
 x17
-}
-else if (id == 3) {
-val x4 = c
-val x5 = x4 == 'A'
-val x15 = if (x5) {
-false
-} else {
-false
-}
-x15
 }
 else if (id == 6) {
 val x7 = c
@@ -83,6 +73,16 @@ false
 x13
 }
 x14
+}
+else if (id == 3) {
+val x4 = c
+val x5 = x4 == 'A'
+val x15 = if (x5) {
+false
+} else {
+false
+}
+x15
 }
 else { throw new RuntimeException("invalid state " + id) }
 }

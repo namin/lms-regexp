@@ -1,4 +1,4 @@
-package scala.virtualization.lms.regexp
+package scala.lms.regexp
 
 // Bit-coded Regular Expression Parsing by Lasse Nielsen and Fritz Henglein
 // http://www.diku.dk/hjemmesider/ansatte/henglein/papers/henglein2011b.pdf
@@ -208,8 +208,8 @@ object Parsing {
       var paths = Set((in0, str, epsilon))
       var results = Set[Code]()
       while (!paths.isEmpty) {
-	results ++= paths.collect{case (`out0`, Nil, output) => output.reverse}
-	paths = paths.filter{case (s,cs,d) => !cs.isEmpty}.flatMap{case (s,c::cs,d) => t.collect{case NTr(`s`, toState, Some(`c`), output) => (toState, cs, output ++ d)}} ++ paths.flatMap{case (s,cs,d) => t.collect{case NTr(`s`, toState, None, output) => (toState, cs, output ++ d)}}
+	      results ++= paths.collect{case (`out0`, Nil, output) => output.reverse}
+	      paths = paths.filter{case (s,cs,d) => !cs.isEmpty}.flatMap{case (s,c::cs,d) => t.collect{case NTr(`s`, toState, Some(`c`), output) => (toState, cs, output ++ d)}} ++ paths.flatMap{case (s,cs,d) => t.collect{case NTr(`s`, toState, None, output) => (toState, cs, output ++ d)}}
       }
       return results
     }
@@ -346,7 +346,7 @@ object Parsing {
 }
 
 object StagedParsing {
-  import scala.virtualization.lms.common._
+  import scala.lms.common._
   import Parsing._
 
   trait BitCodedDSL extends Base with ParsingDSLBase {
@@ -399,39 +399,39 @@ object StagedParsing {
       val outputMaps = var_new(List[Int => (Int, List[Boolean])]())
       val nextStateFinal = var_new(unit(false))
       while (!curStr.isEmpty && nextState != -1) {
-	val curState = readVar(nextState)
-	var_assign(nextState, -1)
-	val c = curStr.head
-	var_assign(curStr, curStr.tail)
-	for (state <- 0 to dfa.nStates-1) {
-	  if (curState == unit(state)) {
-	    val ts = dfa.transitions.filter(t => t.fromState == state)
-	    for (t <- ts) {
-	      if (c == unit(t.input)) {
-		var_assign(nextState, t.toState)
-		var_assign(nextStateFinal, unit(dfa.finals.contains(t.toState)))
-		var_assign(outputMaps, unit(t.outputMap) :: outputMaps)
+	      val curState = readVar(nextState)
+	      var_assign(nextState, -1)
+	      val c = curStr.head
+	      var_assign(curStr, curStr.tail)
+	      for (state <- 0 to dfa.nStates-1) {
+	        if (curState == unit(state)) {
+	          val ts = dfa.transitions.filter(t => t.fromState == state)
+	          for (t <- ts) {
+	            if (c == unit(t.input)) {
+		            var_assign(nextState, t.toState)
+		            var_assign(nextStateFinal, unit(dfa.finals.contains(t.toState)))
+		            var_assign(outputMaps, unit[Int => (Int, List[Boolean])](t.outputMap) :: outputMaps)
+	            }
+	          }
+	        }
 	      }
-	    }
-	  }
-	}
       }
-      if (nextState == -1 || !nextStateFinal) null else {
-	val code = var_new(List[Boolean]())
-	val nfaState = var_new(unit(dfa.nfaFinal))
-	while (!outputMaps.isEmpty) {
-	  val m = outputMaps.head
-	  var_assign(outputMaps, outputMaps.tail)
-	  val (prevNfaState, extraCode) = t2(m(nfaState))
-	  var_assign(code, extraCode ++ code)
-	  var_assign(nfaState, prevNfaState)
-	}
-	for ((initNfaState, begCode) <- dfa.initMap) {
-	  if (readVar(nfaState) == unit(initNfaState)) {
-	    var_assign(code, unit(begCode) ++ code)
-	  }
-	}
-	code
+      if (nextState == -1 || !nextStateFinal) unit(null) else {
+	      val code = var_new(List[Boolean]())
+	      val nfaState = var_new(unit(dfa.nfaFinal))
+	      while (!outputMaps.isEmpty) {
+	        val m = outputMaps.head
+	        var_assign(outputMaps, outputMaps.tail)
+	        val (prevNfaState, extraCode) = t2(m(nfaState))
+	        var_assign(code, extraCode ++ code)
+	        var_assign(nfaState, prevNfaState)
+	      }
+	      for ((initNfaState, begCode) <- dfa.initMap) {
+	        if (readVar(nfaState) == unit(initNfaState)) {
+	          var_assign(code, unit(begCode) ++ code)
+	        }
+	      }
+	      code
       }
     }
   }
@@ -444,6 +444,17 @@ object StagedParsing {
   trait BitCodedDSLImpl extends ParsingDSLBaseExp {q =>
     object codegen extends ParsingDSLGenBase {
       val IR: q.type = q
+      override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+        case Struct(tag, elems) =>
+          emitValDef(sym, "(" + elems.map(e => quote(e._2)).mkString(",") + ")")
+        case _ => super.emitNode(sym, rhs)
+      }
+      override def remap[A](m: Typ[A]) = {
+        val n = m.runtimeClass.getSimpleName
+        if (n.startsWith("Tuple"))
+          n + m.typeArguments.map(remap(_)).mkString("[", ",", "]")
+        else super.remap(m)
+      }
     }
   }
 }

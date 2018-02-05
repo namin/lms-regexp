@@ -1,4 +1,4 @@
-package scala.virtualization.lms.regexp
+package scala.lms.regexp
 
 class TestOpt extends FileDiffSuite {
   trait Examples extends DSL {

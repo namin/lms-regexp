@@ -1,6 +1,6 @@
-package scala.virtualization.lms.common
+package scala.lms.common
 
-import scala.virtualization.lms.util.ClosureCompare
+import scala.lms.util.ClosureCompare
 import scala.reflect.SourceContext
 
 trait FunctionsExternalDef extends FunctionsExp with BlockExp with ClosureCompare {
@@ -22,7 +22,7 @@ trait FunctionsExternalDef extends FunctionsExp with BlockExp with ClosureCompar
   }
 
   var funTable: List[(Sym[_], Any)] = List()
-  override def doLambda[A:Manifest,B:Manifest](f: Exp[A]=>Exp[B])(implicit pos: SourceContext): Exp[A=>B] = {
+  override def doLambda[A:Typ,B:Typ](f: Exp[A]=>Exp[B])(implicit pos: SourceContext): Exp[A=>B] = {
     var can = canonicalize(f)
 
     funTable.find(_._2 == can) match {

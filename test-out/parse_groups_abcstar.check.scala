@@ -1,9 +1,9 @@
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class Groups extends ((scala.collection.immutable.List[Boolean])=>(scala.collection.immutable.List[scala.Tuple2[Int, Int]])) {
-def apply(x84:scala.collection.immutable.List[Boolean]): scala.collection.immutable.List[scala.Tuple2[Int, Int]] = {
-var x85: scala.collection.immutable.List[scala.Tuple2[Int, Int]] = List(null, null, null, null, null, null)
+class Groups extends ((scala.collection.immutable.List[Boolean])=>(scala.collection.immutable.List[Tuple2[Int,Int]])) {
+def apply(x84:scala.collection.immutable.List[Boolean]): scala.collection.immutable.List[Tuple2[Int,Int]] = {
+var x85: scala.collection.immutable.List[Tuple2[Int,Int]] = List(null, null, null, null, null, null)
 var x86: Int = 0
 var x87: scala.collection.immutable.List[Boolean] = x84
 val x27 = List()
@@ -13,7 +13,7 @@ val x90 = !x89
 x90}) {
 val x92 = x87
 val x94 = x86
-var x96: scala.collection.immutable.List[scala.Tuple2[Int, Int]] = List(null, null, null, null, null)
+var x96: scala.collection.immutable.List[Tuple2[Int,Int]] = List(null, null, null, null, null)
 var x97: Int = 0
 val x93 = x92.tail
 var x98: scala.collection.immutable.List[Boolean] = x93
