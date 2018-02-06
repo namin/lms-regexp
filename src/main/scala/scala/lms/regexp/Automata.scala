@@ -16,13 +16,12 @@ trait DFAOps extends Base with PrimitiveOps {
 }
 
 
-trait DFAOpsExp extends BaseExp with PrimitiveOpsExp with DFAOps { this: Functions => 
+trait DFAOpsExp extends BaseExp with PrimitiveOpsExp with DFAOps { this: Functions =>
   implicit def dfaStateTyp: Typ[DfaState]   = manifestTyp
 
   case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
-  
+
   def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
-  
 }
 
 
@@ -71,7 +70,7 @@ trait ScalaGenDFAOps extends StabilityCalculator with ScalaGenBase {
 
 trait NFAtoDFA extends DFAOps with ClosureCompare { this: DSLBase =>
   type NIO = List[NTrans]
-  
+
   case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO) extends Ordered[NTrans] {
     override def compare(o: NTrans) = {
       val i = this.c.compare(o.c)
@@ -81,11 +80,11 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: DSLBase =>
           val tf = canonicalize(this.s())
           val of = canonicalize(o.s())
           if (tf == of) 0 else tf.compare(of)
-	}
+	      }
       }
     }
   }
-  
+
   def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => false, s))
 
   def guard(cond: CharSet, found: => Boolean = false)(e: => NIO): NIO = {
@@ -97,7 +96,7 @@ trait NFAtoDFA extends DFAOps with ClosureCompare { this: DSLBase =>
   }
 
   def stop(): NIO = Nil
-  
+
 
   sealed abstract class CharSet extends Ordered[CharSet] {
     override def compare(o: CharSet) = (this,o) match {
